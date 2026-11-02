@@ -43,6 +43,7 @@
     "node_modules",
     "themes",
     ".next",
-    "__tests__"
+    "__tests__",
+    "docs"
   ]
 }

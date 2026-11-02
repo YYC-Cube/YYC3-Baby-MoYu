@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞（私密报告）
+    url: mailto:admin@0379.email
+    about: 请勿公开披露未修复漏洞，按 SECURITY.md 邮件报告
+  - name: 使用与开发文档
+    url: https://baby.yyc3.vip
+    about: 先查阅 README 与 docs/developer 文档套
+  - name: 行为准则
+    url: https://github.com/YYC-Cube/YYC3-Baby-MoYu/blob/main/CODE_OF_CONDUCT.md
+    about: 参与社区前请阅读并遵守

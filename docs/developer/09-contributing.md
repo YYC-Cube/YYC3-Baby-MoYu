@@ -24,7 +24,7 @@
 
 ```bash
 bun run dev                 # 开发
-bun test                    # 新增逻辑必须带测试（参考 __tests__/lib/badges.test.ts）
+bun run test                    # 新增逻辑必须带测试（参考 __tests__/lib/badges.test.ts）
 bunx tsc --noEmit && bun run lint && bun run build   # 四门禁
 git commit && git push
 ```

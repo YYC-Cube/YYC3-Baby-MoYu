@@ -6,7 +6,7 @@ name: Deploy Docs to GitHub Pages
     paths:
       - "docs/**"
       - "README.md"
-      - "public/CNAME"
+      - "public/**"
       - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
 
@@ -22,6 +22,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,6 +37,8 @@ jobs:
       - name: Build documentation site
         run: |
           set -e
+          # 目录可能为空（历史状态/规范文档已归档），nullglob 避免把通配符当文件名传给 pandoc
+          shopt -s nullglob
           mkdir -p site/developer site/status site/standard site/analysis
 
           # 自定义域名（baby.yyc3.vip）
@@ -91,9 +94,9 @@ jobs:
             --metadata lang=zh-CN --css=style.css --embed-resources=false \
             -o site/README.html
 
-          # README 顶图随站点发布（README.html 内相对引用 public/YYC3-Family.png）
+          # README 顶图随站点发布（README.html 内相对引用 public/yyc3-family.png）
           mkdir -p site/public
-          cp public/YYC3-Family.png site/public/YYC3-Family.png
+          cp public/yyc3-family.png site/public/yyc3-family.png
 
           # 站内 .md 链接改写为 .html（跨页面导航可用）
           find site -name "*.html" -exec sed -i \

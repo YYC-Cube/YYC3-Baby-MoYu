@@ -4,18 +4,19 @@
 
 ```mermaid
 flowchart LR
-    T["bunx tsc --noEmit<br/>0 错误"] --> L["bun run lint<br/>0 error"] --> B["next build<br/>含类型检查"] --> U["bun test<br/>251 用例"] --> P["推送 ✅"]
+    T["bunx tsc --noEmit<br/>0 错误"] --> L["bun run lint<br/>0 error"] --> B["next build<br/>含类型检查"] --> U["bun run test<br/>257 用例"] --> P["推送 ✅"]
 ```
 
 | 门禁 | 命令 | 当前基线 |
 | ------ | ------ | --------- |
 | 类型 | `bun run type-check` | **0 错误**（应用代码；`__tests__/`、`themes/` 排除） |
-| Lint | `bun run lint` | **0 error**，~88 warning（见债务清单） |
+| Lint | `bun run lint` | **0 error**，56 warning（见债务清单） |
 | 构建 | `bun run build` | 通过（类型门禁已恢复，无 ignoreBuildErrors） |
-| 测试 | `bun test` | 257/257（19 文件，<1s；含 44 个安全行为用例） |
+| 测试 | `bun run test` | 257/257（19 文件，<1s；含 44 个安全行为用例） |
 | DB 直测 | `bun run test:node` | 7/7（node:sqlite 注入/迁移/种子守卫） |
 | e2e | `bun run test:e2e` | 3/3（登录→建娃→写记录→登出 / 匿名 401 矩阵 / 敏感页重定向；生产构建，账号自举不依赖种子） |
-| 依赖 | `npm audit --package-lock-only --registry=https://registry.npmjs.org` | 0 漏洞 |
+| 视觉 | `bun run test:visual` | 8/8（首页/视频工坊 × 四主题；darwin/linux 分平台基线） |
+| 依赖 | `bun run audit:osv` | OSV.dev 审计；Critical 阻断，High/Medium 输出 `osv-results.json` |
 
 ## 测试套件结构
 

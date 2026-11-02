@@ -13,6 +13,7 @@
 | [07 · 测试与质量门禁](./07-testing-quality.md) | tsc/lint/test/audit 四道门禁与债务清单 |
 | [08 · 部署](./08-deployment.md) | 本地生产、脚本、Docker 注意事项 |
 | [09 · 贡献指南](./09-contributing.md) | 分支模型、提交规范、徽章系统扩展指南（4 等级 × 8 分类） |
+| [10 · 可视化交互体系设计](./10-visual-interaction-system.md) | 设计令牌 / 四主题 / 交互状态机 / 数据可视化 / 动效 / WCAG 2.2 AA / 视觉回归 |
 
 ## 一分钟导览
 
@@ -20,7 +21,7 @@
 bun install --registry https://registry.npmmirror.com
 cp .env.example .env.local   # 填入 BIGMODEL_API_KEY
 bun run dev                   # http://localhost:1228
-bun test                      # 251 个用例
+bun run test                  # 257 个用例
 ```
 
 ## 技术栈速览

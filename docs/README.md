@@ -4,17 +4,21 @@
 
 | 目录 | 定位 | 维护策略 |
 | ---- | ---- | -------- |
-| [status/](./status/) | ★ **项目实况跟踪**（进度/里程碑/风险/问题/资源/决策） | **每工作日 17:00 更新** |
-| [developer/](./developer/) | ★ **现行开发文档**（10 篇，唯一被维护的文档集） | 随代码变更持续更新 |
-| [standard/](./standard/) | 术语表与命名规范 | 新增术语时登记 |
+| `status/`（历史归档） | 项目实况跟踪（历史文档已归档，现行状态见根 README「当前状态」） | 归档只读 |
+| [developer/](./developer/) | ★ **现行开发文档**（11 篇，唯一被维护的文档集） | 随代码变更持续更新 |
+| `YYC3-小语/`（本地资料） | 组件拆分项：四项目同源收敛、12 包工作区、拆分总结与质量基线（已加入 `.gitignore`，暂缓入库） | 本地维护 |
+| `standard/`（历史归档） | 术语表与命名规范（现行以团队 SSOT 为准） | 归档只读 |
 | [analysis/](./analysis/) | 专项分析报告（兄弟项目对比/技术选型/融合路线） | 结论入 developer/ 后归档 |
 | [archive/](./archive/) | 历史归档（白皮书/方案/审计/创作/快照） | 只读，不再维护 |
 
-## 项目实况（status/）
+## 项目实况（本次会话）
 
 | 文档 | 内容 |
 | ---- | ---- |
-| [项目实况跟踪](./status/project-status.md) | 进度 75% · 里程碑 M1-M9 · 模块风险矩阵 · 问题台账 · 决策记录（每工作日 17:00 更新） |
+| [00 · 项目现状审核报告](https://github.com/YYC-Cube/YYC3-Baby-MoYu/blob/main/docs/YYC3-Baby-MoYu-codex-20261102/00-项目现状审核报告.md) | 全局审计：质量门禁实测、CI 红叉根因、安全与文档缺口、评分与行动项 |
+| [01 · 任务规划与节点目标](https://github.com/YYC-Cube/YYC3-Baby-MoYu/blob/main/docs/YYC3-Baby-MoYu-codex-20261102/01-任务规划与节点目标.md) | 本轮目标、任务分解、验收标准与里程碑 |
+| [02 · 执行日志与进度跟踪](https://github.com/YYC-Cube/YYC3-Baby-MoYu/blob/main/docs/YYC3-Baby-MoYu-codex-20261102/02-执行日志与进度跟踪.md) | 逐项修复记录、命令与结果、遗留风险 |
+| [03 · 总结文档与状态同步](https://github.com/YYC-Cube/YYC3-Baby-MoYu/blob/main/docs/YYC3-Baby-MoYu-codex-20261102/03-总结文档与状态同步.md) | 交付清单、验证证据、下次会话恢复指南 |
 
 ## 专项分析（analysis/）
 
@@ -39,6 +43,7 @@
 | [07 · 测试与质量门禁](./developer/07-testing-quality.md) | tsc / lint / test / audit 四道门禁 |
 | [08 · 部署](./developer/08-deployment.md) | 本地生产、脚本、Docker 注意事项 |
 | [09 · 贡献指南](./developer/09-contributing.md) | 分支模型、提交规范、徽章系统扩展指南 |
+| [10 · 可视化交互体系设计](./developer/10-visual-interaction-system.md) | 设计令牌 / 四主题 / 交互状态机 / 数据可视化 / 动效 / WCAG 2.2 AA / 视觉回归 |
 
 ## 历史归档（archive/）
 

@@ -1,0 +1,60 @@
+name: OSV Dependency Audit
+
+# 数据源：OSV.dev（开源漏洞数据库）
+# 门禁策略：Critical 阻断；High/Medium/Low 以报告形式可见（避免 dev 工具链误伤主流程）
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "bun.lock"
+      - "package.json"
+      - "scripts/osv-audit.mjs"
+      - ".github/workflows/osv-audit.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "bun.lock"
+      - "package.json"
+      - "scripts/osv-audit.mjs"
+  schedule:
+    # 每周一 03:00 UTC（北京时间 11:00）
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: osv-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  osv:
+    name: OSV 依赖审计
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: OSV 审计（Critical 阻断）
+        run: node scripts/osv-audit.mjs --fail-on=critical --output=osv-results.json
+
+      - name: 高危观察报告（不阻断）
+        continue-on-error: true
+        run: node scripts/osv-audit.mjs --fail-on=high
+
+      - name: Upload OSV report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: osv-results
+          path: osv-results.json
+          if-no-files-found: warn
+          retention-days: 30

@@ -167,6 +167,8 @@ coverage/
 *.lcov
 .nyc_output/
 test-results/
+# OSV 审计报告（CI artifact / 本地生成）
+osv-results.json
 *.coverage
 .coverage
 .coverage.*
@@ -372,7 +374,10 @@ tracking/
 
 # ---- 项目品牌/运行时图片放行（放在忽略规则之后，git 规则后匹配者优先）----
 # README 顶图
-!public/YYC3-Family.png
+!public/yyc3-family.png
+# Playwright 视觉回归基线（分平台）
+!e2e/__screenshots__/
+!e2e/__screenshots__/**
 # 默认头像回退图（themes/*/RoleInfoManager 引用）
 !public/placeholder-user.jpg
 # 角色主题图库（lib/character-manager.ts / lib/asset-manager.ts 引用）
@@ -388,6 +393,10 @@ public/role-photos/.DS_Store
 docs/generated/
 api-docs/
 swagger-ui/
+
+# 本地文档资产（暂不提交远程；保留工作区与迁移基线供本地审计）
+/docs/YYC3-小语/
+/docs/成长守护-未来之语/
 
 # Reports
 reports/

@@ -45,7 +45,7 @@ bun run build && bun run start   # 生产模式
 | `bun run dev` | 开发服务器（:1228，热更新） |
 | `bun run build` | 生产构建（含完整 TypeScript 检查） |
 | `bun run start` | 生产启动 |
-| `bun test` | 全部单元测试（216 用例，<1s） |
+| `bun run test` | 全部单元测试（257 用例，<1s） |
 | `bun run type-check` | 全量类型检查 |
 | `bun run lint` / `lint:fix` | ESLint 检查 / 自动修复 |
 
