@@ -74,6 +74,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install unzip（Playwright 容器缺少 setup-bun 解压依赖）
+        run: apt-get update && apt-get install -y --no-install-recommends unzip
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
