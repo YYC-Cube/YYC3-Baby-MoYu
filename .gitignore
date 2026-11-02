@@ -632,3 +632,6 @@ backup/
 data/
 .secrets-backup/
 # 密钥备份目录严禁入库
+
+# 工作区 CI 依赖本地未入库的 docs/YYC3-小语（随工作区一起本地保留）
+/.github/workflows/yyc3-xy-workspace-ci.yml
