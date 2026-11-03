@@ -137,3 +137,36 @@ export async function deleteRow(table: string, id: string): Promise<boolean> {
   await ensureSeeded()
   return getServerDB().delete(table, id)
 }
+
+/**
+ * 多孩子聚合查询（column IN 集合），替代逐孩子循环。
+ * 表名经白名单校验，列名与排序经 SQL 标识符校验，适配层负责 JSON 列反序列化。
+ */
+export async function listRowsIn<T = Record<string, unknown>>(
+  table: string,
+  column: string,
+  values: string[],
+  options: {
+    limit?: number
+    offset?: number
+    orderBy?: { column: string; direction?: "ASC" | "DESC" }
+    equal?: Record<string, unknown>
+  } = {}
+): Promise<T[]> {
+  assertTable(table)
+  await ensureSeeded()
+  const rows = await getServerDB().findManyIn<Record<string, unknown>>(table, column, values, options)
+  return rows.map((r) => deserializeRow(table, r)) as T[]
+}
+
+/** 多孩子聚合计数（分页 total 用） */
+export async function countRowsIn(
+  table: string,
+  column: string,
+  values: string[],
+  equal: Record<string, unknown> = {}
+): Promise<number> {
+  assertTable(table)
+  await ensureSeeded()
+  return getServerDB().countIn(table, column, values, equal)
+}

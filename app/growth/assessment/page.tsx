@@ -4,6 +4,8 @@ import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import PageHeader from "@/components/headers/PageHeader"
 import Navigation from "@/components/Navigation"
+import { useChildren } from "@/hooks/useChildren"
+import { authFetch } from "@/lib/api/auth-fetch"
 import {
   STAGE_ASSESSMENTS,
   getApplicableQuestions,
@@ -19,7 +21,6 @@ export default function AssessmentPage() {
   const [currentDimensionIndex, setCurrentDimensionIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, number>>({})
   const [showReport, setShowReport] = useState(false)
-
   // 获取当前阶段的适用评估
   const stageAssessment = STAGE_ASSESSMENTS[currentStage]
   const applicableDimensions = useMemo(
@@ -318,6 +319,52 @@ function AssessmentReport({
   const scoreMap = Object.fromEntries(dimensionScores.map((d) => [d.id, d.score]))
   const recommendations = generateRecommendations(scoreMap, stageId)
 
+  // 落库：评估结果写入 growth_assessments（此前仅前端展示，刷新即丢）
+  const { currentChild, isLoading: childrenLoading } = useChildren()
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle")
+  const [saveMessage, setSaveMessage] = useState("")
+
+  const handleSave = async () => {
+    if (saveState === "saving") return
+    if (!currentChild) {
+      setSaveState("error")
+      setSaveMessage("请先在「宝宝档案」创建并选择宝宝，评估结果才能保存")
+      return
+    }
+    setSaveState("saving")
+    setSaveMessage("")
+
+    try {
+      const res = await authFetch("/api/growth-assessments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          child_id: currentChild.id,
+          stage_id: stageId,
+          dimensions: dimensionScores.map((d) => ({ id: d.id, name: d.name, score: d.score })),
+          overall_score: overallScore,
+          recommendations,
+        }),
+      })
+      const result = (await res.json().catch(() => ({}))) as { success?: boolean; message?: string }
+      if (res.status === 401) {
+        setSaveState("error")
+        setSaveMessage("请先登录后再保存报告")
+        return
+      }
+      if (!res.ok || !result.success) {
+        setSaveState("error")
+        setSaveMessage(result.message ?? `保存失败（HTTP ${res.status}）`)
+        return
+      }
+      setSaveState("saved")
+      setSaveMessage(`已保存到 ${currentChild.name} 的成长档案`)
+    } catch (err) {
+      setSaveState("error")
+      setSaveMessage(err instanceof Error ? err.message : "保存失败，请稍后重试")
+    }
+  }
+
   const colorClasses: Record<string, string> = {
     blue: "bg-blue-100 text-blue-500",
     green: "bg-green-100 text-green-500",
@@ -435,13 +482,28 @@ function AssessmentReport({
                 重新评估
               </motion.button>
               <motion.button
-                className="flex-1 px-5 py-3 bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl font-medium"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                onClick={handleSave}
+                disabled={saveState === "saving"}
+                className="flex-1 px-5 py-3 bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                whileHover={{ scale: saveState === "saving" ? 1 : 1.02 }}
+                whileTap={{ scale: saveState === "saving" ? 1 : 0.98 }}
               >
-                保存报告
+                {saveState === "saving" ? "保存中…" : saveState === "saved" ? "已保存" : "保存报告"}
               </motion.button>
             </div>
+
+            {/* 保存反馈：明确告知「存到哪、为什么没存」 */}
+            {saveMessage && (
+              <p
+                className={`text-sm ${saveState === "error" ? "text-red-600" : "text-green-600"}`}
+                role="status"
+              >
+                {saveMessage}
+              </p>
+            )}
+            {!childrenLoading && !currentChild && saveState === "idle" && (
+              <p className="text-sm text-slate-500">当前未选择宝宝档案，保存前请先创建档案。</p>
+            )}
           </motion.div>
         </div>
       </main>

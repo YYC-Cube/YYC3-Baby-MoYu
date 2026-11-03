@@ -53,6 +53,7 @@
 | [08 · 部署](./developer/08-deployment.md) | 本地生产、脚本、Docker 注意事项 |
 | [09 · 贡献指南](./developer/09-contributing.md) | 分支模型、提交规范、徽章系统扩展指南 |
 | [10 · 可视化交互体系设计](./developer/10-visual-interaction-system.md) | 设计令牌 / 四主题 / 交互状态机 / 数据可视化 / 动效 / WCAG 2.2 AA / 视觉回归 |
+| [11 · 国际化边界与治理](./developer/11-i18n-boundary.md) | 英文试点 2/14 页 · `@yyc3/i18n-core` 不适用评估 · 全量国际化判定标准 |
 
 ## 历史归档（archive/）
 

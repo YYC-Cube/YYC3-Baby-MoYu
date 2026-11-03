@@ -10,13 +10,14 @@
 | ---- | ---- | ---- |
 | `osv-audit.mjs` | OSV.dev 依赖审计（Critical 阻断，产出 `osv-results.json`） | 网络；`bun run audit:osv` |
 | `generate-docs.py` | 文档生成 | Python 3 |
+| `check-i18n-coverage.mjs` | i18n 边界巡检（页面覆盖率 + zh/en 词条键一致性） | `bun run check:i18n` |
 | `ts-node-hooks.mjs` | `node --experimental-strip-types` 直测钩子 | Node ≥ 22.13 |
 
 ## 历史遗留（不可直接执行）
 
 | 脚本 | 失效原因 |
 | ---- | ---- |
-| `deploy-docker.sh` | 调用不存在的 `docker-compose.yml`（仓库无 `Dockerfile`/compose） |
+| `deploy-docker.sh` | 仍为历史遗留：假设 Postgres schema、`.env.docker` 与 compose `profiles`，与当前「SQLite + standalone 单实例」不符。**现行容器化请直接用仓库根 `docker compose up -d --build`**（见 08-deployment.md） |
 | `deploy-to-production.sh` | 目标路径 `/opt/xiaoyu-guardian/services/xiaoyu-api/*`、Postgres 容器均不存在 |
 | `deploy-to-yyc3-33.sh` | 指向外部部署主机，非本仓库产物 |
 | `deploy-microservices.sh` | 依赖 `microservices/{kong,consul,postgres}`，本仓库为单体应用 |

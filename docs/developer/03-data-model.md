@@ -52,7 +52,9 @@ erDiagram
 **已知限制（待立项）**
 1. 学期配置（`yyc3_semester`）仍留在 localStorage（单对象配置，未并入集合）。
 2. 多标签页并发编辑为「后写覆盖」，家庭单用户场景可接受；如需强一致需引入版本号/冲突合并。
-3. 发展评估结果（`growth_assessments`）仍走 AI 端点即时返回，未写入本表/实体表。
+
+> `growth_assessments` 已于 2026-11-02 补齐写路径（`POST /api/growth-assessments`），
+> 评估报告页「保存报告」按钮现已真实落库。
 
 ## JSON 列约定（重要）
 

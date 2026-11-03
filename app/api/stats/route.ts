@@ -1,6 +1,6 @@
 import { requireAuth } from "@/lib/auth/guard"
 import { getOwnedChildIds } from "@/lib/api/ownership"
-import { getServerDB } from "@/lib/db/server"
+import { countRowsIn } from "@/lib/db/server"
 import { NextResponse } from "next/server"
 
 /**
@@ -12,34 +12,20 @@ export async function GET(request: Request) {
 
   try {
     const childIds = await getOwnedChildIds(auth.user.id)
-    const db = getServerDB()
 
-    const [children, records, milestones, assessments] = await Promise.all([
-      Promise.resolve(childIds.length),
-      countForChildren(db, "growth_records", childIds),
-      countForChildren(db, "milestones", childIds),
-      countForChildren(db, "growth_assessments", childIds),
+    // 单次 IN 聚合（原实现为「每个孩子一次 count」的 N+1）
+    const [records, milestones, assessments] = await Promise.all([
+      countRowsIn("growth_records", "child_id", childIds),
+      countRowsIn("milestones", "child_id", childIds),
+      countRowsIn("growth_assessments", "child_id", childIds),
     ])
 
     return NextResponse.json({
-      data: { children, records, milestones, assessments },
+      data: { children: childIds.length, records, milestones, assessments },
       success: true,
     })
   } catch (error) {
     console.error("[api] Error fetching stats:", error)
     return NextResponse.json({ error: "Failed to fetch stats", success: false }, { status: 500 })
   }
-}
-
-/** 按孩子集合计数（count 仅支持 AND 等值条件；孩子数通常 1-3，逐个求和） */
-async function countForChildren(
-  db: ReturnType<typeof getServerDB>,
-  table: "growth_records" | "milestones" | "growth_assessments",
-  childIds: string[],
-): Promise<number> {
-  let sum = 0
-  for (const id of childIds) {
-    sum += await db.count(table, { child_id: id })
-  }
-  return sum
 }

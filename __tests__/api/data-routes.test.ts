@@ -53,6 +53,39 @@ mock.module("@/lib/db/server", () => ({
   },
   isForeignKeyError: () => false,
   assertTable: () => {},
+  // 供聚合查询端点使用（growth-records / stats / growth-assessments 走 IN 查询）
+  listRowsIn: async (
+    table: string,
+    column: string,
+    values: string[],
+    options: { limit?: number; offset?: number; orderBy?: { column: string; direction?: "ASC" | "DESC" }; equal?: Record<string, unknown> } = {},
+  ) => {
+    const equal = options.equal ?? {}
+    let rows = tableOf(table).filter(
+      (r) =>
+        values.includes(String(r[column])) &&
+        Object.entries(equal).every(([k, v]) => r[k] === v),
+    )
+    if (options.orderBy) {
+      const { column: sortCol, direction } = options.orderBy
+      rows = [...rows].sort((a, b) => {
+        const av = String(a[sortCol] ?? "")
+        const bv = String(b[sortCol] ?? "")
+        return direction === "ASC" ? av.localeCompare(bv) : bv.localeCompare(av)
+      })
+    }
+    if (options.limit !== undefined) {
+      const offset = options.offset ?? 0
+      rows = rows.slice(offset, offset + options.limit)
+    }
+    return rows
+  },
+  countRowsIn: async (table: string, column: string, values: string[], equal: Record<string, unknown> = {}) =>
+    tableOf(table).filter(
+      (r) =>
+        values.includes(String(r[column])) &&
+        Object.entries(equal).every(([k, v]) => r[k] === v),
+    ).length,
   // 供 /api/user-documents 使用：事务为直通（内存 mock 无需回滚语义），批量删除按 id 过滤
   getServerDB: () => ({
     transaction: async <T>(cb: () => Promise<T>) => cb(),
