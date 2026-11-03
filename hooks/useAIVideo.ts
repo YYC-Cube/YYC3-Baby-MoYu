@@ -2,6 +2,12 @@
 
 import { useState, useCallback, useEffect } from "react"
 import {
+  hydrateCollection,
+  readCollection,
+  subscribeCollection,
+  writeCollection,
+} from "@/lib/client/collection-store"
+import {
   type VideoGenerationRequest,
   type GeneratedVideo,
   type VideoType,
@@ -12,6 +18,8 @@ import {
 } from "@/types/ai-video"
 
 const VIDEO_STORAGE_KEY = "yyc3_videos"
+// 服务端集合类型：视频作品整组持久化（登录后跨设备可见）
+const COLLECTION_KIND = "video" as const
 
 function generateId(prefix: string): string {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -26,16 +34,17 @@ export function useAIVideo() {
   // 加载视频列表
   const loadVideos = useCallback(() => {
     try {
-      const stored = localStorage.getItem(VIDEO_STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored) as Array<GeneratedVideo & { createdAt: string }>
-        setVideos(
-          parsed.map((v) => ({
-            ...v,
-            createdAt: new Date(v.createdAt),
-          })),
-        )
+      const stored = readCollection<GeneratedVideo & { createdAt: string }>(COLLECTION_KIND, VIDEO_STORAGE_KEY)
+      if (!stored) {
+        setVideos([])
+        return
       }
+      setVideos(
+        stored.map((v) => ({
+          ...v,
+          createdAt: new Date(v.createdAt),
+        })),
+      )
     } catch (error) {
       console.error("加载视频列表失败:", error)
     }
@@ -43,13 +52,16 @@ export function useAIVideo() {
 
   useEffect(() => {
     loadVideos()
+    const unsubscribe = subscribeCollection(COLLECTION_KIND, loadVideos)
+    void hydrateCollection(COLLECTION_KIND, VIDEO_STORAGE_KEY)
+    return unsubscribe
   }, [loadVideos])
 
   // 保存视频
   const saveVideo = useCallback((video: GeneratedVideo) => {
     setVideos((prev) => {
       const updated = [video, ...prev]
-      localStorage.setItem(VIDEO_STORAGE_KEY, JSON.stringify(updated))
+      writeCollection(COLLECTION_KIND, VIDEO_STORAGE_KEY, updated)
       return updated
     })
   }, [])
@@ -58,7 +70,7 @@ export function useAIVideo() {
   const updateVideo = useCallback((videoId: string, updates: Partial<GeneratedVideo>) => {
     setVideos((prev) => {
       const updated = prev.map((v) => (v.id === videoId ? { ...v, ...updates } : v))
-      localStorage.setItem(VIDEO_STORAGE_KEY, JSON.stringify(updated))
+      writeCollection(COLLECTION_KIND, VIDEO_STORAGE_KEY, updated)
       return updated
     })
   }, [])
@@ -253,7 +265,7 @@ export function useAIVideo() {
   const deleteVideo = useCallback((videoId: string) => {
     setVideos((prev) => {
       const updated = prev.filter((v) => v.id !== videoId)
-      localStorage.setItem(VIDEO_STORAGE_KEY, JSON.stringify(updated))
+      writeCollection(COLLECTION_KIND, VIDEO_STORAGE_KEY, updated)
       return updated
     })
   }, [])

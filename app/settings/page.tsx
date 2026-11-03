@@ -7,7 +7,7 @@ import UserCenter from "@/components/auth/UserCenter"
 import PageHeader from "@/components/headers/PageHeader"
 import ThemeSwitcher from "@/components/theme-system/ThemeSwitcher"
 import { useAuth } from "@/hooks/useAuth"
-import { useChildrenMock } from "@/hooks/useChildren-mock"
+import { useChildren } from "@/hooks/useChildren"
 import { characterManager } from "@/lib/character-manager"
 import { motion } from "framer-motion"
 import { useState } from "react"
@@ -16,7 +16,8 @@ export default function SettingsPage() {
   const [eyeMode, setEyeMode] = useState(true)
   const [reminder, setReminder] = useState(false)
   const { user, logout } = useAuth()
-  const { currentChild } = useChildrenMock()
+  // 数据来源：真实儿童档案（/api/children），非内置示例
+  const { currentChild } = useChildren()
 
   return (
     <div className="h-screen flex flex-col overflow-hidden relative bg-sky-100">

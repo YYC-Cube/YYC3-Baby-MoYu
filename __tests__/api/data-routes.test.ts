@@ -9,15 +9,23 @@ import { NextRequest } from "next/server"
 import { generateToken, type JWTPayload } from "@/lib/auth/jwt"
 
 // —— 内存数据库 mock（模块级，供路由经 @/lib/db/server 间接读写） ——
+// 注意：Bun 的 mock.module 在同一进程内跨文件共享，本 mock 因此需覆盖其他测试文件
+// （如 user-documents.test.ts）所需的 getServerDB/事务/批量删除与管理表，
+// 否则先加载的 mock 会让后者的 `import { getServerDB }` 解析失败。
 interface Row { id: string; user_id?: string; [k: string]: unknown }
 const db = {
   users: [] as Array<Row & { email: string; is_active?: number }>,
   children: [] as Row[],
   growth_records: [] as Row[],
   homework_tasks: [] as Row[],
+  user_documents: [] as Row[],
   createdCalls: [] as Array<{ table: string; data: Record<string, unknown> }>,
   updatedCalls: [] as Array<{ table: string; id: string; data: Record<string, unknown> }>,
   deleted: [] as string[],
+}
+
+function tableOf(table: string): Row[] {
+  return (db as unknown as Record<string, Row[]>)[table]
 }
 
 mock.module("@/lib/db/server", () => ({
@@ -44,6 +52,20 @@ mock.module("@/lib/db/server", () => ({
     return true
   },
   isForeignKeyError: () => false,
+  assertTable: () => {},
+  // 供 /api/user-documents 使用：事务为直通（内存 mock 无需回滚语义），批量删除按 id 过滤
+  getServerDB: () => ({
+    transaction: async <T>(cb: () => Promise<T>) => cb(),
+    deleteMany: async (table: string, ids: string[]) => {
+      const list = tableOf(table)
+      for (const id of ids) {
+        const idx = list.findIndex((r) => r.id === id)
+        if (idx >= 0) list.splice(idx, 1)
+      }
+      return ids.length
+    },
+    count: async () => 0,
+  }),
 }))
 
 mock.module("@/lib/auth/service", () => ({
@@ -83,6 +105,7 @@ function authed(url: string, userId: string, init: RequestInit = {}): NextReques
 const j = async (res: Response) => ({ status: res.status, body: await res.json() })
 
 beforeEach(() => {
+  db.user_documents = []
   db.users = [
     { id: "user-a", email: "a@t.cn", is_active: 1 },
     { id: "user-b", email: "b@t.cn", is_active: 1 },

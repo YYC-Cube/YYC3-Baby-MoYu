@@ -1,6 +1,12 @@
 "use client"
 
 import { type Schedule, type ScheduleFormData, type ScheduleType, getScheduleColor } from "@/types/schedule"
+import {
+  hydrateCollection,
+  readCollection,
+  subscribeCollection,
+  writeCollection,
+} from "@/lib/client/collection-store"
 import { useCallback, useEffect, useState } from "react"
 
 interface UseScheduleReturn {
@@ -24,24 +30,25 @@ interface AISchedulePreferences {
 }
 
 const STORAGE_KEY = "yyc3-schedules"
+// 服务端集合类型（见 /api/user-documents）：登录后以服务端为准，游客保留本地
+const COLLECTION_KIND = "schedule" as const
 
 function loadSchedules(): Schedule[] {
   if (typeof window === "undefined") return []
-  const saved = localStorage.getItem(STORAGE_KEY)
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved) as Array<Omit<Schedule, 'startTime' | 'endTime' | 'createdAt' | 'updatedAt'> & Record<string, string>>
-      return parsed.map((s) => ({
-        ...s,
-        startTime: new Date(s.startTime),
-        endTime: new Date(s.endTime),
-        createdAt: new Date(s.createdAt),
-        updatedAt: new Date(s.updatedAt),
-      }))
-    } catch {
-      return []
-    }
+  const cached = readCollection<
+    Omit<Schedule, "startTime" | "endTime" | "createdAt" | "updatedAt"> & Record<string, string>
+  >(COLLECTION_KIND, STORAGE_KEY)
+  if (cached && cached.length > 0) {
+    return cached.map((s) => ({
+      ...s,
+      startTime: new Date(s.startTime),
+      endTime: new Date(s.endTime),
+      createdAt: new Date(s.createdAt),
+      updatedAt: new Date(s.updatedAt),
+    }))
   }
+  // 有缓存但为空数组：用户已清空，尊重空集合，不再塞默认值
+  if (cached && cached.length === 0) return []
   return generateDefaultSchedules()
 }
 
@@ -85,7 +92,8 @@ function setTime(date: Date, hours: number, minutes: number): Date {
 
 function saveSchedules(schedules: Schedule[]): void {
   if (typeof window === "undefined") return
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(schedules))
+  // 本地缓存即时写入 + 服务端防抖同步（游客自动降级为仅本地）
+  writeCollection(COLLECTION_KIND, STORAGE_KEY, schedules)
 }
 
 export function useSchedule(): UseScheduleReturn {
@@ -94,9 +102,15 @@ export function useSchedule(): UseScheduleReturn {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const loaded = loadSchedules()
-    setSchedules(loaded)
-    setIsLoading(false)
+    const apply = () => {
+      setSchedules(loadSchedules())
+      setIsLoading(false)
+    }
+    apply()
+    // 服务端就绪后刷新一次（游客会保持本地副本）
+    const unsubscribe = subscribeCollection(COLLECTION_KIND, apply)
+    void hydrateCollection(COLLECTION_KIND, STORAGE_KEY)
+    return unsubscribe
   }, [])
 
   // 异步契约：保持 async 签名供调用方统一 await（内部同步持久化）
