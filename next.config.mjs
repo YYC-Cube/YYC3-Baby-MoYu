@@ -5,6 +5,8 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // standalone：产出仅含运行必需文件的 .next/standalone（容器镜像据此剥离 node_modules）
+  output: "standalone",
   outputFileTracingRoot: import.meta.dirname,
   images: {
     unoptimized: true,

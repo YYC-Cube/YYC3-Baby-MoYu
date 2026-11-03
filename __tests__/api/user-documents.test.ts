@@ -58,6 +58,20 @@ mock.module("@/lib/db/server", () => ({
   },
   isForeignKeyError: () => false,
   assertTable: () => {},
+  listRowsIn: async (table: string, column: string, values: string[], options: { equal?: Record<string, unknown> } = {}) => {
+    const equal = options.equal ?? {}
+    return (db as unknown as Record<string, Array<Record<string, unknown>>>)[table].filter(
+      (r) =>
+        values.includes(String(r[column])) &&
+        Object.entries(equal).every(([k, v]) => r[k] === v),
+    )
+  },
+  countRowsIn: async (table: string, column: string, values: string[], equal: Record<string, unknown> = {}) =>
+    (db as unknown as Record<string, Array<Record<string, unknown>>>)[table].filter(
+      (r) =>
+        values.includes(String(r[column])) &&
+        Object.entries(equal).every(([k, v]) => r[k] === v),
+    ).length,
   getServerDB: () => ({
     transaction: async <T>(cb: () => Promise<T>) => cb(),
     deleteMany: async (table: string, ids: string[]) => {

@@ -466,6 +466,81 @@ export class SQLiteDatabase {
     }
   }
 
+  /**
+   * 按集合条件批量查询（column IN (...)），可选排序与分页
+   * @description 用于「多孩子聚合」场景：替代逐个孩子循环查询（N+1）。
+   *   column 与排序列均经标识符校验；空集合直接返回 []，不发 SQL。
+   */
+  async findManyIn<T>(
+    table: string,
+    column: string,
+    values: string[],
+    options: {
+      limit?: number
+      offset?: number
+      orderBy?: { column: string; direction?: "ASC" | "DESC" }
+      equal?: Record<string, unknown>
+    } = {}
+  ): Promise<T[]> {
+    try {
+      assertSQLIdentifier(table, "table")
+      assertSQLIdentifier(column)
+      if (values.length === 0) return []
+      const { limit, offset = 0, orderBy, equal = {} } = options
+
+      const placeholders = values.map(() => "?").join(", ")
+      let query = `SELECT * FROM ${table} WHERE ${column} IN (${placeholders})`
+      const params: SQLInputValue[] = [...values]
+
+      for (const [key, value] of Object.entries(equal)) {
+        assertSQLIdentifier(key)
+        query += ` AND ${key} = ?`
+        params.push(value as SQLInputValue)
+      }
+
+      if (orderBy) {
+        assertSQLIdentifier(orderBy.column)
+        const direction = orderBy.direction === "ASC" ? "ASC" : "DESC"
+        query += ` ORDER BY ${orderBy.column} ${direction}`
+      }
+      if (limit !== undefined) {
+        query += ` LIMIT ? OFFSET ?`
+        params.push(Math.max(1, limit), Math.max(0, offset))
+      }
+
+      const stmt = this.db.prepare(query)
+      return stmt.all(...params) as T[]
+    } catch (error) {
+      logQueryError(`批量查询失败 ${table}.${column}`, error, { module: "db", function: "findManyIn" })
+      return []
+    }
+  }
+
+  /** 按集合条件计数（与 findManyIn 同语义，供分页 total 使用） */
+  async countIn(table: string, column: string, values: string[], equal: Record<string, unknown> = {}): Promise<number> {
+    try {
+      assertSQLIdentifier(table, "table")
+      assertSQLIdentifier(column)
+      if (values.length === 0) return 0
+
+      const placeholders = values.map(() => "?").join(", ")
+      let query = `SELECT COUNT(*) as count FROM ${table} WHERE ${column} IN (${placeholders})`
+      const params: SQLInputValue[] = [...values]
+      for (const [key, value] of Object.entries(equal)) {
+        assertSQLIdentifier(key)
+        query += ` AND ${key} = ?`
+        params.push(value as SQLInputValue)
+      }
+
+      const stmt = this.db.prepare(query)
+      const result = stmt.get(...params) as { count: number }
+      return result.count
+    } catch (error) {
+      logQueryError(`批量计数失败 ${table}.${column}`, error, { module: "db", function: "countIn" })
+      return 0
+    }
+  }
+
   // 原子性事务支持
   async transaction<T>(callback: () => Promise<T>): Promise<T> {
     this.db.exec("BEGIN")

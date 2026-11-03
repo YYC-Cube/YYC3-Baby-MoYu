@@ -49,6 +49,8 @@
     "test:e2e": "playwright test",
     "test:visual": "playwright test theme-visual",
     "test:visual:update": "playwright test theme-visual --update-snapshots",
+    "check:i18n": "node scripts/check-i18n-coverage.mjs",
+    "check:i18n:strict": "node scripts/check-i18n-coverage.mjs --strict",
     "audit:osv": "node scripts/osv-audit.mjs --fail-on=critical --output=osv-results.json",
     "audit:osv:high": "node scripts/osv-audit.mjs --fail-on=high"
   },

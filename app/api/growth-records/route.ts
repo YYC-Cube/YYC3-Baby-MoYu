@@ -1,7 +1,10 @@
 import { requireAuth } from "@/lib/auth/guard"
-import { createRow, isForeignKeyError, listRows } from "@/lib/db/server"
+import { countRowsIn, createRow, isForeignKeyError, listRowsIn } from "@/lib/db/server"
 import { getOwnedChildIds, isChildOwnedBy, pickFields } from "@/lib/api/ownership"
 import { type NextRequest, NextResponse } from "next/server"
+
+const DEFAULT_LIMIT = 200
+const MAX_LIMIT = 500
 
 export async function GET(request: NextRequest) {
   // P0-2 数据隔离：成长记录按当前用户的孩子集合过滤
@@ -24,17 +27,25 @@ export async function GET(request: NextRequest) {
       childIds = await getOwnedChildIds(auth.user.id)
     }
 
-    let records: Record<string, unknown>[] = []
-    for (const id of childIds) {
-      const conditions: Record<string, unknown> = { child_id: id }
-      if (type) conditions.type = type
-      records = records.concat(await listRows("growth_records", conditions))
-    }
-    records.sort(
-      (a, b) => new Date(String(b.recorded_at)).getTime() - new Date(String(a.recorded_at)).getTime()
-    )
+    // 分页参数：默认 200，上限 500（避免一次性拉全量导致响应膨胀）
+    const rawLimit = Number(searchParams.get("limit") ?? DEFAULT_LIMIT)
+    const rawOffset = Number(searchParams.get("offset") ?? 0)
+    const limit = Number.isFinite(rawLimit) ? Math.min(Math.max(1, Math.trunc(rawLimit)), MAX_LIMIT) : DEFAULT_LIMIT
+    const offset = Number.isFinite(rawOffset) ? Math.max(0, Math.trunc(rawOffset)) : 0
+    const equal = type ? { type } : {}
 
-    return NextResponse.json({ data: records, success: true })
+    // 单次 IN 查询 + 库内排序分页（替代逐孩子循环 + 内存排序）
+    const [records, total] = await Promise.all([
+      listRowsIn("growth_records", "child_id", childIds, {
+        limit,
+        offset,
+        orderBy: { column: "recorded_at", direction: "DESC" },
+        equal,
+      }),
+      countRowsIn("growth_records", "child_id", childIds, equal),
+    ])
+
+    return NextResponse.json({ data: records, meta: { total, limit, offset }, success: true })
   } catch (error) {
     console.error("[api] Error fetching growth records:", error)
     return NextResponse.json({ error: "Failed to fetch growth records", success: false }, { status: 500 })

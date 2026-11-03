@@ -1,0 +1,22 @@
+# 构建上下文裁剪：镜像内不需要本地依赖、构建产物、数据与文档
+node_modules
+.next
+data
+logs
+backups
+.git
+.github
+docs
+__tests__
+e2e
+test-results
+playwright-report
+coverage
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+package-lock.json
+tsconfig.tsbuildinfo
+osv-results.json

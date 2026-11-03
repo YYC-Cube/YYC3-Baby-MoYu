@@ -279,7 +279,7 @@ $RECYCLE.BIN/
 # ========================================
 
 # Docker
-.dockerignore
+# 说明：.dockerignore 是构建必需文件，必须入库（原模板误列入忽略清单，已移除）
 docker-compose.override.yml
 .docker/
 
@@ -635,3 +635,7 @@ data/
 
 # 工作区 CI 依赖本地未入库的 docs/YYC3-小语（随工作区一起本地保留）
 /.github/workflows/yyc3-xy-workspace-ci.yml
+
+# 本地规范/闭环资料（团队 SSOT 以 ~/YYC-Cube/YYC3-团队通用-标准规范 为准，本仓不入库）
+docs/YYC3-团队通用-标规文档/YYC3-团队通用-开发标准.md
+docs/YYC3-项目开发-闭环体系/

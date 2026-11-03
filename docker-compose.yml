@@ -1,0 +1,48 @@
+# YYC³ 小语 · 单实例部署（SQLite + 进程内限流）
+# 说明：当前架构为单副本语义（见 docs/developer/08-deployment.md「部署拓扑约束」）。
+# 多副本前必须替换限流实现（Redis）并迁移 SQLite → PostgreSQL。
+#
+# 使用：
+#   cp .env.example .env.local   # 填入 JWT_SECRET / AI 密钥
+#   docker compose up -d --build
+#   curl -fsS localhost:1228/api/health
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: yyc3-baby-moyu:local
+    container_name: yyc3-baby-moyu
+    restart: unless-stopped
+    ports:
+      - "1228:1228"
+    environment:
+      NODE_ENV: production
+      # 缺失即启动后被鉴权拒绝：必须在 .env.local 或宿主机环境中提供
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET 未设置}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-2h}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-30d}
+      # AI 密钥均可留空：缺省时对话降级为示例、生图降级为占位图（见 06-ai-engine.md）
+      BIGMODEL_API_KEY: ${BIGMODEL_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+      FAL_KEY: ${FAL_KEY:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      # 容器内固定落盘路径（由下方 volume 映射到宿主 ./data）
+      DATABASE_URL: /app/data/yyc3.db
+      LOG_DIR: /app/logs
+    volumes:
+      # 数据库与日志必须在宿主持久化，容器重建不丢数据
+      - ./data:/app/data
+      - ./logs:/app/logs
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:1228/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
