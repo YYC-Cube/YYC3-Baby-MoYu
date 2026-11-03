@@ -4,33 +4,42 @@
 
 ```mermaid
 flowchart LR
-    T["bunx tsc --noEmit<br/>0 错误"] --> L["bun run lint<br/>0 error"] --> B["next build<br/>含类型检查"] --> U["bun run test<br/>257 用例"] --> P["推送 ✅"]
+    T["bunx tsc --noEmit<br/>0 错误"] --> L["bun run lint<br/>0 error"] --> B["next build<br/>含类型检查"] --> U["bun run test<br/>258 用例"] --> P["推送 ✅"]
 ```
 
 | 门禁 | 命令 | 当前基线 |
-| ------ | ------ | --------- |
+| ---- | ---- | ---- |
 | 类型 | `bun run type-check` | **0 错误**（应用代码；`__tests__/`、`themes/` 排除） |
-| Lint | `bun run lint` | **0 error**，56 warning（见债务清单） |
+| Lint | `bun run lint` | **0 error**，51 warning（见债务清单） |
 | 构建 | `bun run build` | 通过（类型门禁已恢复，无 ignoreBuildErrors） |
-| 测试 | `bun run test` | 257/257（19 文件，<1s；含 44 个安全行为用例） |
+| 测试 | `bun run test` | 258/258（20 文件，~1.8s；含鉴权/越权/限流类安全行为用例） |
 | DB 直测 | `bun run test:node` | 7/7（node:sqlite 注入/迁移/种子守卫） |
 | e2e | `bun run test:e2e` | 3/3（登录→建娃→写记录→登出 / 匿名 401 矩阵 / 敏感页重定向；生产构建，账号自举不依赖种子） |
 | 视觉 | `bun run test:visual` | 8/8（首页/视频工坊 × 四主题；darwin/linux 分平台基线） |
 | 依赖 | `bun run audit:osv` | OSV.dev 审计；Critical 阻断，High/Medium 输出 `osv-results.json` |
 
-## 测试套件结构
+> 2026-11-02 复核实测：tsc 0 error · lint 0 error/51 warning · 258/258 · node 7/7 · build 成功（编译 ~1.9s）·
+> e2e 3/3 · 四主题视觉 8/8。数字以本节为准，变更门禁时请同步刷新。
+
+## 测试套件结构（按目录实况）
 
 ```
 __tests__/
-├── lib/badges.test.ts      17 用例：统计聚合/评估引擎/持久化幂等/定义完整性
-├── lib/auth.test.ts        9 用例：JWT 签发/过期/伪造/行映射（P0-1）
-├── lib/logger.test.ts      10 用例：日志解析/统计/告警/目录扫描（P0-2）
-├── lib/theme-system.test.ts 13 用例：四主题注册/明暗映射/背景层/CSS 完整性/语义类（Phase 2-3）
-├── lib/utils/formatDate*   中英日期/相对时间（昨天·前天）/周岁计算
-├── hooks/                  useAIChat · useGrowthRecords · useAccessibility…
-├── components/             ProfilePage · LanguageSwitcher…
-└── pages/                  settings
+├── api/                    auth-routes（登录/注册/刷新/限流/令牌类型）
+│                           data-routes（children/growth/homework 的 401·403·IDOR·白名单）
+│                           ai-chat（401/400/demo 降级/role 回落/429）
+│                           user-documents（kind 白名单/覆盖语义/隔离/体积与条数上限）
+├── lib/                    badges · auth · auth/jwt-type · rate-limit · theme-system
+│                           character-manager · config · db/identifier · utils
+│                           api/auth-fetch（401→刷新→重试并发锁）
+├── hooks/                  hooks.test.bun · useAccessibility · useGrowthRecords
+├── components/common/      LanguageSwitcher
+├── pages/                  settings · profile
+└── utils/                  helpers
 ```
+
+> 已删除 `__tests__/hooks/useAIChat.test.ts`：该文件在测试内**自定义**同名 Hook 并断言自身，
+> 生产代码中不存在该模块，属「自证型用例」，会虚增通过数。对应能力改由 `api/ai-chat.test.ts` 覆盖真实端点。
 
 运行时：Bun test + jsdom（`bun.test.preload.ts` 提供 DOM 环境与 framer-motion mock）。
 

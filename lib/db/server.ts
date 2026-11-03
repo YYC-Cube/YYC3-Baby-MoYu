@@ -10,6 +10,7 @@ const JSON_COLUMNS: Record<string, string[]> = {
   milestones: ["celebration_data"],
   ai_conversations: ["messages"],
   courses: ["content", "media_urls", "tags"],
+  user_documents: ["payload"],
 }
 
 // 写入方向：对象/数组 → JSON 字符串
@@ -82,6 +83,7 @@ const ALLOWED_TABLES = new Set([
   "homework_tasks",
   "courses",
   "stage_transitions",
+  "user_documents",
 ])
 
 export function assertTable(table: string): void {

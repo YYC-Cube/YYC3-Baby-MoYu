@@ -2,19 +2,9 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useChildrenMock } from '@/hooks/useChildren-mock'
+import { useChildren } from '@/hooks/useChildren'
+import type { Child } from '@/lib/db/types'
 import { characterManager } from '@/lib/character-manager'
-
-// 展示用 Child 形状（与 lib/db/types 的 Child 结构兼容）
-type MockChild = {
-  id: string
-  user_id: string
-  name: string
-  nickname?: string
-  birth_date: string
-  gender: 'male' | 'female' | 'other'
-  created_at: string
-}
 
 interface QVersionCharacterProps {
   childId?: string
@@ -35,7 +25,8 @@ export default function QVersionCharacter({
   onGenderChange,
   mood = 'happy'
 }: QVersionCharacterProps) {
-  const { currentChild, children } = useChildrenMock()
+  // 数据来源：/api/children（真实档案 + 租户隔离）；不再使用内置假数据
+  const { currentChild, children } = useChildren()
   const [isAnimating, setIsAnimating] = useState(false)
   const [displayGender, setDisplayGender] = useState<'male' | 'female'>('female')
 
@@ -45,19 +36,18 @@ export default function QVersionCharacter({
     : currentChild
 
   // 根据性别确定角色名称
-  const getCharacterName = (gender: 'male' | 'female', child?: MockChild | null): string => {
-    // 如果有儿童信息，使用儿童姓名
+  const getCharacterName = (gender: 'male' | 'female', child?: Child | null): string => {
+    // 有真实档案则用档案姓名；无档案时用产品统称，绝不编造具体孩子姓名
     if (child?.name) {
       return child.name
     }
-    // 默认Q版角色名称
-    return gender === 'male' ? '沫言' : '沫语'
+    return '小语'
   }
 
   // 根据用户信息和心情获取角色信息
-  const getCharacterImage = (child: MockChild | null, currentMood: string): string => {
-    const character = characterManager.getCharacterForUser(child);
-    return characterManager.getCharacterImagePath(character, currentMood);
+  const getCharacterImage = (child: Child | null, currentMood: string): string => {
+    const character = characterManager.getCharacterForUser(child)
+    return characterManager.getCharacterImagePath(character, currentMood)
   }
 
   // 根据性别确定主题色
@@ -240,7 +230,7 @@ export function ChildQVersionAvatar({
   child,
   size = 'md'
 }: {
-  child: MockChild | null | undefined
+  child: Child | null | undefined
   size?: 'sm' | 'md' | 'lg' | 'xl'
 }) {
   if (!child) return null

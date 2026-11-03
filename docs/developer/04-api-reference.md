@@ -74,6 +74,36 @@ Query：`childId`、`status`（pending/in_progress/completed/overdue）。租户
 
 删除任务，`{ success: true }`；404 不存在 / 403 非本人。
 
+## 客户端集合持久化（`/api/user-documents`，全部需认证）
+
+> 承载课表 / 日程 / 互动 / 视频 / 评估等「客户端整组维护」的数据，表结构见 [03 · 数据模型](./03-data-model.md)。
+
+| 方法 | 路径 | 说明 |
+| ---- | ---- | ---- |
+| GET | `/api/user-documents?kind=<kind>` | 返回 `data: [{ id, data, updatedAt }]`；`kind` 不在白名单 → 400 |
+| PUT | `/api/user-documents` | body `{ kind, items: [{ id, data }] }`；**replace-all**（事务内先删后插）；返回 `{ kind, count }` |
+| DELETE | `/api/user-documents?kind=<kind>` | 清空该 kind 的集合 |
+
+`kind` 白名单：`schedule` / `curriculum` / `interaction` / `video` / `assessment`。
+
+**约束（超限即拒绝）**
+
+| 约束 | 值 | 状态码 |
+| ---- | ---- | ---- |
+| 单组条数 | ≤ 500 | 400 |
+| 单条 payload | ≤ 64 KB | 413 |
+| 单组总字节 | ≤ 1 MB | 413 |
+| 同组内 `id` 重复 | 不允许 | 400 |
+| 未登录 | — | 401（跨用户数据互不可见） |
+
+```bash
+# 示例：整组写入课表（浏览器用 Cookie，API 客户端用 Bearer）
+curl -X PUT http://localhost:1228/api/user-documents \
+  -H 'content-type: application/json' \
+  --cookie-jar cookies.txt \
+  -d '{"kind":"schedule","items":[{"id":"s1","data":{"title":"起床","type":"rest"}}]}'
+```
+
 ## 自治核心（服务端单例）
 
 | 端点 | 限流 | 说明 |

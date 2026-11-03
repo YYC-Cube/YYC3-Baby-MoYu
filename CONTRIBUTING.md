@@ -114,7 +114,7 @@ Closes #123
 ```bash
 bun run type-check     # tsc --noEmit，0 error
 bun run lint           # ESLint，0 error（warning 需说明）
-bun run test            # 单元测试，257+ 全绿
+bun run test            # 单元测试，258+ 全绿
 bun run test:node      # node:sqlite 直测，7/7
 bun run build          # Next.js 生产构建
 bun run test:e2e       # Playwright 冒烟（需先 build）

@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react"
 import {
+  hydrateCollection,
+  readCollection,
+  subscribeCollection,
+  writeCollection,
+} from "@/lib/client/collection-store"
+import {
   type Course,
   type CourseSchedule,
   type Semester,
@@ -11,6 +17,8 @@ import {
 
 const STORAGE_KEY = "yyc3_curriculum"
 const SEMESTER_KEY = "yyc3_semester"
+// 服务端集合类型：课程表整组持久化（登录后跨设备可见）
+const COLLECTION_KIND = "curriculum" as const
 
 function generateId(): string {
   return `course_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -118,24 +126,28 @@ export function useCurriculum() {
   useEffect(() => {
     const loadData = () => {
       try {
-        const stored = localStorage.getItem(STORAGE_KEY)
-        const storedSemester = localStorage.getItem(SEMESTER_KEY)
+        const cached = readCollection<
+          Omit<Course, "createdAt" | "updatedAt"> & { createdAt: string; updatedAt: string }
+        >(COLLECTION_KIND, STORAGE_KEY)
 
-        if (stored) {
-          const parsed = JSON.parse(stored) as Array<Omit<Course, 'createdAt' | 'updatedAt'> & { createdAt: string; updatedAt: string }>
+        if (cached && cached.length > 0) {
           setCourses(
-            parsed.map((c) => ({
+            cached.map((c) => ({
               ...c,
               createdAt: new Date(c.createdAt),
               updatedAt: new Date(c.updatedAt),
             })),
           )
+        } else if (cached && cached.length === 0) {
+          // 用户已清空课程表：尊重空集合
+          setCourses([])
         } else {
-          const defaultCourses = getDefaultCourses("default")
-          setCourses(defaultCourses)
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultCourses))
+          // 默认课表仅作首屏占位，不写入持久层（避免把示例数据当作用户数据）
+          setCourses(getDefaultCourses("default"))
         }
 
+        // 学期属于单对象配置，暂留 localStorage（见 docs/developer/03-data-model.md 的已知限制）
+        const storedSemester = localStorage.getItem(SEMESTER_KEY)
         if (storedSemester) {
           const parsed = JSON.parse(storedSemester) as Omit<Semester, 'startDate' | 'endDate'> & { startDate: string; endDate: string }
           setSemester({
@@ -152,11 +164,14 @@ export function useCurriculum() {
     }
 
     loadData()
+    const unsubscribe = subscribeCollection(COLLECTION_KIND, loadData)
+    void hydrateCollection(COLLECTION_KIND, STORAGE_KEY)
+    return unsubscribe
   }, [])
 
   // 保存数据
   const saveData = useCallback((data: Course[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    writeCollection(COLLECTION_KIND, STORAGE_KEY, data)
   }, [])
 
   // 添加课程

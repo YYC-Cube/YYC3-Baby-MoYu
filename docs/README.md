@@ -20,6 +20,15 @@
 | [02 · 执行日志与进度跟踪](https://github.com/YYC-Cube/YYC3-Baby-MoYu/blob/main/docs/YYC3-Baby-MoYu-codex-20261102/02-执行日志与进度跟踪.md) | 逐项修复记录、命令与结果、遗留风险 |
 | [03 · 总结文档与状态同步](https://github.com/YYC-Cube/YYC3-Baby-MoYu/blob/main/docs/YYC3-Baby-MoYu-codex-20261102/03-总结文档与状态同步.md) | 交付清单、验证证据、下次会话恢复指南 |
 
+## 首次全维度调研（2026-11-02 · fullaudit）
+
+| 文档 | 内容 |
+| ---- | ---- |
+| [00 · 全维度调研与审核报告](./YYC3-Baby-MoYu-fullaudit-20261102/00-全维度调研与审核报告.md) | 业务/技术/代码/协作四层采集 · 功能接线矩阵 · 六维深度分析 · P0–P3 分级 · 路线与风险 · 协作对接指引 |
+| [01 · 测试方案与验证执行](./YYC3-Baby-MoYu-fullaudit-20261102/01-测试方案与验证执行.md) | 门禁与运行时实测证据 · 40+ 可执行用例（正向/反向/边界）· 覆盖与环境兼容范围 · 通过/失败判定 |
+| [02 · 执行日志与进度跟踪](./YYC3-Baby-MoYu-fullaudit-20261102/02-执行日志与进度跟踪.md) | 本次调研逐项操作、命令与结果、阻塞与处置 |
+| [03 · 总结文档与状态同步](./YYC3-Baby-MoYu-fullaudit-20261102/03-总结文档与状态同步.md) | 一句话结论 · 关键决策 · 下次会话启动指南 · TOP3 行动 |
+
 ## 专项分析（analysis/）
 
 | 文档 | 内容 |
@@ -36,7 +45,7 @@
 | [用户使用手册](./user-manual.md) | 面向家长的产品操作指南（功能地图/常见操作/隐私/FAQ） |
 | [01 · 快速上手](./developer/01-getting-started.md) | 环境要求、安装、启动、常见问题 |
 | [02 · 可视化架构体系](./developer/02-architecture.md) | 系统分层 / 混合路由 / 数据流 / AI 链路 / 徽章评估（Mermaid） |
-| [03 · 数据模型](./developer/03-data-model.md) | SQLite 九张表、JSON 列约定、种子数据、备份 |
+| [03 · 数据模型](./developer/03-data-model.md) | SQLite 十张表（含客户端集合 `user_documents`）、JSON 列约定、种子数据、备份 |
 | [04 · API 参考](./developer/04-api-reference.md) | 全部 REST 端点：请求/响应/错误码约定 |
 | [05 · 前端组件体系](./developer/05-frontend.md) | 目录组织、UI 基建、状态管理、主题与角色系统 |
 | [06 · AI 引擎与安全](./developer/06-ai-engine.md) | 服务端代理模式、密钥管理、AI 引擎模块清单 |

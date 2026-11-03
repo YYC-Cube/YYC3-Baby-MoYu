@@ -15,12 +15,13 @@ erDiagram
     children ||--o{ stage_transitions : "child_id"
     children ||--o{ ai_conversations : "child_id"
     users ||--o{ ai_conversations : "user_id"
+    users ||--o{ user_documents : "user_id（客户端集合）"
 ```
 
-## 九张表
+## 十张表
 
 | 表 | 用途 | 关键列 | JSON 列（自动序列化） |
-|----|------|--------|----------------------|
+| ---- | ---- | ---- | ---- |
 | `users` | 家长账户 | email(唯一)、role、password_hash、first_name/last_name、is_active、email_verified（JWT 鉴权，P0-1 融合） | — |
 | `children` | 宝宝档案 | birth_date、gender、current_stage | — |
 | `growth_records` | 成长记录 | type(milestone/observation/emotion/learning)、recorded_at | media_urls、tags |
@@ -30,8 +31,28 @@ erDiagram
 | `homework_tasks` | 作业任务 | status(pending/in_progress/completed/overdue)、priority | — |
 | `courses` | 课程 | subject、difficulty_level(1-5) | content、media_urls、tags |
 | `stage_transitions` | 成长阶段变迁 | from_stage→to_stage | — |
+| `user_documents` | **客户端集合持久化**（课表/日程/互动/视频/评估） | `user_id` + `kind` + `doc_id`（唯一索引 `(user_id,kind,doc_id)`） | payload |
 
 索引已覆盖全部外键列与高频查询列（recorded_at / due_date / status 等）。
+
+## `user_documents` 设计说明（2026-11-02 引入）
+
+**为什么是 JSON 文档表而不是四张宽表**：这四类集合只在客户端「整组读写」，服务端无聚合查询需求；
+为异构结构各建一张宽表会带来 4 套 DTO + 4 套迁移，收益为负。待出现统计/检索需求时再迁移为专用表。
+
+| 字段 | 说明 |
+| ---- | ---- |
+| `kind` | 白名单：`schedule` / `curriculum` / `interaction` / `video` / `assessment` |
+| `doc_id` | 客户端生成的项目 id（同一用户、同一 kind 内唯一） |
+| `payload` | 该项目完整对象（JSON，单条 ≤64 KB，单组 ≤500 条、总量 ≤1 MB） |
+
+**读写语义**：`GET` 按 `kind` 整取；`PUT` 为 **replace-all**（事务内先删后插）；`DELETE` 按 `kind` 清空。
+客户端由 `lib/client/collection-store.ts` 负责「本地缓存 + 防抖推送 + 一次性迁移」，游客降级为仅本地。
+
+**已知限制（待立项）**
+1. 学期配置（`yyc3_semester`）仍留在 localStorage（单对象配置，未并入集合）。
+2. 多标签页并发编辑为「后写覆盖」，家庭单用户场景可接受；如需强一致需引入版本号/冲突合并。
+3. 发展评估结果（`growth_assessments`）仍走 AI 端点即时返回，未写入本表/实体表。
 
 ## JSON 列约定（重要）
 

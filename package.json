@@ -34,7 +34,7 @@
   "homepage": "https://baby.yyc3.vip",
   "engines": {
     "bun": ">=1.0.0",
-    "node": ">=18.0.0"
+    "node": ">=22.13.0"
   },
   "scripts": {
     "dev": "next dev -p 1228",

@@ -307,6 +307,14 @@ export default function AIChatPage() {
         </div>
       </header>
 
+      {/* 诚实标注：本页回答由本地预设话术生成，不调用模型；避免用户误判为真实推理 */}
+      <div className="bg-amber-50 border-b border-amber-200 text-amber-800 text-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          演示模式：本页回答为预设示例，未调用模型。API 端点 <code className="font-mono">/api/ai/chat</code> 在配置
+          <code className="font-mono"> OPENAI_API_KEY </code>后返回真实模型输出。
+        </div>
+      </div>
+
       {/* 主要内容 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

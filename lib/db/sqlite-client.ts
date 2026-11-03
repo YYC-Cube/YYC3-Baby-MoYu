@@ -139,6 +139,20 @@ CREATE TABLE IF NOT EXISTS stage_transitions (
   FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE
 );
 
+-- 用户文档集合表（客户端轻量集合的服务端化：课表/日程/互动/视频/评估）
+-- 设计取舍：这些集合无服务端查询需求（仅按用户+类型整取），故采用「JSON 文档」而非逐字段建表，
+-- 避免为 4 类异构结构引入 4 张宽表；后续若需聚合查询，再迁移为专用表。
+CREATE TABLE IF NOT EXISTS user_documents (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  doc_id TEXT NOT NULL,
+  payload TEXT NOT NULL, -- JSON 对象
+  created_at TEXT NOT NULL,
+  updated_at TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- 创建索引以提高查询性能
 CREATE INDEX IF NOT EXISTS idx_children_user_id ON children(user_id);
 CREATE INDEX IF NOT EXISTS idx_growth_records_child_id ON growth_records(child_id);
@@ -153,6 +167,8 @@ CREATE INDEX IF NOT EXISTS idx_homework_tasks_due_date ON homework_tasks(due_dat
 CREATE INDEX IF NOT EXISTS idx_homework_tasks_status ON homework_tasks(status);
 CREATE INDEX IF NOT EXISTS idx_courses_subject ON courses(subject);
 CREATE INDEX IF NOT EXISTS idx_stage_transitions_child_id ON stage_transitions(child_id);
+CREATE INDEX IF NOT EXISTS idx_user_documents_owner_kind ON user_documents(user_id, kind);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_documents_unique ON user_documents(user_id, kind, doc_id);
 `
 
 export class SQLiteDatabase {

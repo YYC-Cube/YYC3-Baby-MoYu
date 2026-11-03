@@ -28,6 +28,15 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    # 主版本升级需人工评估：TypeScript 7 目前与 typescript-eslint 8 不兼容，
+    # 自动 PR 会在 CI 34s 内失败（历史 run 41407953310），因此屏蔽 major 自动升级。
+    ignore:
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "jsdom"
+        update-types:
+          - "version-update:semver-major"
 
   - package-ecosystem: "github-actions"
     directory: "/"

@@ -1,9 +1,17 @@
 "use client"
 
 import type { InteractionAnalysis, InteractionRecord, InteractionType } from "@/types/interaction"
+import {
+  hydrateCollection,
+  readCollection,
+  subscribeCollection,
+  writeCollection,
+} from "@/lib/client/collection-store"
 import { useCallback, useEffect, useState } from "react"
 
 const STORAGE_KEY = "yyc3_interactions"
+// 服务端集合类型：互动记录整组持久化
+const COLLECTION_KIND = "interaction" as const
 
 function generateId(): string {
   return `interaction_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -166,21 +174,24 @@ export function useInteractions() {
   useEffect(() => {
     const loadData = () => {
       try {
-        const stored = localStorage.getItem(STORAGE_KEY)
+        const stored = readCollection<InteractionRecord & { createdAt: string; updatedAt: string }>(
+          COLLECTION_KIND,
+          STORAGE_KEY,
+        )
 
-        if (stored) {
-          const parsed = JSON.parse(stored) as Array<InteractionRecord & { createdAt: string; updatedAt: string }>
+        if (stored && stored.length > 0) {
           setInteractions(
-            parsed.map((r) => ({
+            stored.map((r) => ({
               ...r,
               createdAt: new Date(r.createdAt).getTime(),
               updatedAt: new Date(r.updatedAt).getTime(),
             })),
           )
+        } else if (stored && stored.length === 0) {
+          setInteractions([])
         } else {
-          const defaultData = getDefaultInteractions("default")
-          setInteractions(defaultData)
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData))
+          // 默认示例仅作空态展示，不写入持久层
+          setInteractions(getDefaultInteractions("default"))
         }
       } catch (error) {
         console.error("加载互动记录失败:", error)
@@ -190,11 +201,14 @@ export function useInteractions() {
     }
 
     loadData()
+    const unsubscribe = subscribeCollection(COLLECTION_KIND, loadData)
+    void hydrateCollection(COLLECTION_KIND, STORAGE_KEY)
+    return unsubscribe
   }, [])
 
   // 保存数据
   const saveData = useCallback((data: InteractionRecord[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    writeCollection(COLLECTION_KIND, STORAGE_KEY, data)
   }, [])
 
   // 添加互动记录
