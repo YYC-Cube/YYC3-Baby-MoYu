@@ -9,6 +9,28 @@ bun run start          # Node 进程监听 :1228
 
 数据落盘 `data/yyc3.db`（进程外文件，重启不丢）。
 
+## 容器化（2026-11-02 起提供）
+
+仓库根新增 `Dockerfile`（多阶段）与 `docker-compose.yml`（单实例）。镜像内构建**必须用 Node 作为运行主体**：
+Next 16 的编译产物在 Bun 运行时下会报 `Expected CommonJS module to have a function wrapper`，
+因此构建阶段为 `node:22.13` + 复用 Bun 装依赖，运行时为 `node:22.13-bookworm-slim`（`node:sqlite` 所需）。
+
+```bash
+cp .env.example .env.local        # 填 JWT_SECRET（生产必填）与 AI 密钥（可留空）
+docker compose up -d --build      # 首次构建约 3–5 分钟
+docker compose ps                 # STATUS 应为 healthy
+curl -fsS localhost:1228/api/health
+```
+
+| 约束 | 说明 |
+| ---- | ---- |
+| 数据持久化 | `./data:/app/data`、`./logs:/app/logs` 两个 volume；容器重建不丢数据 |
+| 健康检查 | 容器 healthcheck 调用 `/api/health`（含数据库只读探针），失败即 unhealthy |
+| 单实例 | 与「部署拓扑约束」一致：**不要**直接 `--scale` 扩副本（限流与 SQLite 均为单实例语义） |
+| 密钥 | 仅经环境变量注入，`.env*` 已 gitignore；`.dockerignore` 亦排除 `.env*` |
+| 镜像瘦身 | 已启用 `output: "standalone"`（`next.config.mjs`）：镜像 **604 MB**（未启用时 2.37 GB）；`next start` 与 e2e 流程不受影响 |
+| 验证基线 | 本机实测：`docker build` 通过 → 容器 `healthy` → `/api/health` 200 → 注册/登录/建娃/评估落库 201 → **容器重启后数据仍在** |
+
 **部署拓扑约束（单实例锁定）**：当前三种实现均为**单进程语义**，多实例/Serverless 水平扩缩前不可直接复制副本——
 1. **限流**（`lib/rate-limit.ts`）：进程内内存桶，多副本时每副本独立计数，实际配额 = 副本数 × 配置值。多实例前接 Upstash Redis 替换存储后端（接口不变，仅换实现）。
 2. **SQLite 单写者**：多副本需共享挂载 `data/` 或改用 PostgreSQL（接口已抽象）。
@@ -58,6 +80,7 @@ bun run start          # Node 进程监听 :1228
 
 - [ ] `bun run build && bun run start` 本地通过
 - [ ] `curl -o /dev/null -w "%{http_code}" localhost:1228/` 返回 200（匿名可访问）
+- [ ] `curl -fsS localhost:1228/api/health` 返回 `status: ok` 且 HTTP 200
 - [ ] `curl localhost:1228/api/children` 返回 **401**（数据端点必须登录，200 即为越权缺陷）
 - [ ] `/en` 与根路由均 200（混合路由回归点）
 - [ ] `.env.local` 密钥为服务端变量且已轮换过

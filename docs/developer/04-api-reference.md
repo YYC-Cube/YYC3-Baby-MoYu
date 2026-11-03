@@ -37,8 +37,11 @@
 |-------|------|
 | `childId` | 按宝宝过滤（须属于当前用户，否则 **403**） |
 | `type` | milestone / observation / emotion / learning |
+| `limit` | 默认 200，上限 500（超出即夹取） |
+| `offset` | 默认 0（负数夹取为 0） |
 
-仅返回当前用户孩子集合的记录，按 `recorded_at` 倒序；`media_urls`、`tags` 已是结构化数组。
+仅返回当前用户孩子集合的记录，按 `recorded_at` 倒序；跨孩子聚合为**单条 `IN` 查询**（库内排序分页）；
+响应含 `meta: { total, limit, offset }`；`media_urls`、`tags` 已是结构化数组。
 
 ### POST /api/growth-records
 
@@ -103,6 +106,20 @@ curl -X PUT http://localhost:1228/api/user-documents \
   --cookie-jar cookies.txt \
   -d '{"kind":"schedule","items":[{"id":"s1","data":{"title":"起床","type":"rest"}}]}'
 ```
+
+## 发展评估结果（`/api/growth-assessments`，全部需认证）
+
+| 方法 | 路径 | 说明 |
+| ---- | ---- | ---- |
+| GET | `/api/growth-assessments?childId=&limit=&offset=` | 按孩子（可省略=全部自己的孩子）读取；`limit` 默认 50 / 上限 200；返回 `data + meta.total` |
+| POST | `/api/growth-assessments` | body：`child_id`、`stage_id`、`dimensions[{id,name,score}]`、`overall_score(0-100)`、`recommendations[]`；201 返回落库记录 |
+
+`child_id` 非本人 → **403**；入参非法 → 400；写入后刷新/换设备仍可读（对应 `growth_assessments` 表）。
+
+## 健康检查（`/api/health`，匿名）
+
+`GET /api/health` → `{ status: "ok" | "degraded", checks: { database }, version, uptimeSec, timestamp }`。
+数据库只读探针失败返回 **503**，供容器/K8s 探活与摘流；不返回连接串、路径等内部信息。
 
 ## 自治核心（服务端单例）
 

@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart LR
-    T["bunx tsc --noEmit<br/>0 错误"] --> L["bun run lint<br/>0 error"] --> B["next build<br/>含类型检查"] --> U["bun run test<br/>258 用例"] --> P["推送 ✅"]
+    T["bunx tsc --noEmit<br/>0 错误"] --> L["bun run lint<br/>0 error"] --> B["next build<br/>含类型检查"] --> U["bun run test<br/>266 用例"] --> P["推送 ✅"]
 ```
 
 | 门禁 | 命令 | 当前基线 |
@@ -12,13 +12,13 @@ flowchart LR
 | 类型 | `bun run type-check` | **0 错误**（应用代码；`__tests__/`、`themes/` 排除） |
 | Lint | `bun run lint` | **0 error**，51 warning（见债务清单） |
 | 构建 | `bun run build` | 通过（类型门禁已恢复，无 ignoreBuildErrors） |
-| 测试 | `bun run test` | 258/258（20 文件，~1.8s；含鉴权/越权/限流类安全行为用例） |
+| 测试 | `bun run test` | 266/266（21 文件，~1.8s；含鉴权/越权/限流类安全行为用例） |
 | DB 直测 | `bun run test:node` | 7/7（node:sqlite 注入/迁移/种子守卫） |
 | e2e | `bun run test:e2e` | 3/3（登录→建娃→写记录→登出 / 匿名 401 矩阵 / 敏感页重定向；生产构建，账号自举不依赖种子） |
 | 视觉 | `bun run test:visual` | 8/8（首页/视频工坊 × 四主题；darwin/linux 分平台基线） |
 | 依赖 | `bun run audit:osv` | OSV.dev 审计；Critical 阻断，High/Medium 输出 `osv-results.json` |
 
-> 2026-11-02 复核实测：tsc 0 error · lint 0 error/51 warning · 258/258 · node 7/7 · build 成功（编译 ~1.9s）·
+> 2026-11-02 复核实测：tsc 0 error · lint 0 error/51 warning · 266/266 · node 7/7 · build 成功（编译 ~1.9s）·
 > e2e 3/3 · 四主题视觉 8/8。数字以本节为准，变更门禁时请同步刷新。
 
 ## 测试套件结构（按目录实况）
@@ -29,6 +29,7 @@ __tests__/
 │                           data-routes（children/growth/homework 的 401·403·IDOR·白名单）
 │                           ai-chat（401/400/demo 降级/role 回落/429）
 │                           user-documents（kind 白名单/覆盖语义/隔离/体积与条数上限）
+│                           growth-assessments（401/400/403/201/分页夹取 + health 200/503）
 ├── lib/                    badges · auth · auth/jwt-type · rate-limit · theme-system
 │                           character-manager · config · db/identifier · utils
 │                           api/auth-fetch（401→刷新→重试并发锁）

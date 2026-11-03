@@ -36,7 +36,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/build-passing-22c55e" alt="build passing" />
-  <img src="https://img.shields.io/badge/tests-258%20passed-22c55e" alt="258 tests passed" />
+  <img src="https://img.shields.io/badge/tests-266%20passed-22c55e" alt="266 tests passed" />
   <img src="https://img.shields.io/badge/type--check-0%20errors-22c55e" alt="0 type errors" />
   <img src="https://img.shields.io/badge/a11y-WCAG%202.2%20AA-0f766e" alt="WCAG 2.2 AA" />
   <img src="https://img.shields.io/badge/%E5%BE%AB%E7%AB%A0-30%20%E6%9E%9A-d946ef?logo=medal&logoColor=white" alt="30 badges" />
@@ -80,7 +80,7 @@ bun run dev
 # 构建 / 生产启动
 bun run build && bun run start
 
-# 测试（258 个用例）
+# 测试（266 个用例）
 bun run test
 ```
 
@@ -133,7 +133,7 @@ bun run test
 | ------ | ------ |
 | `bun run dev` | Next.js 开发服务器（:1228） |
 | `bun run build` / `start` | 生产构建 / 启动 |
-| `bun run test` | 单元测试（258 用例，全绿） |
+| `bun run test` | 单元测试（266 用例，全绿） |
 | `bun run type-check` | 类型检查（应用代码 **0 错误**，见 TYPECHECK_BASELINE.md） |
 | `bun run lint` / `lint:fix` | ESLint 检查 / 自动修复 |
 | `bun run test:e2e` | Playwright 行为冒烟（3 例） |
@@ -141,6 +141,7 @@ bun run test
 | `bun run test:visual:update` | 重新生成当前平台视觉基线（darwin / linux） |
 | `bun run audit:osv` | OSV.dev 依赖审计（Critical 阻断，生成 `osv-results.json`） |
 | `bun run audit:osv:high` | OSV 高危观察（不阻断，用于排查） |
+| `bun run check:i18n` | i18n 边界巡检（页面覆盖率 + zh/en 词条键一致性；`check:i18n:strict` 可阻断） |
 
 ## 目录结构
 
@@ -165,13 +166,18 @@ bun run test
 ├── middleware.ts         # locale 路由中间件
 ├── hooks/ types/ config/ # 钩子、类型、配置
 ├── themes/               # Figma 三套主题参考（未接线，排除出 tsc）
-├── __tests__/            # 单元测试（258 用例）
+├── __tests__/            # 单元测试（266 用例）
 ├── public/               # 静态资源（icon/manifest/PWA/角色照片/CNAME）
 ├── scripts/              # 部署脚本 + 文档生成器（generate-docs.py）
 └── docs/                 # ★ 文档中心（唯一入口见 docs/README.md）
     ├── developer/        #   现行开发文档（11 篇，唯一维护）
     └── archive/          #   历史归档（architecture/audit/creative/snapshots/plans）
 ```
+
+## 容器与探活
+
+- `Dockerfile`（Node 22.13 运行 + Bun 装依赖）与 `docker-compose.yml`（单实例，mount `./data`、`./logs`）
+- `GET /api/health`：数据库只读探针，异常返回 503，供容器 healthcheck / K8s 探活
 
 ## 安全约定
 
@@ -204,6 +210,7 @@ bun run test
 | [08 · 部署](./docs/developer/08-deployment.md) | 本地生产、脚本、Docker 注意事项 |
 | [09 · 贡献指南](./docs/developer/09-contributing.md) | 分支模型、提交规范、徽章系统扩展指南 |
 | [10 · 可视化交互体系设计](./docs/developer/10-visual-interaction-system.md) | 设计令牌 / 四主题 / 交互状态机 / 数据可视化 / 动效 / WCAG 2.2 AA / 视觉回归 |
+| [11 · 国际化边界与治理](./docs/developer/11-i18n-boundary.md) | 英文试点范围（2/14 页）· `@yyc3/i18n-core` 不适用评估 · 全量国际化判定标准 |
 
 ## 开源协作
 
@@ -223,7 +230,7 @@ bun run test
 
 - ✅ 构建通过，生产冒烟 200（含 `/en` i18n 路由、`/manifest.json`、`/icon.svg`）
 - ✅ SQLite 真实持久化（写入 → 重启 → 数据在）；课表/日程/互动/视频经 `/api/user-documents` 跨设备同步（游客自动降级本地）
-- ✅ 测试 258/258 全绿（含鉴权/越权/限流等安全行为用例）；`test:node` 7/7；E2E 3/3；四主题视觉 8/8
+- ✅ 测试 266/266 全绿（含鉴权/越权/限流等安全行为用例）；`test:node` 7/7；E2E 3/3；四主题视觉 8/8
 - ✅ 类型债 1,986 → **0**（[TYPECHECK_BASELINE.md](./TYPECHECK_BASELINE.md)，`tsc --noEmit` 0 error）
 - ✅ 关键依赖安全升级：`next` 16.4.3、`zod` 4.6.7、`next-intl` 4.14.9（关闭已知通告；项目以 `bun.lock` 为准）
 - ✅ OSV 依赖审计：`bun run audit:osv` + `.github/workflows/osv-audit.yml`（Critical 阻断、每周定时、PR/push 触发、报告 artifact）

@@ -22,7 +22,7 @@
 | `bunx tsc --noEmit` | **0 错误**（应用代码；`__tests__/`、`themes/` 排除，前者由 bun test 运行时把关） |
 | `next build` | 含完整类型检查，**通过** |
 | `bun run lint` | **0 error**，51 warning（any 家族/悬浮 Promise/React Compiler 现代化债务，已归档见下） |
-| `bun test` | 258/258 全绿（2026-11-02 复核） |
+| `bun test` | 266/266 全绿（2026-11-02 复核） |
 | `bun run audit:osv` | 0 Critical（814 包，High/Medium 留档） |
 
 ## 剩余 warning 债务（不阻断，按域消化）
