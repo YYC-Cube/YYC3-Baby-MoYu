@@ -179,7 +179,7 @@ flowchart LR
 ```mermaid
 flowchart TB
     subgraph Data["真实行为数据"]
-        API["/api/growth-records · /api/children · /api/homework<br/>SQLite 九表（记录/里程碑/作业/多档案）"]
+        API["/api/growth-records · /api/children · /api/homework<br/>/api/user-documents（课表/互动/视频集合）<br/>SQLite 十表"]
     end
     subgraph Engine["客户端评估引擎"]
         useB["useBadges<br/>hooks/useBadges.ts"]

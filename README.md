@@ -36,7 +36,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/build-passing-22c55e" alt="build passing" />
-  <img src="https://img.shields.io/badge/tests-257%20passed-22c55e" alt="257 tests passed" />
+  <img src="https://img.shields.io/badge/tests-258%20passed-22c55e" alt="258 tests passed" />
   <img src="https://img.shields.io/badge/type--check-0%20errors-22c55e" alt="0 type errors" />
   <img src="https://img.shields.io/badge/a11y-WCAG%202.2%20AA-0f766e" alt="WCAG 2.2 AA" />
   <img src="https://img.shields.io/badge/%E5%BE%AB%E7%AB%A0-30%20%E6%9E%9A-d946ef?logo=medal&logoColor=white" alt="30 badges" />
@@ -61,7 +61,7 @@
 | 运行时/包管理 | Node ≥ 22.13（`node:sqlite`）+ Bun（测试）/ npm 兼容 |
 | 样式 | Tailwind CSS 4 + shadcn/ui（Radix） |
 | 状态 | React state + AuthProvider Context + authFetch/apiClient（认证自动附带与刷新） |
-| AI | BigModel 开放平台（作业批改 / 语音 / 情感分析），密钥仅服务端 |
+| AI | 三通道：OpenAI 兼容（对话 / 编排 / 评估 / 续写）· BigModel（作业批改 / 语音）· fal.ai（生图）；缺密钥自动降级且前端可感知，密钥仅服务端 |
 | 数据 | SQLite（`node:sqlite`，`data/yyc3.db`，WAL） |
 | i18n | next-intl v4（zh 默认 / en，`/en` 前缀路由） |
 
@@ -80,7 +80,7 @@ bun run dev
 # 构建 / 生产启动
 bun run build && bun run start
 
-# 测试（257 个用例）
+# 测试（258 个用例）
 bun run test
 ```
 
@@ -133,7 +133,7 @@ bun run test
 | ------ | ------ |
 | `bun run dev` | Next.js 开发服务器（:1228） |
 | `bun run build` / `start` | 生产构建 / 启动 |
-| `bun run test` | 单元测试（257 用例，全绿） |
+| `bun run test` | 单元测试（258 用例，全绿） |
 | `bun run type-check` | 类型检查（应用代码 **0 错误**，见 TYPECHECK_BASELINE.md） |
 | `bun run lint` / `lint:fix` | ESLint 检查 / 自动修复 |
 | `bun run test:e2e` | Playwright 行为冒烟（3 例） |
@@ -151,6 +151,7 @@ bun run test
 │   └── <feature>/        #   功能页面（growth/homework/books/...）
 ├── components/           # React 组件（ui/ 基础件 + 业务分组 + 角色主题）
 ├── lib/
+│   ├── client/           #   客户端集合持久化适配层（本地缓存 + 服务端同步/迁移）
 │   ├── agentic/           #   AgenticCore 服务端单例（经 /api/agentic 调用）
 │   ├── ai/               #   AI 引擎（情感/语音/多模态）
 │   ├── api/              #   外部 API 客户端（服务端）+ authFetch/ai-guard（客户端认证）
@@ -164,7 +165,7 @@ bun run test
 ├── middleware.ts         # locale 路由中间件
 ├── hooks/ types/ config/ # 钩子、类型、配置
 ├── themes/               # Figma 三套主题参考（未接线，排除出 tsc）
-├── __tests__/            # 单元测试（257 用例）
+├── __tests__/            # 单元测试（258 用例）
 ├── public/               # 静态资源（icon/manifest/PWA/角色照片/CNAME）
 ├── scripts/              # 部署脚本 + 文档生成器（generate-docs.py）
 └── docs/                 # ★ 文档中心（唯一入口见 docs/README.md）
@@ -195,7 +196,7 @@ bun run test
 | [用户使用手册](./docs/user-manual.md) | 面向家长的产品操作指南（功能地图/隐私/FAQ） |
 | [01 · 快速上手](./docs/developer/01-getting-started.md) | 环境要求、安装、启动、常见问题 |
 | [02 · 可视化架构体系](./docs/developer/02-architecture.md) | 系统分层 / 混合路由 / 数据流 / AI 链路 / 目录拓扑（Mermaid） |
-| [03 · 数据模型](./docs/developer/03-data-model.md) | SQLite 九张表、JSON 列约定、种子数据、备份 |
+| [03 · 数据模型](./docs/developer/03-data-model.md) | SQLite 十张表（含客户端集合 `user_documents`）、JSON 列约定、种子数据、备份 |
 | [04 · API 参考](./docs/developer/04-api-reference.md) | 全部 REST 端点：请求/响应/错误码约定 |
 | [05 · 前端组件体系](./docs/developer/05-frontend.md) | 目录组织、UI 基建、状态管理、主题与角色系统 |
 | [06 · AI 引擎与安全](./docs/developer/06-ai-engine.md) | 服务端代理模式、密钥管理、AI 引擎模块清单 |
@@ -221,8 +222,8 @@ bun run test
 ## 当前状态
 
 - ✅ 构建通过，生产冒烟 200（含 `/en` i18n 路由、`/manifest.json`、`/icon.svg`）
-- ✅ SQLite 真实持久化（写入 → 重启 → 数据在）
-- ✅ 测试 257/257 全绿（含 38 个安全行为用例）；`test:node` 7/7；E2E 3/3
+- ✅ SQLite 真实持久化（写入 → 重启 → 数据在）；课表/日程/互动/视频经 `/api/user-documents` 跨设备同步（游客自动降级本地）
+- ✅ 测试 258/258 全绿（含鉴权/越权/限流等安全行为用例）；`test:node` 7/7；E2E 3/3；四主题视觉 8/8
 - ✅ 类型债 1,986 → **0**（[TYPECHECK_BASELINE.md](./TYPECHECK_BASELINE.md)，`tsc --noEmit` 0 error）
 - ✅ 关键依赖安全升级：`next` 16.4.3、`zod` 4.6.7、`next-intl` 4.14.9（关闭已知通告；项目以 `bun.lock` 为准）
 - ✅ OSV 依赖审计：`bun run audit:osv` + `.github/workflows/osv-audit.yml`（Critical 阻断、每周定时、PR/push 触发、报告 artifact）

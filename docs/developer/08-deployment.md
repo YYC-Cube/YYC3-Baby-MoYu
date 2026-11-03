@@ -19,21 +19,31 @@ bun run start          # Node 进程监听 :1228
 ## 环境变量清单
 
 | 变量 | 必填 | 默认 | 说明 |
-|------|------|------|------|
-| `BIGMODEL_API_KEY` | ✅ | — | BigModel 服务端密钥 |
+| ---- | ---- | ---- | ---- |
+| `JWT_SECRET` | ✅（生产） | —（开发用 `data/.jwt-dev-secret` 随机密钥） | 缺失时生产进程拒绝签发令牌 |
+| `BIGMODEL_API_KEY` | 视功能 | — | 作业批改 / 语音转写 |
+| `OPENAI_API_KEY` | 视功能 | — | 对话 / 编排 / 评估报告 / 故事续写（缺失则对话降级为示例） |
+| `OPENAI_BASE_URL` | | — | 可选，OpenAI 兼容网关地址 |
+| `FAL_KEY` | | — | 生图（缺失则返回占位图） |
 | `PORT` | | 1228（脚本内置） | 监听端口 |
-| `DATABASE_URL` | | `<cwd>/data/yyc3.db` | SQLite 库文件路径 |
-| `NEXT_PUBLIC_AI_API_URL` | | https://api.0379.love/v1 | 客户端 AI 网关（只读） |
+| `DATABASE_URL` | | `<cwd>/data/yyc3.db` | **SQLite 文件路径**（非 PG 连接串） |
 | `NEXT_PUBLIC_APP_URL` | | http://localhost:1228 | 站点地址 |
+| `NEXT_PUBLIC_API_URL` | | 空（同源） | 仅拆分独立后端时设置 |
+| `CSRF_TRUSTED_ORIGINS` / `CSRF_REQUIRE_ORIGIN` | | 空 / false | 反向代理或多端 WebView 场景 |
+
+> 完整样板以仓库根 `.env.example` 为准（每个读取点都必须在此登记）。
 
 ## 脚本（scripts/）
 
-| 脚本 | 用途 |
-|------|------|
-| deploy-docker.sh / docker-compose 相关 | 容器化部署（注意：Dockerfile 需 node:≥22.13 基础镜像） |
-| deploy-to-production.sh / deploy-to-yyc3-33.sh | 历史部署目标 |
-| database-schema.sql | 表结构 SQL 独立副本 |
-| auto-fix-errors.ts / generate-docs.py | 历史维护工具/文档生成器 |
+**现行可用**：`osv-audit.mjs`（依赖审计）、`generate-docs.py`（文档生成）、`ts-node-hooks.mjs`（node 直测钩子）。
+
+| 脚本 | 状态 | 说明 |
+| ---- | ---- | ---- |
+| `deploy-docker.sh`、`deploy-to-production.sh`、`deploy-to-yyc3-33.sh`、`deploy-microservices.sh`、`deploy-local-ai.sh`、`deploy-knowledge-graph.sh`、`deploy-data-analytics.sh` | ⚠️ **历史遗留（不可直接执行）** | 依赖 `docker-compose.yml`、`services/xiaoyu-api/`、`microservices/` 等**仓库中不存在**的资产；当前架构为单进程 `next start`。保留仅为历史追溯，见 `scripts/README.md` |
+| `database-schema.sql` | 参考 | 表结构 SQL 独立副本（以 `lib/db/sqlite-client.ts` 为准） |
+| `auto-fix-errors.ts`、`fix-integration-conflicts.ts` | 历史维护工具 | 一次性脚本，不建议复用 |
+
+> 容器化尚未落地（仓库无 `Dockerfile` / `docker-compose.yml`）。若需容器化，基础镜像必须 Node ≥ 22.13，并按 `08` 的「单实例锁定」约束评估。
 
 ## 备份与恢复
 
@@ -47,11 +57,12 @@ bun run start          # Node 进程监听 :1228
 ## 健康检查清单（上线前）
 
 - [ ] `bun run build && bun run start` 本地通过
-- [ ] `curl localhost:1228/api/children` 返回 200 且含种子数据
+- [ ] `curl -o /dev/null -w "%{http_code}" localhost:1228/` 返回 200（匿名可访问）
+- [ ] `curl localhost:1228/api/children` 返回 **401**（数据端点必须登录，200 即为越权缺陷）
 - [ ] `/en` 与根路由均 200（混合路由回归点）
 - [ ] `.env.local` 密钥为服务端变量且已轮换过
 - [ ] `data/`、`.env*` 均在 .gitignore
-- [ ] `npm audit` 0 漏洞
+- [ ] `bun run audit:osv` 0 Critical（High/Medium 有书面处置）
 
 ## 运行时约束
 
