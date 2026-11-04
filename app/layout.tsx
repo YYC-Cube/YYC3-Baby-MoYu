@@ -15,9 +15,11 @@ import { ThemeBackgroundLayer } from "@/components/theme-system/ThemeBackgroundL
 import { AuthProvider } from "@/hooks/useAuth"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { NextIntlClientProvider } from "next-intl"
 import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import type React from "react"
+import zhMessages from "../messages/zh.json"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], display: "swap" })
@@ -95,17 +97,21 @@ export default function RootLayout({
         <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
       </head>
       <body className={`${inter.className} antialiased selection:bg-orange-200 selection:text-orange-900`}>
-        <ErrorBoundary>
-          <ThemeSystemProvider>
-            <DndProvider>
-              <AuthProvider>
-                <ThemeBackgroundLayer />
-                {children}
-                <ClientWrapper />
-              </AuthProvider>
-            </DndProvider>
-          </ThemeSystemProvider>
-        </ErrorBoundary>
+        {/* P0(i18n)：根路由（中文主应用）注入 zh Provider，使根页面组件可用 useTranslations；
+            /en|/zh 前缀路由由 app/[locale]/layout.tsx 的内层 Provider 覆盖为对应语言 */}
+        <NextIntlClientProvider locale="zh" messages={zhMessages}>
+          <ErrorBoundary>
+            <ThemeSystemProvider>
+              <DndProvider>
+                <AuthProvider>
+                  <ThemeBackgroundLayer />
+                  {children}
+                  <ClientWrapper />
+                </AuthProvider>
+              </DndProvider>
+            </ThemeSystemProvider>
+          </ErrorBoundary>
+        </NextIntlClientProvider>
         <Analytics />
         <SpeedInsights />
       </body>

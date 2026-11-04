@@ -30,10 +30,13 @@ function isPageRoute(dir, name) {
 const zhRootPages = subdirs(APP_DIR).filter((n) => isPageRoute(APP_DIR, n) && n !== "[locale]")
 const enPages = subdirs(LOCALE_DIR).filter((n) => isPageRoute(LOCALE_DIR, n))
 
+// 首页也是页面路由：app/page.tsx ↔ app/[locale]/page.tsx（此前未计入，口径偏小）
+const zhTotal = zhRootPages.length + (existsSync(join(APP_DIR, "page.tsx")) ? 1 : 0)
+const enTotal = enPages.length + (existsSync(join(LOCALE_DIR, "page.tsx")) ? 1 : 0)
+const homeCovered = existsSync(join(APP_DIR, "page.tsx")) && existsSync(join(LOCALE_DIR, "page.tsx"))
+
 const missing = zhRootPages.filter((n) => !enPages.includes(n))
-const coverage = zhRootPages.length === 0
-  ? 0
-  : Math.round((enPages.length / zhRootPages.length) * 100)
+const coverage = zhTotal === 0 ? 0 : Math.round((enTotal / zhTotal) * 100)
 
 // 词条键一致性（浅层键；本项目 messages 为扁平结构）
 function flatten(obj, prefix = "") {
@@ -69,12 +72,13 @@ if (zhMessages && enMessages) {
 }
 
 console.log("=== i18n 边界巡检 ===")
-console.log(`中文页面（app/*/page.tsx）：${zhRootPages.length} 个 → ${zhRootPages.join(", ") || "(无)"}`)
-console.log(`英文镜像（app/[locale]/*/page.tsx）：${enPages.length} 个 → ${enPages.join(", ") || "(无)"}`)
+console.log(`中文页面（含首页）：${zhTotal} 个 → 子页：${zhRootPages.join(", ") || "(无)"} + 首页`)
+console.log(`英文镜像（含首页）：${enTotal} 个 → 子页：${enPages.join(", ") || "(无)"}${homeCovered ? " + 首页" : ""}`)
 console.log(`页面覆盖率：${coverage}%（未覆盖 ${missing.length} 个：${missing.join(", ") || "无"}）`)
 console.log(`词条键：zh ${zhMessages ? flatten(zhMessages).length : "缺失"} / en ${enMessages ? flatten(enMessages).length : "缺失"}`)
 if (missingKeys.length) console.log(`en 缺失键（${missingKeys.length}）：${missingKeys.slice(0, 20).join(", ")}`)
 if (extraKeys.length) console.log(`en 多余键（${extraKeys.length}）：${extraKeys.slice(0, 20).join(", ")}`)
+console.log("⚠️ 口径说明：本脚本只统计「镜像路由存在」，不代表该页已词条化（中文硬编码副本也会被计入）。")
 
 const failed = missing.length > 0 || missingKeys.length > 0 || !zhMessages || !enMessages
 if (failed && strict) {
