@@ -30,7 +30,15 @@
     "courses": "课程学习",
     "books": "图书阅读",
     "profile": "个人中心",
-    "settings": "设置"
+    "settings": "设置",
+    "tabHome": "首页",
+    "tabVideos": "视频",
+    "tabBooks": "绘本",
+    "tabShortDrama": "短剧",
+    "tabCreative": "创作",
+    "tabCurriculum": "课表",
+    "tabGrowth": "成长",
+    "tabSettings": "设置"
   },
   "home": {
     "greeting": "每一天都是独有的限量版！",
@@ -86,7 +94,42 @@
     "analysis": "题目分析",
     "startTask": "开始任务",
     "viewSolution": "查看答案",
-    "askForHelp": "寻求帮助"
+    "askForHelp": "寻求帮助",
+    "pageTitle": "我的作业任务",
+    "filterSubject": "按学科筛选",
+    "filterDue": "按截止日期排序",
+    "childHeader": "{name}的作业",
+    "ageText": "{years}岁{months}个月",
+    "noChild": "请先在设置中添加孩子档案",
+    "tabPending": "待完成",
+    "tabDone": "已完成",
+    "tabReview": "待批改",
+    "progressLabel": "完成度",
+    "btnDone": "已完成 ✓",
+    "btnAiHelp": "AI辅助做题",
+    "modalTitle": "AI智能作业助手",
+    "subjects": {
+      "chinese": "语文",
+      "math": "数学",
+      "english": "英语"
+    },
+    "samples": {
+      "one": {
+        "title": "古诗词背诵",
+        "desc": "背诵《静夜思》并录制音频",
+        "due": "今天 18:00"
+      },
+      "two": {
+        "title": "口算练习",
+        "desc": "完成10道两位数加减法",
+        "due": "明天 09:00"
+      },
+      "three": {
+        "title": "单词拼写",
+        "desc": "记住20个新单词",
+        "due": "昨天"
+      }
+    }
   },
   "books": {
     "title": "图书阅读",

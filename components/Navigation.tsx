@@ -3,20 +3,23 @@
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 
+// label 为词条键（messages/*/json 的 navigation 命名空间），渲染时经 t() 取当前语言
 const navItems = [
-  { id: "home", icon: "ri-home-smile-2-fill", label: "首页", href: "/" },
-  { id: "videos", icon: "ri-video-fill", label: "视频", href: "/videos" },
-  { id: "books", icon: "ri-book-3-fill", label: "绘本", href: "/books" },
-  { id: "short-drama", icon: "ri-movie-2-fill", label: "短剧", href: "/ai-creative", badge: true },
-  { id: "creative", icon: "ri-palette-fill", label: "创作", href: "/ai-creative" },
-  { id: "curriculum", icon: "ri-calendar-todo-fill", label: "课表", href: "/curriculum" },
-  { id: "growth", icon: "ri-trophy-fill", label: "成长", href: "/growth" },
-  { id: "settings", icon: "ri-settings-4-fill", label: "设置", href: "/settings" },
+  { id: "home", icon: "ri-home-smile-2-fill", labelKey: "tabHome", href: "/" },
+  { id: "videos", icon: "ri-video-fill", labelKey: "tabVideos", href: "/videos" },
+  { id: "books", icon: "ri-book-3-fill", labelKey: "tabBooks", href: "/books" },
+  { id: "short-drama", icon: "ri-movie-2-fill", labelKey: "tabShortDrama", href: "/ai-creative", badge: true },
+  { id: "creative", icon: "ri-palette-fill", labelKey: "tabCreative", href: "/ai-creative" },
+  { id: "curriculum", icon: "ri-calendar-todo-fill", labelKey: "tabCurriculum", href: "/curriculum" },
+  { id: "growth", icon: "ri-trophy-fill", labelKey: "tabGrowth", href: "/growth" },
+  { id: "settings", icon: "ri-settings-4-fill", labelKey: "tabSettings", href: "/settings" },
 ]
 
 export default function Navigation() {
   const pathname = usePathname()
+  const t = useTranslations("navigation")
 
   return (
     <motion.nav
@@ -48,7 +51,7 @@ export default function Navigation() {
                 />
               )}
               <i className={`${item.icon} text-xl mb-0.5`} />
-              <span className="text-[10px]">{item.label}</span>
+              <span className="text-[10px]">{t(item.labelKey)}</span>
             </motion.button>
           </Link>
         )

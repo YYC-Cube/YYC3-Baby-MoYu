@@ -30,7 +30,15 @@
     "courses": "Courses",
     "books": "Books",
     "profile": "Profile",
-    "settings": "Settings"
+    "settings": "Settings",
+    "tabHome": "Home",
+    "tabVideos": "Videos",
+    "tabBooks": "Books",
+    "tabShortDrama": "Shorts",
+    "tabCreative": "Create",
+    "tabCurriculum": "Schedule",
+    "tabGrowth": "Growth",
+    "tabSettings": "Settings"
   },
   "home": {
     "greeting": "Every day is a unique limited edition!",
@@ -86,7 +94,42 @@
     "analysis": "Problem Analysis",
     "startTask": "Start Task",
     "viewSolution": "View Solution",
-    "askForHelp": "Ask for Help"
+    "askForHelp": "Ask for Help",
+    "pageTitle": "My Homework Tasks",
+    "filterSubject": "Filter by subject",
+    "filterDue": "Sort by due date",
+    "childHeader": "{name}'s Homework",
+    "ageText": "{years}y {months}m old",
+    "noChild": "Please add a child profile in Settings first",
+    "tabPending": "To Do",
+    "tabDone": "Done",
+    "tabReview": "To Review",
+    "progressLabel": "Progress",
+    "btnDone": "Done ✓",
+    "btnAiHelp": "AI Assist",
+    "modalTitle": "AI Homework Assistant",
+    "subjects": {
+      "chinese": "Chinese",
+      "math": "Math",
+      "english": "English"
+    },
+    "samples": {
+      "one": {
+        "title": "Poem Recitation",
+        "desc": "Recite “Quiet Night Thoughts” and record the audio",
+        "due": "Today 18:00"
+      },
+      "two": {
+        "title": "Mental Math",
+        "desc": "Complete 10 two-digit addition and subtraction problems",
+        "due": "Tomorrow 09:00"
+      },
+      "three": {
+        "title": "Spelling Words",
+        "desc": "Memorize 20 new words",
+        "due": "Yesterday"
+      }
+    }
   },
   "books": {
     "title": "Book Reading",
