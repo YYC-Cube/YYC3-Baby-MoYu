@@ -2,72 +2,50 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 import Navigation from "@/components/Navigation"
 import PageHeader from "@/components/headers/PageHeader"
 
+type CourseId = "c1" | "c2" | "c3"
+type CourseCategoryId = "chinese" | "math" | "science" | "art" | "enrichment"
+
 interface Course {
-  id: string
-  title: string
-  description: string
-  category: string
+  id: CourseId
+  category: CourseCategoryId
   status: "ongoing" | "new" | "normal"
   progress?: number
-  duration?: string
-  difficulty?: string
-  badge?: string
+  hasDuration?: boolean
 }
 
 const coursesData: Course[] = [
-  {
-    id: "course-1",
-    title: "小学古诗词鉴赏 (上)",
-    description: "掌握 50 首必背古诗，理解诗歌意境。",
-    category: "语文",
-    status: "ongoing",
-    progress: 75,
-    badge: "进行中",
-  },
-  {
-    id: "course-2",
-    title: "趣味科学实验课",
-    description: "探索 10 个居家小实验，激发科学兴趣。",
-    category: "科学",
-    status: "new",
-    duration: "共 4 课时",
-    badge: "新课上线",
-  },
-  {
-    id: "course-3",
-    title: "初级编程思维训练",
-    description: "通过简单拖拽，学习编程逻辑和流程控制。",
-    category: "素质拓展",
-    status: "normal",
-    difficulty: "难度：中",
-  },
+  { id: "c1", category: "chinese", status: "ongoing", progress: 75 },
+  { id: "c2", category: "science", status: "new", hasDuration: true },
+  { id: "c3", category: "enrichment", status: "normal" },
 ]
 
-const categories = [
-  { id: "all", label: "全部课程", icon: "" },
-  { id: "语文", label: "语文", icon: "📚" },
-  { id: "数学", label: "数学", icon: "📐" },
-  { id: "科学", label: "科学", icon: "🌏" },
-  { id: "艺术", label: "艺术", icon: "🎨" },
-  { id: "素质拓展", label: "素质拓展", icon: "🌟" },
+const categories: { id: "all" | CourseCategoryId; icon: string }[] = [
+  { id: "all", icon: "" },
+  { id: "chinese", icon: "📚" },
+  { id: "math", icon: "📐" },
+  { id: "science", icon: "🌏" },
+  { id: "art", icon: "🎨" },
+  { id: "enrichment", icon: "🌟" },
 ]
 
 export default function CoursesPage() {
-  const [selectedCategory, setSelectedCategory] = useState("all")
+  const t = useTranslations("courses")
+  const [selectedCategory, setSelectedCategory] = useState<"all" | CourseCategoryId>("all")
 
   const filteredCourses =
     selectedCategory === "all" ? coursesData : coursesData.filter((c) => c.category === selectedCategory)
 
   return (
     <div className="h-screen flex flex-col overflow-hidden relative bg-sky-100">
-      <PageHeader icon="ri-macbook-fill" title="我的公益课程" showBack>
+      <PageHeader icon="ri-macbook-fill" title={t("pageTitle")} showBack>
         <div className="relative w-1/3 max-w-xs hidden md:block">
           <input
             type="text"
-            placeholder="搜索你想学的课程..."
+            placeholder={t("searchPlaceholder")}
             className="w-full py-3 pl-12 pr-4 rounded-full border-2 border-blue-100 focus:border-blue-300 transition shadow-sm outline-none text-slate-600 placeholder:text-slate-400 bg-white"
           />
           <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -78,7 +56,7 @@ export default function CoursesPage() {
         <section className="max-w-7xl mx-auto w-full px-8 pb-28 pt-4">
           {/* 分类按钮 */}
           <section className="mb-6 flex overflow-x-auto hide-scrollbar gap-3 pb-2 items-center">
-            <h3 className="text-xl font-bold text-slate-700 whitespace-nowrap pr-3">🔍 分类:</h3>
+            <h3 className="text-xl font-bold text-slate-700 whitespace-nowrap pr-3">{t("filterLabel")}</h3>
 
             {categories.map((cat, index) => (
               <motion.button
@@ -93,7 +71,7 @@ export default function CoursesPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {cat.icon} {cat.label}
+                {cat.icon} {t(`categories.${cat.id}`)}
               </motion.button>
             ))}
           </section>
@@ -113,10 +91,13 @@ export default function CoursesPage() {
 }
 
 function CourseCard({ course, index }: { course: Course; index: number }) {
-  const categoryColors: { [key: string]: string } = {
-    语文: "bg-white border-green-200",
-    科学: "bg-macaron-purple",
-    素质拓展: "bg-macaron-yellow",
+  const t = useTranslations("courses")
+  const categoryColors: { [key in CourseCategoryId]: string } = {
+    chinese: "bg-white border-green-200",
+    science: "bg-macaron-purple",
+    enrichment: "bg-macaron-yellow",
+    math: "bg-white",
+    art: "bg-white",
   }
 
   return (
@@ -139,7 +120,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
                 : "bg-yellow-100 text-yellow-700"
           }`}
         >
-          {course.badge || course.difficulty}
+          {t(`items.${course.id}.badge`)}
         </span>
         <i
           className={`${course.status === "ongoing" ? "ri-bookmark-fill text-yellow-500" : "ri-bookmark-line text-slate-300"} text-xl`}
@@ -147,19 +128,19 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
       </div>
 
       <div>
-        <h4 className="text-xl font-bold mb-1">{course.title}</h4>
+        <h4 className="text-xl font-bold mb-1">{t(`items.${course.id}.title`)}</h4>
         <p
-          className={`text-sm ${course.category === "科学" || course.category === "素质拓展" ? "text-slate-600" : "text-slate-500"}`}
+          className={`text-sm ${course.category === "science" || course.category === "enrichment" ? "text-slate-600" : "text-slate-500"}`}
         >
-          {course.description}
+          {t(`items.${course.id}.description`)}
         </p>
       </div>
 
       {course.progress !== undefined && (
         <div>
           <div className="text-sm font-medium mb-1 flex justify-between">
-            <span>进度: {course.progress}%</span>
-            <span className="text-green-600">已学 6/8 单元</span>
+            <span>{t("progressLabel", { progress: course.progress })}</span>
+            <span className="text-green-600">{t("unitsLearned")}</span>
           </div>
           <div className="w-full bg-slate-200 rounded-full h-2.5">
             <motion.div
@@ -172,9 +153,9 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
         </div>
       )}
 
-      {course.duration && (
+      {course.hasDuration && (
         <div className="text-sm font-medium text-slate-600">
-          <i className="ri-time-line text-lg mr-1" /> {course.duration}
+          <i className="ri-time-line text-lg mr-1" /> {t(`items.${course.id}.duration`)}
         </div>
       )}
 
@@ -189,7 +170,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        {course.status === "ongoing" ? "继续学习" : course.status === "new" ? "立即开始" : "查看详情"}
+        {course.status === "ongoing" ? t("continueLearning") : course.status === "new" ? t("startNow") : t("viewDetails")}
       </motion.button>
     </motion.article>
   )

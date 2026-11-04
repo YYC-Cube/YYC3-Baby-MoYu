@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations } from "next-intl"
 import PageHeader from "@/components/PageHeader"
 import Navigation from "@/components/Navigation"
 import BookReader from "@/components/books/BookReader"
@@ -11,6 +12,7 @@ import { usePictureBook } from "@/hooks/usePictureBook"
 import { BOOK_CATEGORY_CONFIG, type BookCategory } from "@/types/ai-creative"
 
 export default function BooksPage() {
+  const t = useTranslations("books")
   const {
     books,
     currentBook,
@@ -64,7 +66,7 @@ export default function BooksPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-b from-amber-50 to-orange-50 pb-24">
-      <PageHeader title="有声绘本" showBack />
+      <PageHeader title={t("pageTitle")} showBack />
 
       {/* 搜索栏 */}
       <div className="px-4 py-3">
@@ -74,7 +76,7 @@ export default function BooksPage() {
             type="text"
             value={searchQuery}
             onChange={handleSearch}
-            placeholder="搜索绘本..."
+            placeholder={t("searchPlaceholder")}
             className="w-full pl-11 pr-4 py-3 bg-white rounded-xl border border-amber-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all"
           />
         </div>
@@ -84,10 +86,11 @@ export default function BooksPage() {
       <div className="px-4 py-2">
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((category) => {
+            // 分类名走词条（zh 与 BOOK_CATEGORY_CONFIG 逐字一致），icon/color 仍取数据层配置
             const config =
               category === "all"
-                ? { name: "全部", icon: "ri-apps-line", color: "#6B7280" }
-                : BOOK_CATEGORY_CONFIG[category]
+                ? { name: t("all"), icon: "ri-apps-line", color: "#6B7280" }
+                : { ...BOOK_CATEGORY_CONFIG[category], name: t(`categoryNames.${category}`) }
             const isActive = activeCategory === category
 
             return (
@@ -115,7 +118,7 @@ export default function BooksPage() {
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2">
               <i className="ri-star-line text-amber-500" />
-              今日推荐
+              {t("todayRecommended")}
             </h2>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -140,7 +143,7 @@ export default function BooksPage() {
                   className="flex items-center gap-2 px-4 py-2 bg-white/90 rounded-full text-amber-600 font-medium hover:bg-white transition-colors"
                 >
                   <i className="ri-play-circle-line text-lg" />
-                  开始阅读
+                  {t("startReading")}
                 </button>
               </div>
             </motion.div>
@@ -181,13 +184,13 @@ export default function BooksPage() {
                   {/* AI生成标签 */}
                   {book.isAIGenerated && (
                     <div className="absolute top-2 left-2 px-2 py-1 bg-linear-to-r from-purple-500 to-pink-500 rounded-full">
-                      <span className="text-xs text-white font-medium">AI创作</span>
+                      <span className="text-xs text-white font-medium">{t("aiCreated")}</span>
                     </div>
                   )}
 
                   {/* 时长 */}
                   <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 rounded-full">
-                    <span className="text-xs text-white">{book.duration}分钟</span>
+                    <span className="text-xs text-white">{t("durationMinutes", { duration: book.duration })}</span>
                   </div>
                 </div>
 
@@ -198,7 +201,7 @@ export default function BooksPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <i className="ri-book-read-line text-amber-500 text-sm" />
-                      <span className="text-xs text-slate-500">{book.readCount}次</span>
+                      <span className="text-xs text-slate-500">{t("readCount", { count: book.readCount })}</span>
                     </div>
                     <span
                       className="text-xs px-2 py-0.5 rounded-full"
@@ -207,7 +210,7 @@ export default function BooksPage() {
                         color: BOOK_CATEGORY_CONFIG[book.category].color,
                       }}
                     >
-                      {BOOK_CATEGORY_CONFIG[book.category].name}
+                      {t(`categoryNames.${book.category}`)}
                     </span>
                   </div>
                 </div>
@@ -220,7 +223,7 @@ export default function BooksPage() {
         {books.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16">
             <i className="ri-book-line text-6xl text-slate-300 mb-4" />
-            <p className="text-slate-500">暂无绘本</p>
+            <p className="text-slate-500">{t("empty")}</p>
           </div>
         )}
       </div>

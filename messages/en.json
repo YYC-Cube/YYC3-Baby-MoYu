@@ -156,7 +156,40 @@
     "allCourses": "All Courses",
     "startLearning": "Start Learning",
     "continueLearning": "Continue Learning",
-    "viewProgress": "View Progress"
+    "viewProgress": "View Progress",
+    "pageTitle": "My Charity Courses",
+    "searchPlaceholder": "Search courses...",
+    "filterLabel": "🔍 Category:",
+    "categories": {
+      "all": "All Courses",
+      "math": "Math",
+      "chinese": "Chinese",
+      "science": "Science",
+      "art": "Arts",
+      "enrichment": "Enrichment"
+    },
+    "items": {
+      "c1": {
+        "title": "Classic Poetry Appreciation (Part 1)",
+        "description": "Master 50 essential poems and understand their imagery.",
+        "badge": "In Progress"
+      },
+      "c2": {
+        "title": "Fun Science Lab",
+        "description": "Explore 10 hands-on experiments at home and spark a love for science.",
+        "badge": "New Course",
+        "duration": "4 lessons in total"
+      },
+      "c3": {
+        "title": "Intro to Computational Thinking",
+        "description": "Learn programming logic and flow control through simple drag-and-drop.",
+        "badge": "Difficulty: Medium"
+      }
+    },
+    "progressLabel": "Progress: {progress}%",
+    "unitsLearned": "6/8 units completed",
+    "startNow": "Start Now",
+    "viewDetails": "View Details"
   },
   "homework": {
     "title": "Homework Center",
@@ -215,7 +248,25 @@
     "categories": "Categories",
     "startReading": "Start Reading",
     "continueReading": "Continue Reading",
-    "addToFavorites": "Add to Favorites"
+    "addToFavorites": "Add to Favorites",
+    "pageTitle": "Audio Picture Books",
+    "searchPlaceholder": "Search picture books...",
+    "all": "All",
+    "todayRecommended": "Today's Picks",
+    "aiCreated": "AI Created",
+    "durationMinutes": "{duration} min",
+    "readCount": "{count} reads",
+    "empty": "No picture books yet",
+    "categoryNames": {
+      "story": "Story",
+      "science": "Science",
+      "emotion": "Emotions",
+      "habit": "Habits",
+      "culture": "Culture",
+      "english": "English",
+      "math": "Math",
+      "nature": "Nature"
+    }
   },
   "ai": {
     "assistant": "AI Assistant",
@@ -490,5 +541,73 @@
     "shareUnsupported": "Your browser does not support sharing",
     "empty": "No badges match the current filters",
     "pointsPer": "{points} pts each"
+  },
+  "messageCenter": {
+    "pageTitle": "Message Center",
+    "markAllRead": "Mark all as read",
+    "sections": {
+      "homework": "Homework Feedback",
+      "system": "System Notices",
+      "activity": "Activity Notices"
+    },
+    "unreadCount": "({count} unread)",
+    "items": {
+      "m1": {
+        "title": "Chinese homework [Poetry Recitation] has been graded!",
+        "content": "Great work! Your teacher praised your reading performance!",
+        "time": "10 min ago"
+      },
+      "m2": {
+        "title": "Math homework [Mental Math] needs improvement",
+        "content": "2 calculation errors found. Please check and redo them in your mistake notebook.",
+        "time": "Yesterday"
+      },
+      "m3": {
+        "title": "Learning reminder: Day 30 of your learning streak!",
+        "content": "Congratulations on the milestone! Keep up the habit!",
+        "time": "1 hour ago"
+      },
+      "m4": {
+        "title": "Charity activity: Story Reading Program launched!",
+        "content": "Thanks for participating — your recording has been accepted!",
+        "time": "3 days ago"
+      }
+    }
+  },
+  "activities": {
+    "pageTitle": "Charity Activity Hub",
+    "myParticipation": "My Activities",
+    "tabOngoing": "💚 Ongoing ({count})",
+    "tabHistory": "📚 History (5)",
+    "ongoing": {
+      "act-1": {
+        "title": "\"My Little Green Planet\" Online Planting Activity",
+        "description": "Plant a virtual tree with online tools and learn about environmental protection. For every step completed, the platform donates to an eco fund.",
+        "participants": "1,200 students joined",
+        "deadline": "5 days left",
+        "banner": "🌍 Adopt a Tree Sapling",
+        "button": "Sign Up & Start Now"
+      },
+      "act-2": {
+        "title": "Record Bedtime Stories for Rural Kids",
+        "description": "Record your voice to send warm bedtime stories to children in remote areas. Let your voice be their company.",
+        "participants": "580 audio clips completed",
+        "deadline": "Ongoing recruitment",
+        "banner": "📖 Story Reading Program",
+        "button": "View Details & Record"
+      }
+    },
+    "history": {
+      "hist-1": {
+        "title": "2024 Spring Book Donation Program",
+        "description": "Delivered 1,200 books to 6 rural schools.",
+        "status": "Ended · May 2024"
+      },
+      "hist-2": {
+        "title": "\"Letters to Earth\" Eco Essay Contest",
+        "description": "Received 300+ entries from kids; 30 outstanding letters were selected.",
+        "status": "Ended · Sep 2024"
+      }
+    }
   }
 }

@@ -2,80 +2,58 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 import Navigation from "@/components/Navigation"
 import PageHeader from "@/components/headers/PageHeader"
 
 type ActivityTab = "ongoing" | "history"
+type OngoingActivityId = "act-1" | "act-2"
+type HistoryActivityId = "hist-1" | "hist-2"
 
 interface Activity {
-  id: string
-  title: string
-  description: string
+  id: OngoingActivityId
+  theme: "plant" | "story"
   icon: string
   iconBg: string
   bgColor: string
-  participants?: string
-  deadline?: string
   buttonColor: string
-  status?: string
 }
 
 interface HistoryActivity {
-  id: string
-  title: string
-  description: string
-  status: string
+  id: HistoryActivityId
 }
 
 const ongoingActivities: Activity[] = [
   {
     id: "act-1",
-    title: '"我的绿色小星球" 线上种植活动',
-    description: "通过线上工具，模拟种植一棵树，学习环保知识。每完成一步，平台将捐赠一笔环保基金。",
+    theme: "plant",
     icon: "ri-plant-line",
     iconBg: "from-green-300 to-green-200",
     bgColor: "bg-macaron-green",
-    participants: "已有 1,200 名同学参与",
-    deadline: "仅剩 5 天",
     buttonColor: "bg-green-500 hover:bg-green-600",
   },
   {
     id: "act-2",
-    title: "为乡村小朋友录制睡前故事",
-    description: "同学们可以录制自己的声音，为偏远地区的儿童送去温暖的睡前故事。让你的声音成为陪伴。",
+    theme: "story",
     icon: "ri-book-read-fill",
     iconBg: "from-blue-300 to-blue-200",
     bgColor: "bg-macaron-blue",
-    participants: "已有 580 份音频完成",
-    deadline: "持续招募中",
     buttonColor: "bg-blue-400 hover:bg-blue-500",
   },
 ]
 
-const historyActivities: HistoryActivity[] = [
-  {
-    id: "hist-1",
-    title: "2024 春季图书捐赠计划",
-    description: "已为 6 所乡村学校送出 1200 本图书。",
-    status: "已结束 · 2024-05",
-  },
-  {
-    id: "hist-2",
-    title: '"给地球写封信" 环保征文',
-    description: "收到 300+ 篇小朋友作品，评选出 30 篇优秀来信。",
-    status: "已结束 · 2024-09",
-  },
-]
+const historyActivities: HistoryActivity[] = [{ id: "hist-1" }, { id: "hist-2" }]
 
 export default function ActivitiesPage() {
+  const t = useTranslations("activities")
   const [activeTab, setActiveTab] = useState<ActivityTab>("ongoing")
 
   return (
     <div className="h-screen flex flex-col overflow-hidden relative bg-sky-100">
       <PageHeader
         icon="ri-heart-2-fill"
-        title="公益活动中心"
-        actions={[{ icon: "ri-user-heart-fill", label: "我的参与" }]}
+        title={t("pageTitle")}
+        actions={[{ icon: "ri-user-heart-fill", label: t("myParticipation") }]}
       />
 
       <main className="flex-1 overflow-y-auto w-full">
@@ -90,7 +68,7 @@ export default function ActivitiesPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              💚 正在进行 (2)
+              {t("tabOngoing", { count: ongoingActivities.length })}
             </motion.button>
             <motion.button
               className={`flex-1 py-2 rounded-full text-slate-600 transition-all ${
@@ -100,7 +78,8 @@ export default function ActivitiesPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              📚 历史回顾 (5)
+              {/* TODO(P3): 历史计数 5 与 historyActivities 数据条数（2）未对齐，保留原视觉基线 */}
+              {t("tabHistory")}
             </motion.button>
           </div>
 
@@ -123,6 +102,7 @@ export default function ActivitiesPage() {
 }
 
 function OngoingActivityCard({ activity, index }: { activity: Activity; index: number }) {
+  const t = useTranslations("activities")
   return (
     <motion.article
       className={`${activity.bgColor} rounded-3xl p-4 shadow-soft hover:shadow-lg transition-all cursor-pointer flex flex-col gap-4`}
@@ -136,27 +116,27 @@ function OngoingActivityCard({ activity, index }: { activity: Activity; index: n
       >
         <i className={`${activity.icon} absolute left-4 bottom-4 text-9xl text-white/50`} />
         <span className="text-xl font-bold text-slate-800 z-10">
-          {activity.icon.includes("plant") ? "🌍 认领一颗小树苗" : "📖 故事伴读计划"}
+          {t(`ongoing.${activity.id}.banner`)}
         </span>
       </div>
 
       <div className="space-y-2">
-        <h4 className="text-2xl font-bold text-slate-800">{activity.title}</h4>
-        <p className="text-slate-600 text-sm">{activity.description}</p>
+        <h4 className="text-2xl font-bold text-slate-800">{t(`ongoing.${activity.id}.title`)}</h4>
+        <p className="text-slate-600 text-sm">{t(`ongoing.${activity.id}.description`)}</p>
       </div>
 
       <div className="flex justify-between items-center text-sm font-medium mb-2">
         <span
-          className={`flex items-center gap-1 ${activity.icon.includes("plant") ? "text-green-600" : "text-blue-600"}`}
+          className={`flex items-center gap-1 ${activity.theme === "plant" ? "text-green-600" : "text-blue-600"}`}
         >
           <i className="ri-group-line" />
-          {activity.participants}
+          {t(`ongoing.${activity.id}.participants`)}
         </span>
         <span
-          className={`flex items-center gap-1 ${activity.icon.includes("plant") ? "text-red-500" : "text-blue-500"}`}
+          className={`flex items-center gap-1 ${activity.theme === "plant" ? "text-red-500" : "text-blue-500"}`}
         >
           <i className="ri-time-line" />
-          {activity.deadline}
+          {t(`ongoing.${activity.id}.deadline`)}
         </span>
       </div>
 
@@ -165,13 +145,14 @@ function OngoingActivityCard({ activity, index }: { activity: Activity; index: n
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.95 }}
       >
-        {activity.icon.includes("plant") ? "立即报名并开始" : "查看详情并录制"}
+        {t(`ongoing.${activity.id}.button`)}
       </motion.button>
     </motion.article>
   )
 }
 
 function HistoryActivityCard({ activity, index }: { activity: HistoryActivity; index: number }) {
+  const t = useTranslations("activities")
   return (
     <motion.article
       className="bg-white rounded-3xl p-4 shadow-soft hover:shadow-lg transition-all cursor-pointer flex flex-col gap-3"
@@ -180,9 +161,9 @@ function HistoryActivityCard({ activity, index }: { activity: HistoryActivity; i
       transition={{ duration: 0.4, delay: index * 0.1 }}
       whileHover={{ scale: 1.02 }}
     >
-      <h4 className="text-lg font-bold text-slate-800">{activity.title}</h4>
-      <p className="text-sm text-slate-500">{activity.description}</p>
-      <span className="text-xs text-slate-400">{activity.status}</span>
+      <h4 className="text-lg font-bold text-slate-800">{t(`history.${activity.id}.title`)}</h4>
+      <p className="text-sm text-slate-500">{t(`history.${activity.id}.description`)}</p>
+      <span className="text-xs text-slate-400">{t(`history.${activity.id}.status`)}</span>
     </motion.article>
   )
 }
