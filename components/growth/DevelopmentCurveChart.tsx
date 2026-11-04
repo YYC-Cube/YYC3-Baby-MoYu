@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 
 interface DataPoint {
   age: number // 月龄
@@ -37,8 +38,9 @@ export default function DevelopmentCurveChart({
   unit,
 }: DevelopmentCurveChartProps) {
   // 兼容新旧props
+  const t = useTranslations("growth.devCurve")
   const actualChildData = childData || dataPoints || []
-  const actualTitle = title || `${metricName}发展曲线`
+  const actualTitle = title || t("titleOf", { metric: metricName })
   const actualUnit = unit || "cm"
   const _actualDimension = dimension || metricName
   const [hoveredPoint, setHoveredPoint] = useState<DataPoint | null>(null)
@@ -151,7 +153,7 @@ export default function DevelopmentCurveChart({
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold text-slate-800">{actualTitle}</h3>
-          <p className="text-sm text-slate-500">单位: {actualUnit}</p>
+          <p className="text-sm text-slate-500">{t("unitLabel", { unit: actualUnit })}</p>
         </div>
 
         <div className="flex items-center gap-4">
@@ -163,7 +165,7 @@ export default function DevelopmentCurveChart({
               onChange={(e) => { setShowPercentiles(e.target.checked); }}
               className="rounded border-slate-300"
             />
-            显示参考区间
+            {t("showReference")}
           </label>
 
           {/* 当前百分位 */}
@@ -177,7 +179,7 @@ export default function DevelopmentCurveChart({
                     : "bg-red-100 text-red-700"
               }`}
             >
-              第 {percentileRank} 百分位
+              {t("percentile", { rank: percentileRank })}
             </div>
           )}
         </div>
@@ -220,7 +222,7 @@ export default function DevelopmentCurveChart({
                 textAnchor="middle"
                 className="text-xs fill-slate-400"
               >
-                {month}月
+                {t("monthAxis", { month })}
               </text>
             ))}
 
@@ -330,17 +332,17 @@ export default function DevelopmentCurveChart({
       <div className="flex items-center justify-center gap-6 mt-4 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-4 h-1 bg-purple-500 rounded"></div>
-          <span className="text-slate-600">孩子数据</span>
+          <span className="text-slate-600">{t("legendChild")}</span>
         </div>
         {showPercentiles && (
           <>
             <div className="flex items-center gap-2">
               <div className="w-4 h-1 bg-sky-400 rounded border-dashed"></div>
-              <span className="text-slate-600">中位数 (P50)</span>
+              <span className="text-slate-600">{t("legendMedian")}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-3 bg-sky-200 rounded"></div>
-              <span className="text-slate-600">正常范围 (P25-P75)</span>
+              <span className="text-slate-600">{t("legendRange")}</span>
             </div>
           </>
         )}
@@ -348,18 +350,16 @@ export default function DevelopmentCurveChart({
 
       {/* 解读说明 */}
       <div className="mt-4 p-4 bg-slate-50 rounded-xl">
-        <h4 className="text-sm font-medium text-slate-700 mb-2">数据解读</h4>
+        <h4 className="text-sm font-medium text-slate-700 mb-2">{t("interpTitle")}</h4>
         <p className="text-sm text-slate-500">
           {percentileRank !== null &&
             percentileRank >= 25 &&
             percentileRank <= 75 &&
-            "孩子的发展处于正常范围内 (第25-75百分位)，表现良好。"}
+            t("interp.normal")}
           {percentileRank !== null &&
             (percentileRank < 25 || percentileRank > 75) &&
-            (percentileRank < 25
-              ? "孩子的发展略低于同龄平均水平，建议关注并适当加强训练。"
-              : "孩子的发展高于同龄平均水平，表现优秀!")}
-          {percentileRank === null && "暂无足够数据进行评估，请继续记录孩子的成长数据。"}
+            (percentileRank < 25 ? t("interp.below") : t("interp.above"))}
+          {percentileRank === null && t("interp.noData")}
         </p>
       </div>
     </div>

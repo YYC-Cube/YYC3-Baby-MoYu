@@ -4,32 +4,35 @@ import type React from "react"
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 
 interface TagSelectorProps {
   tags: string[]
   onChange: (tags: string[]) => void
 }
 
-const PRESET_TAGS = [
-  "学习",
-  "生活",
-  "情绪",
-  "社交",
-  "运动",
-  "艺术",
-  "阅读",
-  "游戏",
-  "独立性",
-  "创造力",
-  "专注力",
-  "友谊",
-  "快乐",
-  "成就",
-  "进步",
-  "突破",
-]
+// 预设标签键 → growth.tagSelector.presets 词条（zh 与原硬编码逐字一致）
+const PRESET_TAG_KEYS = [
+  "study",
+  "life",
+  "emotion",
+  "social",
+  "sports",
+  "art",
+  "reading",
+  "play",
+  "independence",
+  "creativity",
+  "focus",
+  "friendship",
+  "joy",
+  "achievement",
+  "progress",
+  "breakthrough",
+] as const
 
 export function TagSelector({ tags, onChange }: TagSelectorProps) {
+  const t = useTranslations("growth.tagSelector")
   const [inputValue, setInputValue] = useState("")
 
   const addTag = (tag: string) => {
@@ -82,7 +85,7 @@ export function TagSelector({ tags, onChange }: TagSelectorProps) {
           value={inputValue}
           onChange={(e) => { setInputValue(e.target.value); }}
           onKeyDown={handleKeyDown}
-          placeholder="输入自定义标签，按回车添加"
+          placeholder={t("inputPlaceholder")}
           className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <button
@@ -93,23 +96,23 @@ export function TagSelector({ tags, onChange }: TagSelectorProps) {
           disabled={!inputValue}
           className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          添加
+          {t("add")}
         </button>
       </div>
 
       {/* 预设标签 */}
       <div>
-        <p className="text-xs text-slate-500 mb-2">快速选择：</p>
+        <p className="text-xs text-slate-500 mb-2">{t("quickPick")}</p>
         <div className="flex gap-2 flex-wrap">
-          {PRESET_TAGS.filter((tag) => !tags.includes(tag)).map((tag) => (
+          {PRESET_TAG_KEYS.filter((key) => !tags.includes(t(`presets.${key}`))).map((key) => (
             <motion.button
-              key={tag}
-              onClick={() => { addTag(tag); }}
+              key={key}
+              onClick={() => { addTag(t(`presets.${key}`)); }}
               className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full text-xs"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              #{tag}
+              #{t(`presets.${key}`)}
             </motion.button>
           ))}
         </div>

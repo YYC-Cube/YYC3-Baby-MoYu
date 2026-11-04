@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 
 interface MediaUploaderProps {
   files: File[]
@@ -14,6 +15,7 @@ interface MediaUploaderProps {
 }
 
 export function MediaUploader({ files, onChange, maxFiles = 9, accept = "image/*,video/*" }: MediaUploaderProps) {
+  const t = useTranslations("growth.media")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [previews, setPreviews] = useState<string[]>([])
 
@@ -22,7 +24,7 @@ export function MediaUploader({ files, onChange, maxFiles = 9, accept = "image/*
     const totalFiles = files.length + selectedFiles.length
 
     if (totalFiles > maxFiles) {
-      alert(`最多只能上传${maxFiles}个文件`)
+      alert(t("maxFiles", { count: maxFiles }))
       return
     }
 
@@ -99,13 +101,13 @@ export function MediaUploader({ files, onChange, maxFiles = 9, accept = "image/*
             whileTap={{ scale: 0.95 }}
           >
             <i className="ri-add-line text-3xl text-slate-400" />
-            <span className="text-xs text-slate-500">添加文件</span>
+            <span className="text-xs text-slate-500">{t("addFile")}</span>
           </motion.button>
         )}
       </div>
 
       <p className="text-xs text-slate-500 mt-2">
-        已上传 {files.length}/{maxFiles} 个文件
+        {t("uploaded", { count: files.length, max: maxFiles })}
       </p>
     </div>
   )

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations } from "next-intl"
 
 interface GrowthData {
   date: string
@@ -23,16 +24,18 @@ const DIMENSION_COLORS: Record<string, string> = {
   selfcare: "#eab308",
 }
 
+// 维度中文名走 growth.charts.dims 词条；DIMENSION_COLORS 为纯视觉属性保留
 const DIMENSION_NAMES: Record<string, string> = {
-  cognitive: "认知发展",
-  language: "语言能力",
-  motor: "运动发展",
-  social: "社交能力",
-  emotional: "情绪管理",
-  selfcare: "生活自理",
+  cognitive: "cognitive",
+  language: "language",
+  motor: "motor",
+  social: "social",
+  emotional: "emotional",
+  selfcare: "selfcare",
 }
 
 export default function GrowthCharts({ data, childName = "宝宝" }: GrowthChartsProps) {
+  const t = useTranslations("growth.charts")
   const [chartType, setChartType] = useState<"radar" | "line" | "bar">("radar")
   const [selectedDimension, setSelectedDimension] = useState<string | null>(null)
 
@@ -77,9 +80,9 @@ export default function GrowthCharts({ data, childName = "宝宝" }: GrowthChart
       {/* 图表类型切换 */}
       <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
         {[
-          { id: "radar", icon: "ri-radar-line", label: "雷达图" },
-          { id: "line", icon: "ri-line-chart-line", label: "趋势图" },
-          { id: "bar", icon: "ri-bar-chart-grouped-line", label: "柱状图" },
+          { id: "radar", icon: "ri-radar-line" },
+          { id: "line", icon: "ri-line-chart-line" },
+          { id: "bar", icon: "ri-bar-chart-grouped-line" },
         ].map((type) => (
           <button
             key={type.id}
@@ -89,7 +92,7 @@ export default function GrowthCharts({ data, childName = "宝宝" }: GrowthChart
             }`}
           >
             <i className={type.icon} />
-            {type.label}
+            {t(`chartTypes.${type.id}`)}
           </button>
         ))}
       </div>
@@ -102,7 +105,7 @@ export default function GrowthCharts({ data, childName = "宝宝" }: GrowthChart
       >
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-white/80 text-sm">{childName}的综合发展评分</p>
+            <p className="text-white/80 text-sm">{t("overallScoreOf", { name: childName })}</p>
             <motion.p
               className="text-5xl font-bold mt-2"
               initial={{ scale: 0 }}
@@ -112,7 +115,7 @@ export default function GrowthCharts({ data, childName = "宝宝" }: GrowthChart
               {overallScore}
             </motion.p>
             <p className="text-white/80 text-sm mt-1">
-              {overallScore >= 85 ? "发展优秀" : overallScore >= 70 ? "发展良好" : "持续进步中"}
+              {overallScore >= 85 ? t("overall.excellent") : overallScore >= 70 ? t("overall.good") : t("overall.improving")}
             </p>
           </div>
           <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
@@ -131,7 +134,7 @@ export default function GrowthCharts({ data, childName = "宝宝" }: GrowthChart
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-white rounded-2xl p-6 shadow-sm"
           >
-            <h3 className="font-bold text-slate-800 mb-4">能力雷达图</h3>
+            <h3 className="font-bold text-slate-800 mb-4">{t("radarTitle")}</h3>
             <RadarChart scores={latestScores} />
           </motion.div>
         )}
@@ -144,7 +147,7 @@ export default function GrowthCharts({ data, childName = "宝宝" }: GrowthChart
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-white rounded-2xl p-6 shadow-sm"
           >
-            <h3 className="font-bold text-slate-800 mb-4">发展趋势</h3>
+            <h3 className="font-bold text-slate-800 mb-4">{t("trendTitle")}</h3>
             <LineChart data={trendData} selectedDimension={selectedDimension} />
             <DimensionLegend selected={selectedDimension} onSelect={setSelectedDimension} />
           </motion.div>
@@ -158,7 +161,7 @@ export default function GrowthCharts({ data, childName = "宝宝" }: GrowthChart
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-white rounded-2xl p-6 shadow-sm"
           >
-            <h3 className="font-bold text-slate-800 mb-4">各维度得分</h3>
+            <h3 className="font-bold text-slate-800 mb-4">{t("barTitle")}</h3>
             <BarChart scores={latestScores} />
           </motion.div>
         )}
@@ -176,12 +179,12 @@ export default function GrowthCharts({ data, childName = "宝宝" }: GrowthChart
           >
             <div className="flex items-center gap-2 mb-2">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: DIMENSION_COLORS[dim] }} />
-              <span className="text-sm font-medium text-slate-700">{DIMENSION_NAMES[dim]}</span>
+              <span className="text-sm font-medium text-slate-700">{t(`dims.${dim}`)}</span>
             </div>
             <div className="flex items-end justify-between">
               <span className="text-2xl font-bold text-slate-800">{score}</span>
               <span className="text-xs text-slate-500">
-                {score >= 85 ? "优秀" : score >= 70 ? "良好" : score >= 50 ? "一般" : "需关注"}
+                {score >= 85 ? t("levels.excellent") : score >= 70 ? t("levels.good") : score >= 50 ? t("levels.fair") : t("levels.attention")}
               </span>
             </div>
             <div className="mt-2 h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -202,6 +205,7 @@ export default function GrowthCharts({ data, childName = "宝宝" }: GrowthChart
 
 // 雷达图组件
 function RadarChart({ scores }: { scores: Record<string, number> }) {
+  const t = useTranslations("growth.charts")
   const dimensions = Object.keys(scores)
   const center = 100
   const radius = 80
@@ -290,7 +294,7 @@ function RadarChart({ scores }: { scores: Record<string, number> }) {
           dominantBaseline="middle"
           className="text-xs fill-slate-600"
         >
-          {DIMENSION_NAMES[p.dim]?.slice(0, 2)}
+          {t(`dims.${p.dim}`)}
         </text>
       ))}
     </svg>
@@ -306,7 +310,11 @@ function LineChart({
   selectedDimension: string | null
 }) {
   if (data.length === 0) {
-    return <div className="h-48 flex items-center justify-center text-slate-400">暂无历史数据</div>
+    return (
+      <div className="h-48 flex items-center justify-center text-slate-400">
+        <NoHistoryText />
+      </div>
+    )
   }
 
   const dimensions = Object.keys(DIMENSION_NAMES)
@@ -406,6 +414,7 @@ function LineChart({
 
 // 柱状图组件
 function BarChart({ scores }: { scores: Record<string, number> }) {
+  const t = useTranslations("growth.charts")
   const dimensions = Object.entries(scores)
   const maxValue = 100
 
@@ -413,7 +422,7 @@ function BarChart({ scores }: { scores: Record<string, number> }) {
     <div className="space-y-3">
       {dimensions.map(([dim, score], index) => (
         <div key={dim} className="flex items-center gap-3">
-          <div className="w-16 text-sm text-slate-600 truncate">{DIMENSION_NAMES[dim]?.slice(0, 4)}</div>
+          <div className="w-16 text-sm text-slate-600 truncate">{t(`dims.${dim}`)}</div>
           <div className="flex-1 h-8 bg-slate-100 rounded-full overflow-hidden">
             <motion.div
               className="h-full rounded-full flex items-center justify-end pr-3"
@@ -439,6 +448,7 @@ function DimensionLegend({
   selected: string | null
   onSelect: (dim: string | null) => void
 }) {
+  const t = useTranslations("growth.charts")
   return (
     <div className="flex flex-wrap gap-2 mt-4">
       <button
@@ -447,9 +457,9 @@ function DimensionLegend({
           selected === null ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-600"
         }`}
       >
-        全部
+        {t("all")}
       </button>
-      {Object.entries(DIMENSION_NAMES).map(([dim, name]) => (
+      {Object.entries(DIMENSION_NAMES).map(([dim]) => (
         <button
           key={dim}
           onClick={() => { onSelect(selected === dim ? null : dim); }}
@@ -461,9 +471,15 @@ function DimensionLegend({
           }}
         >
           <span className="w-2 h-2 rounded-full" style={{ backgroundColor: DIMENSION_COLORS[dim] }} />
-          {name.slice(0, 2)}
+          {t(`dims.${dim}`)}
         </button>
       ))}
     </div>
   )
+}
+
+// 空态文案（无数据子图表共用）
+function NoHistoryText() {
+  const t = useTranslations("growth.charts")
+  return <>{t("noHistory")}</>
 }

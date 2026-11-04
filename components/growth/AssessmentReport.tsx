@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations, useLocale } from "next-intl"
 
 interface PDFGeneratorClass {
   new(): PDFGeneratorInstance
@@ -69,6 +70,8 @@ interface AssessmentReportProps {
 
 export default function AssessmentReport({ result, report, onClose }: AssessmentReportProps) {
   const currentReport = result || report
+  const t = useTranslations("growth.report")
+  const locale = useLocale()
   const [activeTab, setActiveTab] = useState<"overview" | "dimensions" | "suggestions">("overview")
   const [isExporting, setIsExporting] = useState(false)
 
@@ -145,7 +148,7 @@ export default function AssessmentReport({ result, report, onClose }: Assessment
         {/* 头部 */}
         <div className="bg-linear-to-r from-blue-500 to-purple-500 text-white p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">发展评估报告</h2>
+            <h2 className="text-xl font-bold">{t("title")}</h2>
             <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full">
               <i className="ri-close-line text-xl" />
             </button>
@@ -157,17 +160,21 @@ export default function AssessmentReport({ result, report, onClose }: Assessment
             <div>
               <h3 className="text-lg font-medium">{currentReport?.childName}</h3>
               <p className="text-white/80">
-                {currentReport?.childAge}个月龄 · {currentReport?.stageName}
+                {t("ageStage", { age: currentReport?.childAge ?? "", stage: currentReport?.stageName ?? "" })}
               </p>
               <p className="text-sm text-white/60">
-                评估日期：{new Date(currentReport?.assessmentDate || '').toLocaleDateString("zh-CN")}
+                {t("assessedAt", {
+                  date: new Date(currentReport?.assessmentDate || "").toLocaleDateString(
+                    locale === "en" ? "en-US" : "zh-CN"
+                  ),
+                })}
               </p>
             </div>
           </div>
           <div className="mt-4 bg-white/20 rounded-xl p-3 flex items-center gap-3">
             <i className="ri-award-line text-2xl" />
             <div>
-              <p className="text-sm text-white/80">总体发展水平</p>
+              <p className="text-sm text-white/80">{t("overallLabel")}</p>
               <p className="font-bold text-lg">{currentReport?.overallLevel}</p>
             </div>
           </div>
@@ -176,9 +183,9 @@ export default function AssessmentReport({ result, report, onClose }: Assessment
         {/* Tab切换 */}
         <div className="flex border-b">
           {[
-            { id: "overview", label: "综合分析", icon: "ri-file-chart-line" },
-            { id: "dimensions", label: "维度详情", icon: "ri-bar-chart-grouped-line" },
-            { id: "suggestions", label: "成长建议", icon: "ri-lightbulb-line" },
+            { id: "overview", icon: "ri-file-chart-line" },
+            { id: "dimensions", icon: "ri-bar-chart-grouped-line" },
+            { id: "suggestions", icon: "ri-lightbulb-line" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -191,7 +198,7 @@ export default function AssessmentReport({ result, report, onClose }: Assessment
                 }`}
             >
               <i className={tab.icon} />
-              {tab.label}
+              {t(`tabs.${tab.id}`)}
             </button>
           ))}
         </div>
@@ -243,7 +250,7 @@ export default function AssessmentReport({ result, report, onClose }: Assessment
                     </div>
                     <div className="flex items-center justify-between text-xs text-slate-500">
                       <span>{data.description}</span>
-                      <span>得分: {data.score} / 100</span>
+                      <span>{t("scoreOf", { score: data.score })}</span>
                     </div>
                   </div>
                 ))}
@@ -261,7 +268,7 @@ export default function AssessmentReport({ result, report, onClose }: Assessment
                 <div>
                   <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
                     <i className="ri-star-line text-yellow-500" />
-                    专家建议
+                    {t("expertAdvice")}
                   </h4>
                   <ul className="space-y-2">
                     {currentReport?.recommendations.map((rec, i) => (
@@ -278,7 +285,7 @@ export default function AssessmentReport({ result, report, onClose }: Assessment
                 <div>
                   <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
                     <i className="ri-footprint-line text-green-500" />
-                    下一步行动
+                    {t("nextActions")}
                   </h4>
                   <ul className="space-y-2">
                     {currentReport?.nextSteps.map((step, i) => (
@@ -300,7 +307,7 @@ export default function AssessmentReport({ result, report, onClose }: Assessment
             onClick={onClose}
             className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-medium hover:bg-slate-200 transition-colors"
           >
-            关闭
+            {t("close")}
           </button>
           <button
             onClick={handleExportPDF}
@@ -310,12 +317,12 @@ export default function AssessmentReport({ result, report, onClose }: Assessment
             {isExporting ? (
               <>
                 <i className="ri-loader-4-line animate-spin" />
-                导出中...
+                {t("exporting")}
               </>
             ) : (
               <>
                 <i className="ri-download-line" />
-                导出报告
+                {t("export")}
               </>
             )}
           </button>
