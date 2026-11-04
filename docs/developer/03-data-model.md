@@ -56,6 +56,37 @@ erDiagram
 > `growth_assessments` 已于 2026-11-02 补齐写路径（`POST /api/growth-assessments`），
 > 评估报告页「保存报告」按钮现已真实落库。
 
+## 数据库驱动：SQLite（默认）/ PostgreSQL 15（可选）
+
+`lib/db/driver.ts` 按环境变量选择实现，业务代码与 `lib/db/server.ts` 零改动：
+
+| 变量 | 取值 | 行为 |
+| ---- | ---- | ---- |
+| `DB_DRIVER` | `sqlite`（默认）/ `postgres` | 显式指定驱动 |
+| `DATABASE_URL` | 文件路径 / `postgres://…` | 未设 `DB_DRIVER` 时按协议自动判定 |
+| `PG_POOL_MAX` | 默认 10 | PG 连接池上限（单实例应用建议 ≤20） |
+| `SEED_DEMO` | 默认 false | PG 模式默认不种演示数据 |
+
+**两套 schema 刻意同构**（日期/JSON 为 TEXT、布尔为 INTEGER），因此 JSON 列转换、分页、IN 查询逻辑完全复用。
+PG 侧关键差异已处理：连接池 + `AsyncLocalStorage` 绑定事务连接（否则 `BEGIN/COMMIT` 会落在不同连接上）。
+
+### 迁移（SQLite → PG）
+
+```bash
+# 1) 建库（示例：本机 PG15 5433）
+createdb -h 127.0.0.1 -p 5433 -U yanyu yyc3_baby_moyu
+
+# 2) 迁移（自动建表 + 幂等插入 + 行数比对）
+bun run db:migrate:pg -- --sqlite data/yyc3.db \
+  --pg postgres://yanyu@127.0.0.1:5433/yyc3_baby_moyu
+
+# 3) 以 PG 启动（可随时回退 sqlite）
+DB_DRIVER=postgres DATABASE_URL=postgres://… bun run start
+```
+
+**回退开关**：改回 `DB_DRIVER=sqlite` 即回到 SQLite；双跑窗口内 SQLite 文件保持不变。
+备份：PG 用 `pg_dump --format=custom`（`backup()` 在 PG 模式下会明确提示改用 pg_dump）。
+
 ## JSON 列约定（重要）
 
 数据库内 JSON 列以**字符串**存储；`lib/db/server.ts` 提供双向透明转换：

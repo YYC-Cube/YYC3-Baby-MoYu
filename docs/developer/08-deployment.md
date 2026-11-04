@@ -31,6 +31,21 @@ curl -fsS localhost:1228/api/health
 | 镜像瘦身 | 已启用 `output: "standalone"`（`next.config.mjs`）：镜像 **604 MB**（未启用时 2.37 GB）；`next start` 与 e2e 流程不受影响 |
 | 验证基线 | 本机实测：`docker build` 通过 → 容器 `healthy` → `/api/health` 200 → 注册/登录/建娃/评估落库 201 → **容器重启后数据仍在** |
 
+### 容器 + PostgreSQL（可选，引入 PG 时）
+
+```bash
+# .env 增加：DB_DRIVER=postgres
+#           DATABASE_URL=postgres://app:***@postgres:5432/yyc3
+#           PG_PASSWORD=***（必填）
+docker compose --profile pg up -d --build
+```
+
+PG 服务不对外暴露端口（仅容器网络内可达）；数据落 `./pgdata`。迁移与回退见 [03 · 数据模型](./03-data-model.md#迁移sqlite--pg)。
+备份：`docker compose exec postgres pg_dump -U app -d yyc3 --format=custom > backup.dump`。
+
+> 目标环境选型（本机 / 单机服务器 / 托管平台）与完整配置清单见 **[12 · 部署承载分析](./12-hosting-profile.md)**。
+
+
 **部署拓扑约束（单实例锁定）**：当前三种实现均为**单进程语义**，多实例/Serverless 水平扩缩前不可直接复制副本——
 1. **限流**（`lib/rate-limit.ts`）：进程内内存桶，多副本时每副本独立计数，实际配额 = 副本数 × 配置值。多实例前接 Upstash Redis 替换存储后端（接口不变，仅换实现）。
 2. **SQLite 单写者**：多副本需共享挂载 `data/` 或改用 PostgreSQL（接口已抽象）。

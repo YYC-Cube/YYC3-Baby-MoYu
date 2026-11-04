@@ -13,7 +13,7 @@ flowchart LR
 | Lint | `bun run lint` | **0 error**，51 warning（见债务清单） |
 | 构建 | `bun run build` | 通过（类型门禁已恢复，无 ignoreBuildErrors） |
 | 测试 | `bun run test` | 266/266（21 文件，~1.8s；含鉴权/越权/限流类安全行为用例） |
-| DB 直测 | `bun run test:node` | 7/7（node:sqlite 注入/迁移/种子守卫） |
+| DB 直测 | `bun run test:node` | 7/7（SQLite）；设置 `PG_TEST_URL` 后 +5 条 PG 用例（共 12/12，CI 默认跳过 PG） |
 | e2e | `bun run test:e2e` | 3/3（登录→建娃→写记录→登出 / 匿名 401 矩阵 / 敏感页重定向；生产构建，账号自举不依赖种子） |
 | 视觉 | `bun run test:visual` | 8/8（首页/视频工坊 × 四主题；darwin/linux 分平台基线） |
 | 依赖 | `bun run audit:osv` | OSV.dev 审计；Critical 阻断，High/Medium 输出 `osv-results.json` |
