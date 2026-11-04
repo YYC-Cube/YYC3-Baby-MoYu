@@ -41,7 +41,31 @@ SSR 水合风险，且无法复用现有 `messages/*.json` 与 middleware 策略
 
 > 当前仅第 5 项具备基础（`/en` 首页可访问），其余未达标，故对外口径为「英文试点」。
 
-## 5. 变更记录
+## 6. 全量化排期（Q3 已批准，2026-11-02 起）
+
+> 原则：**先框架、再页面、最后验收**；每阶段结束必须 `bun run check:i18n` 覆盖率上升且 e2e 不回归。
+
+| 阶段 | 范围 | 产出 | 验收 |
+| ---- | ---- | ---- | ---- |
+| **P0 框架**（0.5 天） | `messages` 分层（common/nav/growth/homework/books/videos/settings…）+ 键命名规范 | `zh/en` 键集合一致（当前 140/140） | `check:i18n` 无缺失键 |
+| **P1 高频页**（1 天） | `/`、`/growth`（含评估）、`/homework` | 3 个 `app/[locale]/<page>` 镜像 + 文案抽取 | 覆盖率 5/14；英文页 e2e 冒烟 3 条 |
+| **P2 内容页**（1.5 天） | `/books`、`/videos`、`/ai-creative`、`/courses` | 4 个镜像 + 图片 alt/aria 英文 | 覆盖率 9/14 |
+| **P3 系统页**（1.5 天） | `/children`、`/badges`、`/curriculum`、`/schedule`、`/interactions`、`/activities`、`/messages`、`/settings` | 8 个镜像 + 表单校验文案 | 覆盖率 **14/14（100%）** |
+| **P4 收口**（0.5 天） | 日期/数字 formatter、语言切换持久化、SEO `hreflang` | 全站可切换且刷新保持 | 清单 §4 全勾 |
+
+**页面清单（14 个中文页 → 镜像）**：
+`activities`、`ai-creative`、`badges`、`books`、`children`、`courses`、`curriculum`、`growth`、`homework`、
+`interactions`、`messages`、`schedule`、`settings`、`videos`（+ 已完成的 `ai-chat`、`growth`）。
+
+**关键约束**
+1. 禁止在 JSX 里硬编码第二语言分支（`locale === 'en' ? … : …`），一律走 `messages`；
+2. 新增文案必须同时提交 `zh`/`en` 两个键；
+3. 翻译质量由产品/领域专家复核（育儿术语不使用机器直译）；
+4. 每阶段把 `check:i18n:strict` 纳入 CI（先告警，P4 起阻断）。
+
+**本轮已交付**：边界文档 + 巡检脚本 + 覆盖率基线（2/14 = 14%）。**P1–P4 属后续排期，不在本轮虚假宣称完成。**
+
+## 7. 变更记录
 
 | 日期 | 变更 | 说明 |
 | ---- | ---- | ---- |

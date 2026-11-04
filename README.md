@@ -62,7 +62,7 @@
 | 样式 | Tailwind CSS 4 + shadcn/ui（Radix） |
 | 状态 | React state + AuthProvider Context + authFetch/apiClient（认证自动附带与刷新） |
 | AI | 三通道：OpenAI 兼容（对话 / 编排 / 评估 / 续写）· BigModel（作业批改 / 语音）· fal.ai（生图）；缺密钥自动降级且前端可感知，密钥仅服务端 |
-| 数据 | SQLite（`node:sqlite`，`data/yyc3.db`，WAL） |
+| 数据 | **SQLite（默认，`node:sqlite` WAL）** 或 **PostgreSQL 15**（`DB_DRIVER=postgres`，同构 schema 可切换/回退） |
 | i18n | next-intl v4（zh 默认 / en，`/en` 前缀路由） |
 
 ## 快速开始
@@ -210,7 +210,8 @@ bun run test
 | [08 · 部署](./docs/developer/08-deployment.md) | 本地生产、脚本、Docker 注意事项 |
 | [09 · 贡献指南](./docs/developer/09-contributing.md) | 分支模型、提交规范、徽章系统扩展指南 |
 | [10 · 可视化交互体系设计](./docs/developer/10-visual-interaction-system.md) | 设计令牌 / 四主题 / 交互状态机 / 数据可视化 / 动效 / WCAG 2.2 AA / 视觉回归 |
-| [11 · 国际化边界与治理](./docs/developer/11-i18n-boundary.md) | 英文试点范围（2/14 页）· `@yyc3/i18n-core` 不适用评估 · 全量国际化判定标准 |
+| [11 · 国际化边界与治理](./docs/developer/11-i18n-boundary.md) | 英文试点范围（2/14 页）· `@yyc3/i18n-core` 不适用评估 · 全量国际化排期（P0–P4） |
+| [12 · 部署承载分析](./docs/developer/12-hosting-profile.md) | 本机/单机/托管三方案对比 · 环境与反代/PG/备份配置清单 · 上线验收项 |
 
 ## 开源协作
 
