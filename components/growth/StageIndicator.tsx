@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations } from "next-intl"
 import { useGrowthStage } from "@/hooks/useGrowthStage"
 import { AGE_STAGES } from "@/lib/growth_stages"
 
@@ -20,6 +21,7 @@ export default function StageIndicator({
   showMilestones: _showMilestones = false,
   showRecommendations = false,
 }: StageIndicatorProps) {
+  const t = useTranslations("growth.stage")
   const {
     currentStage,
     exactAge: _exactAge,
@@ -42,7 +44,7 @@ export default function StageIndicator({
     return (
       <div className="bg-slate-100 rounded-2xl p-4 text-center text-slate-500">
         <i className="ri-calendar-line text-2xl mb-2" />
-        <p>请设置儿童出生日期</p>
+        <p>{t("setBirthdate")}</p>
       </div>
     )
   }
@@ -112,7 +114,7 @@ export default function StageIndicator({
         {/* 里程碑进度 */}
         <div className="bg-white/10 rounded-2xl p-4 mb-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="font-medium">阶段里程碑进度</span>
+            <span className="font-medium">{t("milestoneProgress")}</span>
             <span className="text-sm">
               {milestoneProgress.completed}/{milestoneProgress.total}
             </span>
@@ -127,7 +129,7 @@ export default function StageIndicator({
           </div>
           {milestoneProgress.upcoming.length > 0 && (
             <div className="mt-3">
-              <p className="text-xs text-white/70 mb-1">即将到来的里程碑:</p>
+              <p className="text-xs text-white/70 mb-1">{t("upcoming")}</p>
               <div className="flex flex-wrap gap-2">
                 {milestoneProgress.upcoming.map((m, i) => (
                   <span key={i} className="text-xs bg-white/20 px-2 py-1 rounded-full">
@@ -149,8 +151,7 @@ export default function StageIndicator({
             <div className="flex items-center gap-2">
               <i className="ri-notification-3-line text-yellow-300" />
               <span className="text-sm">
-                还有 <strong>{approachingNextStage.daysUntil}</strong> 天进入
-                <strong> {AGE_STAGES[approachingNextStage.nextStage]?.name}</strong>
+                {t("approaching", { days: approachingNextStage.daysUntil, stage: AGE_STAGES[approachingNextStage.nextStage]?.name })}
               </span>
             </div>
           </motion.div>
@@ -177,7 +178,7 @@ export default function StageIndicator({
             className="w-full mt-4 py-2 bg-white/20 rounded-xl text-sm font-medium hover:bg-white/30 transition"
             onClick={() => { setShowDetails(true); }}
           >
-            查看发展建议
+            {t("viewAdvice")}
           </button>
         )}
       </motion.div>
@@ -200,7 +201,7 @@ export default function StageIndicator({
               onClick={(e: React.MouseEvent<HTMLDivElement>) => { e.stopPropagation(); }}
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold">{currentStage.name} - 发展建议</h3>
+                <h3 className="text-xl font-bold">{t("adviceTitle", { stage: currentStage.name })}</h3>
                 <button
                   className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
                   onClick={() => { setShowDetails(false); }}
@@ -213,7 +214,7 @@ export default function StageIndicator({
               <div className="mb-6">
                 <h4 className="font-bold text-slate-700 mb-3 flex items-center gap-2">
                   <i className="ri-gamepad-line text-green-500" />
-                  推荐活动
+                  {t("recActivities")}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {recommendations.activities.map((activity, i) => (
@@ -228,7 +229,7 @@ export default function StageIndicator({
               <div className="mb-6">
                 <h4 className="font-bold text-slate-700 mb-3 flex items-center gap-2">
                   <i className="ri-book-open-line text-blue-500" />
-                  推荐书籍
+                  {t("recBooks")}
                 </h4>
                 <div className="space-y-2">
                   {recommendations.books.map((book, i) => (
@@ -243,7 +244,7 @@ export default function StageIndicator({
               <div className="mb-6">
                 <h4 className="font-bold text-slate-700 mb-3 flex items-center gap-2">
                   <i className="ri-star-line text-yellow-500" />
-                  重点技能
+                  {t("keySkills")}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {recommendations.skills.map((skill, i) => (
@@ -258,7 +259,7 @@ export default function StageIndicator({
               <div>
                 <h4 className="font-bold text-slate-700 mb-3 flex items-center gap-2">
                   <i className="ri-alert-line text-red-500" />
-                  注意事项
+                  {t("warnings")}
                 </h4>
                 <div className="space-y-2">
                   {recommendations.warnings.map((warning, i) => (

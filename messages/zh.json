@@ -160,6 +160,142 @@
       "monthLabel": "{year}年{month}月",
       "empty": "暂无{label}",
       "emptyAll": "暂无记录"
+    },
+    "createModal": {
+      "title": "创建成长记录",
+      "typeLabel": "记录类型",
+      "types": {
+        "milestone": "里程碑",
+        "observation": "观察日志",
+        "emotion": "情感记录",
+        "learning": "学习记录"
+      },
+      "titleLabel": "标题（可选）",
+      "titlePlaceholder": "AI会根据内容自动生成标题",
+      "contentLabel": "记录内容",
+      "contentPlaceholder": "记录下这个特别的瞬间...",
+      "analyzing": "AI正在分析内容...",
+      "aiSuggestionTitle": "AI小语的建议",
+      "milestoneFlag": "这是一个重要的成长里程碑！",
+      "mediaLabel": "添加照片/视频",
+      "tagsLabel": "标签",
+      "moodLabel": "当前情绪",
+      "moods": {
+        "happy": "开心",
+        "sad": "难过",
+        "angry": "生气",
+        "excited": "兴奋",
+        "calm": "平静",
+        "nervous": "紧张"
+      },
+      "cancel": "取消",
+      "submit": "创建记录"
+    },
+    "charts": {
+      "chartTypes": {
+        "radar": "雷达图",
+        "line": "趋势图",
+        "bar": "柱状图"
+      },
+      "overallScoreOf": "{name}的综合发展评分",
+      "overall": {
+        "excellent": "发展优秀",
+        "good": "发展良好",
+        "improving": "持续进步中"
+      },
+      "radarTitle": "能力雷达图",
+      "trendTitle": "发展趋势",
+      "barTitle": "各维度得分",
+      "dims": {
+        "cognitive": "认知发展",
+        "language": "语言能力",
+        "motor": "运动发展",
+        "social": "社交能力",
+        "emotional": "情绪管理",
+        "selfcare": "生活自理"
+      },
+      "levels": {
+        "excellent": "优秀",
+        "good": "良好",
+        "fair": "一般",
+        "attention": "需关注"
+      },
+      "noHistory": "暂无历史数据",
+      "all": "全部"
+    },
+    "tagSelector": {
+      "inputPlaceholder": "输入自定义标签，按回车添加",
+      "add": "添加",
+      "quickPick": "快速选择：",
+      "presets": {
+        "study": "学习",
+        "life": "生活",
+        "emotion": "情绪",
+        "social": "社交",
+        "sports": "运动",
+        "art": "艺术",
+        "reading": "阅读",
+        "play": "游戏",
+        "independence": "独立性",
+        "creativity": "创造力",
+        "focus": "专注力",
+        "friendship": "友谊",
+        "joy": "快乐",
+        "achievement": "成就",
+        "progress": "进步",
+        "breakthrough": "突破"
+      }
+    },
+    "devCurve": {
+      "titleOf": "{metric}发展曲线",
+      "unitLabel": "单位: {unit}",
+      "showReference": "显示参考区间",
+      "percentile": "第 {rank} 百分位",
+      "monthAxis": "{month}月",
+      "legendChild": "孩子数据",
+      "legendMedian": "中位数 (P50)",
+      "legendRange": "正常范围 (P25-P75)",
+      "interpTitle": "数据解读",
+      "interp": {
+        "normal": "孩子的发展处于正常范围内 (第25-75百分位)，表现良好。",
+        "below": "孩子的发展略低于同龄平均水平，建议关注并适当加强训练。",
+        "above": "孩子的发展高于同龄平均水平，表现优秀!",
+        "noData": "暂无足够数据进行评估，请继续记录孩子的成长数据。"
+      }
+    },
+    "report": {
+      "title": "发展评估报告",
+      "ageStage": "{age}个月龄 · {stage}",
+      "assessedAt": "评估日期：{date}",
+      "overallLabel": "总体发展水平",
+      "tabs": {
+        "overview": "综合分析",
+        "dimensions": "维度详情",
+        "suggestions": "成长建议"
+      },
+      "scoreOf": "得分: {score} / 100",
+      "expertAdvice": "专家建议",
+      "nextActions": "下一步行动",
+      "close": "关闭",
+      "exporting": "导出中...",
+      "export": "导出报告"
+    },
+    "stage": {
+      "setBirthdate": "请设置儿童出生日期",
+      "milestoneProgress": "阶段里程碑进度",
+      "upcoming": "即将到来的里程碑:",
+      "approaching": "还有 {days} 天进入 {stage}",
+      "viewAdvice": "查看发展建议",
+      "adviceTitle": "{stage} - 发展建议",
+      "recActivities": "推荐活动",
+      "recBooks": "推荐书籍",
+      "keySkills": "重点技能",
+      "warnings": "注意事项"
+    },
+    "media": {
+      "maxFiles": "最多只能上传{count}个文件",
+      "addFile": "添加文件",
+      "uploaded": "已上传 {count}/{max} 个文件"
     }
   },
   "courses": {

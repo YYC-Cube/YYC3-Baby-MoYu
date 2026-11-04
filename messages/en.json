@@ -160,6 +160,142 @@
       "monthLabel": "{month}/{year}",
       "empty": "No {label} yet",
       "emptyAll": "No records yet"
+    },
+    "createModal": {
+      "title": "Create Growth Record",
+      "typeLabel": "Record Type",
+      "types": {
+        "milestone": "Milestone",
+        "observation": "Observation",
+        "emotion": "Emotion",
+        "learning": "Learning"
+      },
+      "titleLabel": "Title (optional)",
+      "titlePlaceholder": "AI will generate a title from your content",
+      "contentLabel": "Content",
+      "contentPlaceholder": "Write down this special moment...",
+      "analyzing": "AI is analyzing...",
+      "aiSuggestionTitle": "AI Insights",
+      "milestoneFlag": "This is an important growth milestone!",
+      "mediaLabel": "Add Photos/Videos",
+      "tagsLabel": "Tags",
+      "moodLabel": "Current Mood",
+      "moods": {
+        "happy": "Happy",
+        "sad": "Sad",
+        "angry": "Angry",
+        "excited": "Excited",
+        "calm": "Calm",
+        "nervous": "Nervous"
+      },
+      "cancel": "Cancel",
+      "submit": "Create Record"
+    },
+    "charts": {
+      "chartTypes": {
+        "radar": "Radar",
+        "line": "Trend",
+        "bar": "Bar"
+      },
+      "overallScoreOf": "{name}'s Overall Development Score",
+      "overall": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "improving": "Making Progress"
+      },
+      "radarTitle": "Ability Radar",
+      "trendTitle": "Trends",
+      "barTitle": "Scores by Dimension",
+      "dims": {
+        "cognitive": "Cognitive",
+        "language": "Language",
+        "motor": "Motor",
+        "social": "Social",
+        "emotional": "Emotional",
+        "selfcare": "Self-care"
+      },
+      "levels": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair",
+        "attention": "Needs Attention"
+      },
+      "noHistory": "No history data yet",
+      "all": "All"
+    },
+    "tagSelector": {
+      "inputPlaceholder": "Type a custom tag, press Enter to add",
+      "add": "Add",
+      "quickPick": "Quick picks:",
+      "presets": {
+        "study": "Study",
+        "life": "Life",
+        "emotion": "Emotion",
+        "social": "Social",
+        "sports": "Sports",
+        "art": "Art",
+        "reading": "Reading",
+        "play": "Play",
+        "independence": "Independence",
+        "creativity": "Creativity",
+        "focus": "Focus",
+        "friendship": "Friendship",
+        "joy": "Joy",
+        "achievement": "Achievement",
+        "progress": "Progress",
+        "breakthrough": "Breakthrough"
+      }
+    },
+    "devCurve": {
+      "titleOf": "{metric} Development Curve",
+      "unitLabel": "Unit: {unit}",
+      "showReference": "Show reference ranges",
+      "percentile": "{rank}th percentile",
+      "monthAxis": "{month}mo",
+      "legendChild": "Child data",
+      "legendMedian": "Median (P50)",
+      "legendRange": "Normal range (P25-P75)",
+      "interpTitle": "Interpretation",
+      "interp": {
+        "normal": "Your child's development is within the normal range (25th-75th percentile) — doing well.",
+        "below": "Your child's development is slightly below the peer average. Consider extra support and practice.",
+        "above": "Your child's development is above the peer average — excellent!",
+        "noData": "Not enough data to evaluate yet. Keep recording your child's growth."
+      }
+    },
+    "report": {
+      "title": "Development Assessment Report",
+      "ageStage": "{age} months · {stage}",
+      "assessedAt": "Assessed on: {date}",
+      "overallLabel": "Overall Development Level",
+      "tabs": {
+        "overview": "Overview",
+        "dimensions": "Dimensions",
+        "suggestions": "Suggestions"
+      },
+      "scoreOf": "Score: {score} / 100",
+      "expertAdvice": "Expert Advice",
+      "nextActions": "Next Steps",
+      "close": "Close",
+      "exporting": "Exporting...",
+      "export": "Export Report"
+    },
+    "stage": {
+      "setBirthdate": "Please set the child's birth date",
+      "milestoneProgress": "Stage Milestone Progress",
+      "upcoming": "Upcoming milestones:",
+      "approaching": "{days} days until {stage}",
+      "viewAdvice": "View Development Advice",
+      "adviceTitle": "{stage} — Development Advice",
+      "recActivities": "Recommended Activities",
+      "recBooks": "Recommended Books",
+      "keySkills": "Key Skills",
+      "warnings": "Things to Note"
+    },
+    "media": {
+      "maxFiles": "You can upload up to {count} files",
+      "addFile": "Add",
+      "uploaded": "Uploaded {count}/{max} files"
     }
   },
   "courses": {

@@ -13,6 +13,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations } from "next-intl"
 import { authFetch } from "@/lib/api/auth-fetch"
 import { MediaUploader } from "./MediaUploader"
 import { TagSelector } from "./TagSelector"
@@ -44,6 +45,7 @@ interface CreateRecordModalProps {
 }
 
 export default function CreateRecordModal({ isOpen, onClose, onSubmit }: CreateRecordModalProps) {
+  const t = useTranslations("growth.createModal")
   const [recordType, setRecordType] = useState<"milestone" | "observation" | "emotion" | "learning">("milestone")
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
@@ -129,7 +131,7 @@ export default function CreateRecordModal({ isOpen, onClose, onSubmit }: CreateR
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
           >
             <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-3xl">
-              <h2 className="text-xl font-bold text-slate-800">创建成长记录</h2>
+              <h2 className="text-xl font-bold text-slate-800">{t("title")}</h2>
               <button
                 onClick={onClose}
                 className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center"
@@ -140,13 +142,13 @@ export default function CreateRecordModal({ isOpen, onClose, onSubmit }: CreateR
 
             <div className="p-6 space-y-6">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-3">记录类型</label>
+                <label className="block text-sm font-bold text-slate-700 mb-3">{t("typeLabel")}</label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {[
-                    { id: "milestone", icon: "ri-flag-line", label: "里程碑", color: "yellow" },
-                    { id: "observation", icon: "ri-eye-line", label: "观察日志", color: "purple" },
-                    { id: "emotion", icon: "ri-heart-line", label: "情感记录", color: "pink" },
-                    { id: "learning", icon: "ri-book-line", label: "学习记录", color: "blue" },
+                    { id: "milestone", icon: "ri-flag-line", color: "yellow" },
+                    { id: "observation", icon: "ri-eye-line", color: "purple" },
+                    { id: "emotion", icon: "ri-heart-line", color: "pink" },
+                    { id: "learning", icon: "ri-book-line", color: "blue" },
                   ].map((type) => (
                     <motion.button
                       key={type.id}
@@ -160,37 +162,37 @@ export default function CreateRecordModal({ isOpen, onClose, onSubmit }: CreateR
                       whileTap={{ scale: 0.95 }}
                     >
                       <i className={`${type.icon} text-2xl`} />
-                      <span className="text-xs font-medium">{type.label}</span>
+                      <span className="text-xs font-medium">{t(`types.${type.id}`)}</span>
                     </motion.button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">标题（可选）</label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">{t("titleLabel")}</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => { setTitle(e.target.value); }}
-                  placeholder="AI会根据内容自动生成标题"
+                  placeholder={t("titlePlaceholder")}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">记录内容</label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">{t("contentLabel")}</label>
                 <textarea
                   value={content}
                   onChange={(e) => { setContent(e.target.value); }}
                   onBlur={analyzeContent}
-                  placeholder="记录下这个特别的瞬间..."
+                  placeholder={t("contentPlaceholder")}
                   rows={5}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
                 />
                 {isAnalyzing && (
                   <div className="mt-2 flex items-center gap-2 text-sm text-blue-500">
                     <i className="ri-loader-4-line animate-spin" />
-                    <span>AI正在分析内容...</span>
+                    <span>{t("analyzing")}</span>
                   </div>
                 )}
               </div>
@@ -203,43 +205,43 @@ export default function CreateRecordModal({ isOpen, onClose, onSubmit }: CreateR
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <i className="ri-lightbulb-flash-line text-blue-500" />
-                    <span className="font-bold text-blue-700">AI小语的建议</span>
+                    <span className="font-bold text-blue-700">{t("aiSuggestionTitle")}</span>
                   </div>
                   <p className="text-sm text-slate-700">{aiSuggestions.analysis}</p>
                   {aiSuggestions.isMilestone && (
                     <div className="mt-2 px-3 py-1 bg-yellow-200 text-yellow-800 text-xs rounded-full inline-flex items-center gap-1">
                       <i className="ri-trophy-line" />
-                      <span>这是一个重要的成长里程碑！</span>
+                      <span>{t("milestoneFlag")}</span>
                     </div>
                   )}
                 </motion.div>
               )}
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">添加照片/视频</label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">{t("mediaLabel")}</label>
                 <MediaUploader files={mediaFiles} onChange={setMediaFiles} maxFiles={9} />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">标签</label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">{t("tagsLabel")}</label>
                 <TagSelector tags={tags} onChange={setTags} />
               </div>
 
               {recordType === "emotion" && (
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">当前情绪</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">{t("moodLabel")}</label>
                   <div className="flex gap-2 flex-wrap">
-                    {["开心", "难过", "生气", "兴奋", "平静", "紧张"].map((em) => (
+                    {(["happy", "sad", "angry", "excited", "calm", "nervous"] as const).map((em) => (
                       <motion.button
                         key={em}
                         className={`px-4 py-2 rounded-full ${
-                          emotion === em ? "bg-pink-400 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                          emotion === t(`moods.${em}`) ? "bg-pink-400 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                         }`}
-                        onClick={() => { setEmotion(em); }}
+                        onClick={() => { setEmotion(t(`moods.${em}`)); }}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        {em}
+                        {t(`moods.${em}`)}
                       </motion.button>
                     ))}
                   </div>
@@ -251,14 +253,14 @@ export default function CreateRecordModal({ isOpen, onClose, onSubmit }: CreateR
                   onClick={onClose}
                   className="flex-1 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold"
                 >
-                  取消
+                  {t("cancel")}
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={!content}
                   className="flex-1 px-6 py-3 bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  创建记录
+                  {t("submit")}
                 </button>
               </div>
             </div>
