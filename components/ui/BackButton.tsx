@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface BackButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -10,12 +11,15 @@ interface BackButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
 }
 
 export function BackButton({
-  text = '返回',
+  // 默认文案走 common.back 词条（zh 与原硬编码 "返回" 逐字一致）
+  text,
   showIcon = false,
   variant = 'default',
   className,
   ...props
 }: BackButtonProps) {
+  const t = useTranslations('common');
+  const label = text ?? t('back');
   return (
     <button
       className={cn(
@@ -29,7 +33,7 @@ export function BackButton({
       {...props}
     >
       {showIcon && <ChevronLeft className="w-4 h-4" />}
-      <span>{text}</span>
+      <span>{label}</span>
     </button>
   );
 }

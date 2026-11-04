@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
 import PageHeader from "@/components/PageHeader"
 import { useAIVideo } from "@/hooks/useAIVideo"
 import { useChildren } from "@/hooks/useChildren"
@@ -13,6 +15,8 @@ import { VIDEO_STYLE_CONFIG } from "@/types/ai-video"
 type FilterType = "all" | VideoType
 
 export default function VideosPage() {
+  const t = useTranslations("videos")
+  const locale = useLocale()
   const [activeFilter, setActiveFilter] = useState<FilterType>("all")
   const [showGenerator, setShowGenerator] = useState(false)
   const [selectedVideo, setSelectedVideo] = useState<GeneratedVideo | null>(null)
@@ -25,12 +29,12 @@ export default function VideosPage() {
     loadVideos()
   }, [loadVideos])
 
-  const filters: { id: FilterType; name: string; icon: string }[] = [
-    { id: "all", name: "全部", icon: "ri-apps-line" },
-    { id: "slideshow", name: "幻灯片", icon: "ri-slideshow-3-line" },
-    { id: "image-to-video", name: "动态图", icon: "ri-movie-line" },
-    { id: "story-animation", name: "故事动画", icon: "ri-book-read-line" },
-    { id: "memory-recap", name: "成长回忆", icon: "ri-history-line" },
+  const filters: { id: FilterType; nameKey: string; icon: string }[] = [
+    { id: "all", nameKey: "filters.all", icon: "ri-apps-line" },
+    { id: "slideshow", nameKey: "filters.slideshow", icon: "ri-slideshow-3-line" },
+    { id: "image-to-video", nameKey: "filters.imageToVideo", icon: "ri-movie-line" },
+    { id: "story-animation", nameKey: "filters.storyAnimation", icon: "ri-book-read-line" },
+    { id: "memory-recap", nameKey: "filters.memoryRecap", icon: "ri-history-line" },
   ]
 
   const filteredVideos = activeFilter === "all" ? videos : videos.filter((v) => v.type === activeFilter)
@@ -38,11 +42,11 @@ export default function VideosPage() {
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
-    return mins > 0 ? `${mins}分${secs}秒` : `${secs}秒`
+    return mins > 0 ? t("durationMinsSecs", { mins, secs }) : t("durationSecs", { secs })
   }
 
   const formatDate = (date: Date): string => {
-    return new Date(date).toLocaleDateString("zh-CN", {
+    return new Date(date).toLocaleDateString(locale === "en" ? "en-US" : "zh-CN", {
       month: "short",
       day: "numeric",
     })
@@ -50,7 +54,7 @@ export default function VideosPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-rose-50 via-white to-purple-50 pb-24">
-      <PageHeader title="AI视频工坊" subtitle="将美好回忆变成精彩视频" showBack />
+      <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} showBack />
 
       <div className="px-4 space-y-6">
         {/* 顶部操作栏 */}
@@ -65,7 +69,7 @@ export default function VideosPage() {
                 }`}
               >
                 <i className={filter.icon} />
-                <span>{filter.name}</span>
+                <span>{t(filter.nameKey)}</span>
               </button>
             ))}
           </div>
@@ -88,7 +92,7 @@ export default function VideosPage() {
           className="w-full p-4 rounded-2xl bg-linear-to-r from-pink-500 to-purple-500 text-white flex items-center justify-center gap-3"
         >
           <i className="ri-video-add-line text-2xl" />
-          <span className="font-medium">创建新视频</span>
+          <span className="font-medium">{t("createNew")}</span>
         </motion.button>
 
         {/* 收藏视频 */}
@@ -96,7 +100,7 @@ export default function VideosPage() {
           <div>
             <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2">
               <i className="ri-heart-fill text-pink-500" />
-              我的收藏
+              {t("myFavorites")}
             </h3>
             <div className="flex gap-3 overflow-x-auto pb-2">
               {getFavoriteVideos()
@@ -129,19 +133,19 @@ export default function VideosPage() {
         {/* 视频列表 */}
         <div>
           <h3 className="text-lg font-semibold text-slate-800 mb-3">
-            {activeFilter === "all" ? "全部视频" : filters.find((f) => f.id === activeFilter)?.name}
+            {activeFilter === "all" ? t("allVideos") : t(filters.find((f) => f.id === activeFilter)!.nameKey)}
             <span className="text-sm font-normal text-slate-500 ml-2">({filteredVideos.length})</span>
           </h3>
 
           {filteredVideos.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-2xl">
               <i className="ri-video-line text-5xl text-slate-300 mb-4 block" />
-              <p className="text-slate-500">还没有视频</p>
+              <p className="text-slate-500">{t("empty")}</p>
               <button
                 onClick={() => { setShowGenerator(true); }}
                 className="mt-4 px-4 py-2 bg-pink-500 text-white rounded-lg text-sm"
               >
-                创建第一个视频
+                {t("createFirst")}
               </button>
             </div>
           ) : viewMode === "grid" ? (
@@ -197,7 +201,7 @@ export default function VideosPage() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
-                            if (confirm("确定删除这个视频吗？")) {
+                            if (confirm(t("deleteConfirm"))) {
                               deleteVideo(video.id)
                             }
                           }}
@@ -266,7 +270,7 @@ export default function VideosPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        if (confirm("确定删除这个视频吗？")) {
+                        if (confirm(t("deleteConfirm"))) {
                           deleteVideo(video.id)
                         }
                       }}

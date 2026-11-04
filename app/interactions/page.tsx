@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations } from "next-intl"
 import Navigation from "@/components/Navigation"
 import PageHeader from "@/components/headers/PageHeader"
 import { useInteractions } from "@/hooks/useInteractions"
@@ -22,6 +23,7 @@ type ViewMode = "timeline" | "stats" | "calendar"
 type FilterType = "all" | InteractionType
 
 export default function InteractionsPage() {
+  const t = useTranslations("interactions")
   const [_viewMode, _setViewMode] = useState<ViewMode>("timeline")
   const [filterType, setFilterType] = useState<FilterType>("all")
   const [showEditor, setShowEditor] = useState(false)
@@ -57,9 +59,9 @@ export default function InteractionsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-br from-pink-50 via-purple-50 to-blue-50">
-      <PageHeader icon="ri-heart-3-line" title="成长互动记录">
+      <PageHeader icon="ri-heart-3-line" title={t("pageTitle")}>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-slate-500">记录每一次温暖陪伴</span>
+          <span className="text-sm text-slate-500">{t("subtitle")}</span>
         </div>
       </PageHeader>
 
@@ -77,8 +79,8 @@ export default function InteractionsPage() {
                     {currentChild.name.charAt(0)}
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800">与{currentChild.name}的互动</h3>
-                    <p className="text-xs text-slate-500">本周 {stats.thisWeekRecords} 次互动</p>
+                    <h3 className="font-bold text-slate-800">{t("interactionWith", { name: currentChild.name })}</h3>
+                    <p className="text-xs text-slate-500">{t("weeklyCount", { count: stats.thisWeekRecords })}</p>
                   </div>
                 </div>
                 <ChildSelector />
@@ -88,21 +90,21 @@ export default function InteractionsPage() {
 
           <div className="grid grid-cols-4 gap-3 mb-4">
             {[
-              { label: "总互动", value: stats.totalRecords, icon: "ri-heart-line", color: "from-pink-400 to-pink-500" },
+              { label: t("stats.total"), value: stats.totalRecords, icon: "ri-heart-line", color: "from-pink-400 to-pink-500" },
               {
-                label: "总时长",
+                label: t("stats.duration"),
                 value: `${Math.round(stats.totalDuration / 60)}h`,
                 icon: "ri-time-line",
                 color: "from-blue-400 to-blue-500",
               },
               {
-                label: "平均质量",
-                value: `${stats.averageQuality}分`,
+                label: t("stats.avgQuality"),
+                value: t("qualityScore", { score: stats.averageQuality }),
                 icon: "ri-star-line",
                 color: "from-yellow-400 to-yellow-500",
               },
               {
-                label: "本周",
+                label: t("stats.thisWeek"),
                 value: stats.thisWeekRecords,
                 icon: "ri-calendar-check-line",
                 color: "from-green-400 to-green-500",
@@ -134,7 +136,7 @@ export default function InteractionsPage() {
                   filterType === "all" ? "bg-purple-500 text-white" : "bg-white text-slate-600 hover:bg-slate-100"
                 }`}
               >
-                全部
+                {t("filterAll")}
               </button>
               {(Object.keys(INTERACTION_TYPE_CONFIG) as InteractionType[]).slice(0, 5).map((type) => {
                 const config = INTERACTION_TYPE_CONFIG[type]
@@ -147,7 +149,7 @@ export default function InteractionsPage() {
                     }`}
                   >
                     <i className={config.icon} />
-                    {config.label}
+                    {t(`typeNames.${type}`)}
                   </button>
                 )
               })}
@@ -160,7 +162,7 @@ export default function InteractionsPage() {
               whileTap={{ scale: 0.98 }}
             >
               <i className="ri-add-line" />
-              记录互动
+              {t("recordNew")}
             </motion.button>
           </div>
 
@@ -168,8 +170,8 @@ export default function InteractionsPage() {
             {filteredInteractions.length === 0 ? (
               <div className="bg-white rounded-2xl p-8 text-center shadow-sm">
                 <i className="ri-heart-add-line text-5xl text-slate-300 mb-3" />
-                <p className="text-slate-500">还没有互动记录</p>
-                <p className="text-sm text-slate-400">点击&quot;记录互动&quot;开始记录</p>
+                <p className="text-slate-500">{t("empty")}</p>
+                <p className="text-sm text-slate-400">{t("emptyHint")}</p>
               </div>
             ) : (
               filteredInteractions.map((record, i) => (
@@ -217,6 +219,7 @@ function InteractionCard({
   onDelete: () => void
 }) {
   const [expanded, setExpanded] = useState(false)
+  const t = useTranslations("interactions")
   const typeConfig = getInteractionConfig(record.type)
   const moodConfig = getMoodConfig(record.mood)
   const qualityLevel = record.aiAnalysis ? calculateQualityLevel(record.aiAnalysis.qualityScore) : null
@@ -237,12 +240,12 @@ function InteractionCard({
             <div>
               <h3 className="font-bold text-slate-800">{record.title}</h3>
               <p className="text-xs text-slate-500">
-                {typeConfig.label} · {record.duration}分钟 · {moodConfig.icon}
+                {t(`typeNames.${record.type}`)} · {t("card.duration", { duration: record.duration })} · {moodConfig.icon}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {qualityLevel && <span className={`text-xs font-medium ${getMoodConfig(qualityLevel).color}`}>{getMoodConfig(qualityLevel).label}</span>}
+            {qualityLevel && <span className={`text-xs font-medium ${getMoodConfig(qualityLevel).color}`}>{t(`moodNames.${qualityLevel}`)}</span>}
             <button onClick={onEdit} className="p-1.5 hover:bg-slate-100 rounded-lg">
               <i className="ri-edit-line text-slate-400" />
             </button>
@@ -256,7 +259,7 @@ function InteractionCard({
 
         <div className="flex items-center gap-2 text-xs text-slate-400 mb-3">
           <span>
-            <i className="ri-map-pin-line" /> {record.location || "未记录"}
+            <i className="ri-map-pin-line" /> {record.location || t("card.notRecorded")}
           </span>
           <span>·</span>
           <span>
@@ -282,7 +285,7 @@ function InteractionCard({
             className="text-sm text-purple-500 font-medium flex items-center gap-1"
           >
             <i className="ri-robot-line" />
-            AI分析
+            {t("card.aiAnalysis")}
             <i className={`ri-arrow-${expanded ? "up" : "down"}-s-line`} />
           </button>
         )}
@@ -298,7 +301,7 @@ function InteractionCard({
           >
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div>
-                <p className="text-xs text-slate-500 mb-1">互动质量</p>
+                <p className="text-xs text-slate-500 mb-1">{t("card.qualityLabel")}</p>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-2 bg-white rounded-full overflow-hidden">
                     <div
@@ -310,13 +313,13 @@ function InteractionCard({
                 </div>
               </div>
               <div>
-                <p className="text-xs text-slate-500 mb-1">情感倾向</p>
+                <p className="text-xs text-slate-500 mb-1">{t("card.sentimentLabel")}</p>
                 <p className="text-sm font-medium text-slate-700">{record.aiAnalysis.sentiment}</p>
               </div>
             </div>
 
             <div className="mb-3">
-              <p className="text-xs text-slate-500 mb-1">关键词</p>
+              <p className="text-xs text-slate-500 mb-1">{t("card.keywordsLabel")}</p>
               <div className="flex flex-wrap gap-1">
                 {record.aiAnalysis.keywords.map((kw) => (
                   <span key={kw} className="px-2 py-0.5 bg-white text-purple-600 rounded-full text-xs">
@@ -328,7 +331,7 @@ function InteractionCard({
 
             {record.aiAnalysis.suggestions.length > 0 && (
               <div>
-                <p className="text-xs text-slate-500 mb-1">建议</p>
+                <p className="text-xs text-slate-500 mb-1">{t("card.suggestionsLabel")}</p>
                 <ul className="space-y-1">
                   {record.aiAnalysis.suggestions.map((s, i) => (
                     <li key={i} className="text-xs text-slate-600 flex items-start gap-1">
@@ -364,19 +367,21 @@ function InteractionEditor({
   onClose: () => void
   childId: string
 }) {
+  const [tagInput, setTagInput] = useState("")
+  const t = useTranslations("interactions.editor")
+  const tTypes = useTranslations("interactions")
+  // 编辑器表单默认参与者走词条（zh 与原硬编码 "妈妈" 逐字一致）
   const [formData, setFormData] = useState({
     type: record?.type || ("play"),
     title: record?.title || "",
     content: record?.content || "",
     duration: record?.duration || 30,
-    participants: record?.participants || ["妈妈"],
+    participants: record?.participants || [t("defaultParticipant")],
     location: record?.location || "",
     mood: record?.mood || ("good"),
     tags: record?.tags || ([] as string[]),
     mediaUrls: record?.mediaUrls || ([] as string[]),
   })
-
-  const [tagInput, setTagInput] = useState("")
 
   const handleAddTag = () => {
     if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
@@ -414,7 +419,7 @@ function InteractionEditor({
         onClick={(e) => { e.stopPropagation(); }}
       >
         <div className="sticky top-0 bg-white p-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-bold">{record ? "编辑记录" : "记录互动"}</h2>
+          <h2 className="text-lg font-bold">{record ? t("editTitle") : t("newTitle")}</h2>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg">
             <i className="ri-close-line text-xl" />
           </button>
@@ -422,7 +427,7 @@ function InteractionEditor({
 
         <div className="p-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">互动类型</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">{t("typeLabel")}</label>
             <div className="grid grid-cols-3 gap-2">
               {(Object.keys(INTERACTION_TYPE_CONFIG) as InteractionType[]).map((type) => {
                 const config = INTERACTION_TYPE_CONFIG[type]
@@ -437,7 +442,7 @@ function InteractionEditor({
                     }`}
                   >
                     <i className={`${config.icon} text-xl`} />
-                    <p className="text-xs mt-1">{config.label}</p>
+                    <p className="text-xs mt-1">{tTypes(`typeNames.${type}`)}</p>
                   </button>
                 )
               })}
@@ -445,30 +450,30 @@ function InteractionEditor({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">标题</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("titleLabel")}</label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => { setFormData((prev) => ({ ...prev, title: e.target.value })); }}
               className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
-              placeholder="给这次互动起个名字"
+              placeholder={t("titlePlaceholder")}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">详细描述</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("contentLabel")}</label>
             <textarea
               value={formData.content}
               onChange={(e) => { setFormData((prev) => ({ ...prev, content: e.target.value })); }}
               className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 outline-none resize-none"
               rows={3}
-              placeholder="记录这次互动的过程和感受..."
+              placeholder={t("contentPlaceholder")}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">互动时长（分钟）</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("durationLabel")}</label>
               <input
                 type="number"
                 value={formData.duration}
@@ -478,19 +483,19 @@ function InteractionEditor({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">地点</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("locationLabel")}</label>
               <input
                 type="text"
                 value={formData.location}
                 onChange={(e) => { setFormData((prev) => ({ ...prev, location: e.target.value })); }}
                 className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
-                placeholder="如：家里客厅"
+                placeholder={t("locationPlaceholder")}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">心情</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">{t("moodLabel")}</label>
             <div className="flex gap-2">
               {(Object.keys(MOOD_CONFIG) as MoodType[]).map((mood) => {
                 const config = MOOD_CONFIG[mood]
@@ -503,7 +508,7 @@ function InteractionEditor({
                     }`}
                   >
                     <span className="text-xl">{config.icon}</span>
-                    <p className="text-xs mt-1">{config.label}</p>
+                    <p className="text-xs mt-1">{tTypes(`moodNames.${mood}`)}</p>
                   </button>
                 )
               })}
@@ -511,7 +516,7 @@ function InteractionEditor({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">标签</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("tagsLabel")}</label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -523,10 +528,10 @@ function InteractionEditor({
                   }
                 }}
                 className="flex-1 px-3 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
-                placeholder="输入标签按回车添加"
+                placeholder={t("tagPlaceholder")}
               />
               <button onClick={handleAddTag} className="px-3 py-2 bg-purple-500 text-white rounded-xl">
-                添加
+                {t("add")}
               </button>
             </div>
             {formData.tags.length > 0 && (
@@ -556,14 +561,14 @@ function InteractionEditor({
 
         <div className="sticky bottom-0 bg-white p-4 border-t flex gap-3">
           <button onClick={onClose} className="flex-1 py-2 border rounded-xl font-medium hover:bg-slate-50">
-            取消
+            {t("cancel")}
           </button>
           <button
             onClick={handleSave}
             disabled={!formData.title}
             className="flex-1 py-2 bg-linear-to-r from-pink-500 to-purple-500 text-white rounded-xl font-medium disabled:opacity-50"
           >
-            保存
+            {t("save")}
           </button>
         </div>
       </motion.div>

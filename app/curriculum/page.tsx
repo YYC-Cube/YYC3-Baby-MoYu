@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations } from "next-intl"
 import Navigation from "@/components/Navigation"
 import PageHeader from "@/components/headers/PageHeader"
 import { useCurriculum } from "@/hooks/useCurriculum"
@@ -21,6 +22,7 @@ import {
 type ViewMode = "week" | "day" | "list"
 
 export default function CurriculumPage() {
+  const t = useTranslations("curriculum")
   const [viewMode, setViewMode] = useState<ViewMode>("week")
   const [selectedDay, setSelectedDay] = useState(new Date().getDay() || 7)
   const [showEditor, setShowEditor] = useState(false)
@@ -63,7 +65,7 @@ export default function CurriculumPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <PageHeader icon="ri-calendar-schedule-line" title="智能课程表">
+      <PageHeader icon="ri-calendar-schedule-line" title={t("pageTitle")}>
         <div className="flex items-center gap-2">
           <span className="text-sm text-slate-500">{semester.name}</span>
         </div>
@@ -83,8 +85,8 @@ export default function CurriculumPage() {
                     {currentChild.name.charAt(0)}
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800">{currentChild.name}的课程表</h3>
-                    <p className="text-xs text-slate-500">本周共 {stats.weeklyClasses} 节课</p>
+                    <h3 className="font-bold text-slate-800">{t("scheduleOf", { name: currentChild.name })}</h3>
+                    <p className="text-xs text-slate-500">{t("weeklyClasses", { count: stats.weeklyClasses })}</p>
                   </div>
                 </div>
                 <ChildSelector />
@@ -96,11 +98,11 @@ export default function CurriculumPage() {
             <div className="flex gap-2 bg-white rounded-xl p-1 shadow-sm">
               {(
                 [
-                  { mode: "week", icon: "ri-calendar-line", label: "周视图" },
-                  { mode: "day", icon: "ri-calendar-event-line", label: "日视图" },
-                  { mode: "list", icon: "ri-list-check-2", label: "列表" },
+                  { mode: "week", icon: "ri-calendar-line", labelKey: "views.week" },
+                  { mode: "day", icon: "ri-calendar-event-line", labelKey: "views.day" },
+                  { mode: "list", icon: "ri-list-check-2", labelKey: "views.list" },
                 ] as const
-              ).map(({ mode, icon, label }) => (
+              ).map(({ mode, icon, labelKey }) => (
                 <button
                   key={mode}
                   onClick={() => { setViewMode(mode); }}
@@ -109,7 +111,7 @@ export default function CurriculumPage() {
                   }`}
                 >
                   <i className={icon} />
-                  <span className="hidden sm:inline">{label}</span>
+                  <span className="hidden sm:inline">{t(labelKey)}</span>
                 </button>
               ))}
             </div>
@@ -121,32 +123,32 @@ export default function CurriculumPage() {
               whileTap={{ scale: 0.98 }}
             >
               <i className="ri-add-line" />
-              添加课程
+              {t("addCourse")}
             </motion.button>
           </div>
 
           <div className="grid grid-cols-4 gap-3 mb-4">
             {[
               {
-                label: "校内课程",
+                label: t("stats.school"),
                 value: stats.schoolCourses,
                 icon: "ri-school-line",
                 color: "from-blue-400 to-blue-500",
               },
               {
-                label: "兴趣班",
+                label: t("stats.extra"),
                 value: stats.extraCourses,
                 icon: "ri-palette-line",
                 color: "from-purple-400 to-purple-500",
               },
               {
-                label: "线上课程",
+                label: t("stats.online"),
                 value: stats.onlineCourses,
                 icon: "ri-computer-line",
                 color: "from-green-400 to-green-500",
               },
               {
-                label: "本周课时",
+                label: t("stats.weekly"),
                 value: stats.weeklyClasses,
                 icon: "ri-time-line",
                 color: "from-orange-400 to-orange-500",
@@ -224,6 +226,7 @@ function WeeklyTimetable({
   onSelectDay: (day: number) => void
   onEditCourse: (course: Course) => void
 }) {
+  const t = useTranslations("curriculum")
   const timeRange = [
     "08:00",
     "09:00",
@@ -267,7 +270,7 @@ function WeeklyTimetable({
               selectedDay === i + 1 ? "bg-blue-500 text-white" : "bg-slate-50 text-slate-600 hover:bg-slate-100"
             }`}
           >
-            {day}
+            {t(`weekdayNames.${i + 1}`)}
           </button>
         ))}
       </div>
@@ -315,6 +318,7 @@ function DailySchedule({
   onSelectDay: (day: number) => void
   onEditCourse: (course: Course) => void
 }) {
+  const t = useTranslations("curriculum")
   return (
     <motion.div className="space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="flex gap-2 overflow-x-auto pb-2">
@@ -328,20 +332,20 @@ function DailySchedule({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            {day}
+            {t(`weekdayNames.${i + 1}`)}
           </motion.button>
         ))}
       </div>
 
       <div className="bg-white rounded-2xl p-4 shadow-sm">
         <h3 className="font-bold text-slate-800 mb-4">
-          {WEEKDAYS[selectedDay - 1]} · {courses.length} 节课
+          {t(`weekdayNames.${selectedDay}`)} · {t("classesCount", { count: courses.length })}
         </h3>
 
         {courses.length === 0 ? (
           <div className="text-center py-8 text-slate-400">
             <i className="ri-calendar-line text-4xl mb-2" />
-            <p>今天没有课程安排</p>
+            <p>{t("noCoursesToday")}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -366,8 +370,9 @@ function DailySchedule({
                   <p className="text-sm font-medium text-slate-600">{course.schedules[0]?.room}</p>
                   <p className="text-xs text-slate-400">
                     {course.schedules[0] &&
-                      calculateDuration(course.schedules[0].startTime, course.schedules[0].endTime)}
-                    分钟
+                      t("durationMinutes", {
+                        duration: calculateDuration(course.schedules[0].startTime, course.schedules[0].endTime),
+                      })}
                   </p>
                 </div>
                 <i className="ri-arrow-right-s-line text-slate-400" />
@@ -389,6 +394,7 @@ function CourseList({
   onEditCourse: (course: Course) => void
   onDeleteCourse: (id: string) => void
 }) {
+  const t = useTranslations("curriculum")
   const grouped = {
     school: courses.filter((c) => c.type === "school"),
     extracurricular: courses.filter((c) => c.type === "extracurricular"),
@@ -406,12 +412,12 @@ function CourseList({
         >
           <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
             <i className={`${icon} text-blue-500`} />
-            {label}
+            {t(`courseTypeNames.${value}`)}
             <span className="text-sm font-normal text-slate-400">({grouped[value]?.length || 0})</span>
           </h3>
 
           {grouped[value]?.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-4">暂无课程</p>
+            <p className="text-sm text-slate-400 text-center py-4">{t("noCourses")}</p>
           ) : (
             <div className="space-y-2">
               {grouped[value]?.map((course) => (
@@ -422,7 +428,7 @@ function CourseList({
                       <h4 className="font-medium text-slate-800">{course.name}</h4>
                       <p className="text-xs text-slate-500">
                         {course.teacher && `${course.teacher} · `}
-                        {course.schedules.length} 节/周
+                        {t("perWeek", { count: course.schedules.length })}
                       </p>
                     </div>
                   </div>
@@ -480,6 +486,8 @@ function CourseEditor({
   })
 
   const [conflicts, setConflicts] = useState<Course[]>([])
+  const t = useTranslations("curriculum.editor")
+  const tRoot = useTranslations("curriculum")
 
   const handleAddSchedule = () => {
     const schedule: CourseSchedule = {
@@ -533,7 +541,7 @@ function CourseEditor({
         onClick={(e) => { e.stopPropagation(); }}
       >
         <div className="sticky top-0 bg-white p-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-bold">{course ? "编辑课程" : "添加课程"}</h2>
+          <h2 className="text-lg font-bold">{course ? t("editTitle") : t("addTitle")}</h2>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg">
             <i className="ri-close-line text-xl" />
           </button>
@@ -542,17 +550,17 @@ function CourseEditor({
         <div className="p-4 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">课程名称</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("nameLabel")}</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => { setFormData((prev) => ({ ...prev, name: e.target.value })); }}
                 className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="如：语文"
+                placeholder={t("namePlaceholder")}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">学科</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("subjectLabel")}</label>
               <select
                 value={formData.subject}
                 onChange={(e) => {
@@ -565,10 +573,11 @@ function CourseEditor({
                 }}
                 className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
               >
-                <option value="">选择学科</option>
+                <option value="">{t("selectSubject")}</option>
+                {/* option value 保持数据层中文键（SUBJECT_COLORS 查找依赖），显示名走词条 */}
                 {Object.keys(SUBJECT_COLORS).map((s) => (
                   <option key={s} value={s}>
-                    {s}
+                    {tRoot(`subjectNames.${s}`)}
                   </option>
                 ))}
               </select>
@@ -577,25 +586,25 @@ function CourseEditor({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">教师</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("teacherLabel")}</label>
               <input
                 type="text"
                 value={formData.teacher}
                 onChange={(e) => { setFormData((prev) => ({ ...prev, teacher: e.target.value })); }}
                 className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="如：李老师"
+                placeholder={t("teacherPlaceholder")}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">课程类型</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("typeLabel")}</label>
               <select
                 value={formData.type}
                 onChange={(e) => { setFormData((prev) => ({ ...prev, type: e.target.value as Course["type"] })); }}
                 className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
               >
-                {COURSE_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
+                {COURSE_TYPES.map((ct) => (
+                  <option key={ct.value} value={ct.value}>
+                    {tRoot(`courseTypeNames.${ct.value}`)}
                   </option>
                 ))}
               </select>
@@ -603,13 +612,13 @@ function CourseEditor({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">上课时间</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">{t("timeLabel")}</label>
 
             <div className="bg-slate-50 rounded-xl p-3 space-y-2">
               {formData.schedules.map((schedule) => (
                 <div key={schedule.id} className="flex items-center justify-between bg-white p-2 rounded-lg">
                   <span className="text-sm">
-                    {WEEKDAYS[schedule.dayOfWeek - 1]} {schedule.startTime}-{schedule.endTime}
+                    {tRoot(`weekdayNames.${schedule.dayOfWeek}`)} {schedule.startTime}-{schedule.endTime}
                     {schedule.room && ` (${schedule.room})`}
                   </span>
                   <button onClick={() => { handleRemoveSchedule(schedule.id); }} className="p-1 hover:bg-red-100 rounded">
@@ -626,7 +635,7 @@ function CourseEditor({
                 >
                   {WEEKDAYS.map((day, i) => (
                     <option key={day} value={i + 1}>
-                      {day}
+                      {tRoot(`weekdayNames.${i + 1}`)}
                     </option>
                   ))}
                 </select>
@@ -635,9 +644,9 @@ function CourseEditor({
                   onChange={(e) => { setNewSchedule((prev) => ({ ...prev, startTime: e.target.value })); }}
                   className="px-2 py-1 border rounded-lg text-sm"
                 >
-                  {TIME_SLOTS.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  {TIME_SLOTS.map((slot) => (
+                    <option key={slot} value={slot}>
+                      {slot}
                     </option>
                   ))}
                 </select>
@@ -646,9 +655,9 @@ function CourseEditor({
                   onChange={(e) => { setNewSchedule((prev) => ({ ...prev, endTime: e.target.value })); }}
                   className="px-2 py-1 border rounded-lg text-sm"
                 >
-                  {TIME_SLOTS.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  {TIME_SLOTS.map((slot) => (
+                    <option key={slot} value={slot}>
+                      {slot}
                     </option>
                   ))}
                 </select>
@@ -657,41 +666,41 @@ function CourseEditor({
                   value={newSchedule.room}
                   onChange={(e) => { setNewSchedule((prev) => ({ ...prev, room: e.target.value })); }}
                   className="px-2 py-1 border rounded-lg text-sm"
-                  placeholder="教室"
+                  placeholder={t("roomPlaceholder")}
                 />
                 <button onClick={handleAddSchedule} className="px-2 py-1 bg-blue-500 text-white rounded-lg text-sm">
-                  添加
+                  {t("add")}
                 </button>
               </div>
 
               {conflicts.length > 0 && (
-                <div className="text-xs text-red-500 mt-1">时间冲突：{conflicts.map((c) => c.name).join(", ")}</div>
+                <div className="text-xs text-red-500 mt-1">{t("conflict", { names: conflicts.map((c) => c.name).join(", ") })}</div>
               )}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">备注</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("notesLabel")}</label>
             <textarea
               value={formData.notes}
               onChange={(e) => { setFormData((prev) => ({ ...prev, notes: e.target.value })); }}
               className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none"
               rows={2}
-              placeholder="选填"
+              placeholder={t("notesPlaceholder")}
             />
           </div>
         </div>
 
         <div className="sticky bottom-0 bg-white p-4 border-t flex gap-3">
           <button onClick={onClose} className="flex-1 py-2 border rounded-xl font-medium hover:bg-slate-50">
-            取消
+            {t("cancel")}
           </button>
           <button
             onClick={handleSave}
             disabled={!formData.name || !formData.subject}
             className="flex-1 py-2 bg-blue-500 text-white rounded-xl font-medium disabled:opacity-50"
           >
-            保存
+            {t("save")}
           </button>
         </div>
       </motion.div>
