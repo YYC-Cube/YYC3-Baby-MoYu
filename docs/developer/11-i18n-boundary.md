@@ -10,6 +10,7 @@
 | 方案 | `next-intl` v4（仅此一套，**不引入第二套 i18n 运行时**） |
 | 默认语言 | `zh`（无前缀，根路由 `/`、`/growth`…） |
 | 英文路由 | `/en`、`/en/growth`、`/en/ai-chat`、`/en/homework`（**4 条**，含首页共 4/15=27%） |
+| 文案规模 | zh/en **254/254** 扁平键一致（home+header+growth+homework+navigation 已接线） |
 | Provider | 根布局注入 zh Provider（2026-11-04，P0）；`/en\|/zh` 由 `app/[locale]/layout.tsx` 内层 Provider 覆盖 |
 | 文案源 | `messages/zh.json`、`messages/en.json`（13 命名空间，扁平键 173/173 一致） |
 | 路由策略 | `middleware.ts`：仅 `/en`、`/zh` 前缀交 next-intl；其余直通根路由（防全站被重写导致 404） |
@@ -21,9 +22,11 @@
 
 | 页面 | 路由存在 | 真词条化（双语） |
 | ---- | ---- | ---- |
-| `/en/homework` | ✅ | ✅ **P1 样板**：单组件复用（`app/[locale]/homework/page.tsx` re-export 根组件），zh 文案逐字不变 |
+| `/en/homework` | ✅ | ✅ 单组件复用，zh 逐字不变 |
+| `/en`（首页） | ✅ | ✅ **P1**：app/page.tsx + HomeHeader 全量词条化（home/header 命名空间） |
+| `/en/growth` | ✅ | ✅ **P1**：47 处替换（Tab/统计/提醒/里程碑/记录/评估/AI洞察）；子组件内部示例文案仍中文（P2） |
 | 底部导航 `Navigation` | — | ✅ 全站生效（8 项全部走 `navigation.tab*` 词条） |
-| `/en`、`/en/growth`、`/en/ai-chat` | ✅ | ❌ 中文硬编码副本，待 P2 重构为同款「单组件复用」模式 |
+| `/en/ai-chat` | ✅ | ❌ 中文硬编码副本，待 P2 重构为同款「单组件复用」模式 |
 | 其余 12 个子页 | ❌ | ❌ |
 
 > 技术注记：根布局 zh Provider 会把 `messages/zh.json`（约 7 KB）序列化进 RSC payload，
@@ -88,4 +91,5 @@ SSR 水合风险，且无法复用现有 `messages/*.json` 与 middleware 策略
 | 日期 | 变更 | 说明 |
 | ---- | ---- | ---- |
 | 2026-11-02 | 新建本文 + `check:i18n` 脚本 | 起因：调研发现「全站双语」表述与覆盖不符；并评估 `@yyc3/i18n-core` 不适用 |
+| 2026-11-04（P1） | **首页+growth 真双语** | 首页 12 组文案 + HomeHeader（header 命名空间、日期按 locale）+ growth 47 处替换全走词条；两个镜像副本删除改 re-export（-694/+320 行）；messages 至 254/254；e2e 11/11 基线未重生成即过 |
 | 2026-11-04 | **P0 落地 + 诚实口径修正** | ① 根布局注入 zh Provider（根页面可 `useTranslations`）；② `Navigation` 8 项全部词条化（zh 逐字不变，视觉基线/e2e 不受影响）；③ `homework` 成为首个真双语页（单组件复用 + `/en/homework`）；④ 复核发现既有 3 个镜像为硬编码中文副本（假覆盖），已如实标注；⑤ 覆盖口径改为含首页：4/15=27%（词条化真实值：1 页 + 全局导航） |
