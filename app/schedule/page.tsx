@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTranslations, useLocale } from "next-intl"
+import { formatTimeByLocale } from "@/lib/i18n/format"
 import Navigation from "@/components/Navigation"
 import PageHeader from "@/components/headers/PageHeader"
 import { useSchedule } from "@/hooks/useSchedule"
@@ -249,12 +250,7 @@ function DayView({
 }) {
   const t = useTranslations("schedule")
   const locale = useLocale()
-  const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString(locale === "en" ? "en-US" : "zh-CN", {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
+  const formatTime = (date: Date) => formatTimeByLocale(date, locale)
 
   if (schedules.length === 0) {
     return (
@@ -350,12 +346,7 @@ function TimelineView({
   onEdit: (schedule: Schedule) => void
 }) {
   const locale = useLocale()
-  const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString(locale === "en" ? "en-US" : "zh-CN", {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
+  const formatTime = (date: Date) => formatTimeByLocale(date, locale)
 
   const hours = Array.from({ length: 17 }, (_, i) => i + 6)
 

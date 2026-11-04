@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
+import { formatDateByLocale } from "@/lib/i18n/format"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import PageHeader from "@/components/headers/PageHeader"
@@ -63,7 +64,7 @@ export default function BadgesPage() {
   }
 
   const locale = useLocale()
-  const formatDate = (iso?: string) => (iso ? new Date(iso).toLocaleDateString(locale === "en" ? "en-US" : "zh-CN") : "")
+  const formatDate = (iso?: string) => (iso ? formatDateByLocale(iso, locale) : "")
 
   return (
     <div className="min-h-screen bg-linear-to-b from-amber-50 via-orange-50 to-yellow-50 pb-24">

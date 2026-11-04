@@ -5,12 +5,13 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
+import { localeTag } from "@/lib/i18n/format"
 
 export default function HomeHeader() {
   const t = useTranslations("header")
   const locale = useLocale()
   // zh 保持 zh-CN 格式（视觉基线/e2e 文案逐字不变）；en 用 en-US
-  const dateLocale = locale === "en" ? "en-US" : "zh-CN"
+  const dateLocale = localeTag(locale)
   const [time, setTime] = useState("08:30")
   const [date, setDate] = useState("11月24日 星期五")
   // 登录/注册入口：LoginModal 弹窗（/auth/* 页面路由不存在，历史链接为死链）
