@@ -183,7 +183,9 @@ describe("BADGE_DEFINITIONS 完整性", () => {
 })
 
 describe("徽章解锁持久化（localStorage 存根）", () => {
-  // 测试进程未暴露裸 localStorage（preload 仅挂 window/document/navigator），用 Map 存根
+  // 自给自足：不依赖其他测试文件泄漏的 window/localStorage（bun 单进程按序执行，
+  // CI 与本机文件顺序不同——此前曾因依赖泄漏的 window 导致仅 CI 失败）
+  // 引擎只检查 typeof window !== "undefined"，最小对象即可激活持久化分支
   const backing = new Map<string, string>()
   const stub = {
     getItem: (key: string) => backing.get(key) ?? null,
@@ -192,9 +194,10 @@ describe("徽章解锁持久化（localStorage 存根）", () => {
     clear: () => backing.clear(),
   }
   const globalAny = globalThis as Record<string, unknown>
-  const saved = { localStorage: globalAny.localStorage }
+  const saved = { window: globalAny.window, localStorage: globalAny.localStorage }
 
   it("save → load 往返一致", () => {
+    globalAny.window = saved.window ?? {}
     globalAny.localStorage = stub
     const map = { "first-record": "2026-01-01T00:00:00Z", "streak-7": "2026-02-02T00:00:00Z" }
     saveUnlockedMap(map)
@@ -202,12 +205,14 @@ describe("徽章解锁持久化（localStorage 存根）", () => {
   })
 
   it("存储内容损坏时 load 返回空对象（容错降级）", () => {
+    globalAny.window = saved.window ?? {}
     globalAny.localStorage = stub
     backing.set("yyc3_badge_unlocks_v1", "{not-valid-json")
     expect(loadUnlockedMap()).toEqual({})
   })
 
   it("localStorage 抛错时 load/save 双向静默降级（隐私模式）", () => {
+    globalAny.window = saved.window ?? {}
     const throwing = {
       getItem: () => { throw new Error("SecurityError") },
       setItem: () => { throw new Error("QuotaExceededError") },
@@ -220,6 +225,8 @@ describe("徽章解锁持久化（localStorage 存根）", () => {
   })
 
   afterAll(() => {
+    if (saved.window === undefined) delete globalAny.window
+    else globalAny.window = saved.window
     if (saved.localStorage === undefined) delete globalAny.localStorage
     else globalAny.localStorage = saved.localStorage
   })
