@@ -12,16 +12,16 @@ flowchart LR
 | 类型 | `bun run type-check` | **0 错误**（应用代码；`__tests__/`、`themes/` 排除） |
 | Lint | `bun run lint` | **0 error**，58 warning（见债务清单） |
 | 构建 | `bun run build` | 通过（类型门禁已恢复，无 ignoreBuildErrors） |
-| 测试 | `bun run test` | 350/350（22 文件，~2s；含鉴权/越权/限流类安全行为用例） |
-| 覆盖率 | `bun test --coverage` | 全仓 funcs **81.2%** / lines **79.4%**；`lib/utils.ts` 100/99.7（2026-11-04 补齐） |
+| 测试 | `bun run test` | 372/372（23 文件，~2.5s；含鉴权/越权/限流类安全行为用例） |
+| 覆盖率 | `bun test --coverage` | 全仓 funcs **84.2%** / lines **85.9%**；`lib/utils.ts` 100/99.7 · `lib/auth/cookies.ts` 100/100 · homework 路由 100/96+（2026-11-04 补齐） |
 | DB 直测 | `bun run test:node` | 7/7（SQLite）；设置 `PG_TEST_URL` 后 +5 条 PG 用例（共 12/12，CI 默认跳过 PG） |
 | e2e | `bun run test:e2e` | 3/3（登录→建娃→写记录→登出 / 匿名 401 矩阵 / 敏感页重定向；生产构建，账号自举不依赖种子） |
 | 视觉 | `bun run test:visual` | 8/8（首页/视频工坊 × 四主题；darwin/linux 分平台基线） |
 | i18n | `bun run check:i18n:strict` | 16/16 路由镜像 + 词条 977/977 一致（CI 阻断级） |
 | 依赖 | `bun run audit:osv` | OSV.dev 审计；Critical 阻断，报告输出 `osv-results.json`（ignored） |
 
-> 2026-11-04 复核实测：tsc 0 error · lint 0 error/58 warning · 350/350 · node 7/7 · e2e 3/3 · 四主题视觉 8/8 ·
-> 覆盖率全仓 funcs 81.2% / lines 79.4%（lib/utils.ts 已补齐至 100/99.7）·
+> 2026-11-04 复核实测：tsc 0 error · lint 0 error/58 warning · 372/372 · node 7/7 · e2e 3/3 · 四主题视觉 8/8 ·
+> 覆盖率全仓 funcs 84.2% / lines 85.9%（utils/cookies/homework 路由已补齐至 ~100%）·
 > OSV 0 Critical/0 High（brace-expansion 1.1.21/5.0.12 已升级关闭 4 条 high；残余 minimatch 2 条 moderate，
 > 修复版 11.0.1 为 ESM-only 待上游随链消除）。数字以本节为准，变更门禁时请同步刷新。
 
@@ -31,6 +31,7 @@ flowchart LR
 __tests__/
 ├── api/                    auth-routes（登录/注册/刷新/限流/令牌类型）
 │                           data-routes（children/growth/homework 的 401·403·IDOR·白名单）
+│                           homework-routes（GET 过滤分支/POST 全链/404/500/FK + auth/cookies 传输）
 │                           ai-chat（401/400/demo 降级/role 回落/429）
 │                           user-documents（kind 白名单/覆盖语义/隔离/体积与条数上限）
 │                           growth-assessments（401/400/403/201/分页夹取 + health 200/503）
