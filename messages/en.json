@@ -609,5 +609,296 @@
         "status": "Ended · Sep 2024"
       }
     }
+  },
+  "videos": {
+    "pageTitle": "AI Video Studio",
+    "pageSubtitle": "Turn precious memories into amazing videos",
+    "filters": {
+      "all": "All",
+      "slideshow": "Slideshow",
+      "imageToVideo": "Motion Clip",
+      "storyAnimation": "Story Animation",
+      "memoryRecap": "Memory Recap"
+    },
+    "createNew": "Create New Video",
+    "myFavorites": "My Favorites",
+    "allVideos": "All Videos",
+    "empty": "No videos yet",
+    "createFirst": "Create your first video",
+    "durationMinsSecs": "{mins}m {secs}s",
+    "durationSecs": "{secs}s",
+    "deleteConfirm": "Are you sure you want to delete this video?",
+    "player": {
+      "play": "Play",
+      "pause": "Pause",
+      "volume": "Volume",
+      "fullscreen": "Fullscreen",
+      "close": "Close"
+    }
+  },
+  "creative": {
+    "pageTitle": "AI Creative Studio",
+    "help": "Help",
+    "tabs": {
+      "generate": "AI Painting",
+      "gallery": "Gallery",
+      "write": "Story Writing",
+      "stories": "My Stories"
+    },
+    "describeTitle": "Describe what you want to draw",
+    "promptPlaceholder": "e.g. A cute kitten playing in the garden with butterflies flying around...",
+    "tryThis": "Try this",
+    "examplePrompt": "A little rabbit in a red cloak adventuring through the forest",
+    "styleTitle": "Choose an art style",
+    "artStyleNames": {
+      "cartoon": "Cartoon",
+      "watercolor": "Watercolor",
+      "pixel": "Pixel Art",
+      "sketch": "Sketch",
+      "3d_render": "3D Render",
+      "anime": "Anime"
+    },
+    "canvasTitle": "Choose canvas ratio",
+    "ratios": {
+      "square": "Square",
+      "landscape": "Landscape",
+      "portrait": "Portrait",
+      "widescreen": "Widescreen"
+    },
+    "generating": "AI is creating... {progress}%",
+    "startCreating": "Start Creating",
+    "addChildFirst": "Please add a child profile in Settings first",
+    "galleryEmpty": "No artworks yet — start creating!",
+    "newStoryTitle": "Start a New Story",
+    "storyTitleLabel": "Story Title",
+    "storyTitlePlaceholder": "Give your story a name...",
+    "keywordsLabel": "Keywords (comma separated)",
+    "keywordsPlaceholder": "e.g. rabbit, forest, adventure...",
+    "styleLabel": "Story Style",
+    "storyStyleNames": {
+      "fairy_tale": "Fairy Tale",
+      "adventure": "Adventure",
+      "sci_fi": "Sci-Fi",
+      "fantasy": "Fantasy",
+      "mystery": "Mystery"
+    },
+    "writtenByMe": "Written by me",
+    "aiContinued": "AI continued",
+    "chooseDirection": "Choose where the story goes:",
+    "inputPlaceholder": "Write what you want to add, or let the AI continue...",
+    "thinking": "Thinking...",
+    "addAndContinue": "Add & Continue",
+    "aiContinue": "AI Continue",
+    "storiesEmpty": "No stories yet — start creating!",
+    "statusCompleted": "Completed",
+    "statusCreating": "In Progress",
+    "notStarted": "The story hasn't started yet...",
+    "segmentsCount": "{count} segments",
+    "continueCreating": "Continue Creating"
+  },
+  "interactions": {
+    "pageTitle": "Growth Interaction Log",
+    "subtitle": "Record every warm moment together",
+    "interactionWith": "Interactions with {name}",
+    "weeklyCount": "{count} interactions this week",
+    "stats": {
+      "total": "Total",
+      "duration": "Total Time",
+      "avgQuality": "Avg Quality",
+      "thisWeek": "This Week"
+    },
+    "qualityScore": "{score} pts",
+    "filterAll": "All",
+    "recordNew": "Log Interaction",
+    "typeNames": {
+      "play": "Play",
+      "study": "Study",
+      "outdoor": "Outdoor",
+      "reading": "Reading",
+      "art": "Art",
+      "music": "Music",
+      "sports": "Sports",
+      "conversation": "Chat",
+      "other": "Other"
+    },
+    "moodNames": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor"
+    },
+    "empty": "No interactions yet",
+    "emptyHint": "Tap \"Log Interaction\" to get started",
+    "card": {
+      "duration": "{duration} min",
+      "notRecorded": "Not recorded",
+      "aiAnalysis": "AI Insights",
+      "qualityLabel": "Interaction Quality",
+      "sentimentLabel": "Sentiment",
+      "keywordsLabel": "Keywords",
+      "suggestionsLabel": "Suggestions"
+    },
+    "editor": {
+      "editTitle": "Edit Record",
+      "newTitle": "Log Interaction",
+      "typeLabel": "Type",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Name this interaction",
+      "contentLabel": "Description",
+      "contentPlaceholder": "Describe what happened and how it felt...",
+      "durationLabel": "Duration (minutes)",
+      "locationLabel": "Location",
+      "locationPlaceholder": "e.g. Living room",
+      "moodLabel": "Mood",
+      "tagsLabel": "Tags",
+      "tagPlaceholder": "Type a tag and press Enter",
+      "add": "Add",
+      "cancel": "Cancel",
+      "save": "Save",
+      "defaultParticipant": "Mom"
+    }
+  },
+  "curriculum": {
+    "pageTitle": "Smart Timetable",
+    "scheduleOf": "{name}'s Timetable",
+    "weeklyClasses": "{count} classes this week",
+    "views": {
+      "week": "Week",
+      "day": "Day",
+      "list": "List"
+    },
+    "addCourse": "Add Course",
+    "stats": {
+      "school": "School",
+      "extra": "Extras",
+      "online": "Online",
+      "weekly": "Weekly"
+    },
+    "weekdayNames": {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "7": "Sun"
+    },
+    "classesCount": "{count} classes",
+    "noCoursesToday": "No classes scheduled today",
+    "durationMinutes": "{duration} min",
+    "courseTypeNames": {
+      "school": "School Courses",
+      "extracurricular": "Extracurricular",
+      "online": "Online Courses"
+    },
+    "noCourses": "No courses",
+    "perWeek": "{count}/week",
+    "editor": {
+      "editTitle": "Edit Course",
+      "addTitle": "Add Course",
+      "nameLabel": "Course Name",
+      "namePlaceholder": "e.g. Chinese",
+      "subjectLabel": "Subject",
+      "selectSubject": "Select subject",
+      "teacherLabel": "Teacher",
+      "teacherPlaceholder": "e.g. Ms. Li",
+      "typeLabel": "Course Type",
+      "timeLabel": "Class Time",
+      "roomPlaceholder": "Room",
+      "add": "Add",
+      "conflict": "Time conflict: {names}",
+      "notesLabel": "Notes",
+      "notesPlaceholder": "Optional",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "subjectNames": {
+      "语文": "Chinese",
+      "数学": "Math",
+      "英语": "English",
+      "物理": "Physics",
+      "化学": "Chemistry",
+      "生物": "Biology",
+      "历史": "History",
+      "地理": "Geography",
+      "政治": "Civics",
+      "体育": "PE",
+      "音乐": "Music",
+      "美术": "Art",
+      "科学": "Science",
+      "钢琴": "Piano",
+      "编程": "Coding",
+      "书法": "Calligraphy",
+      "舞蹈": "Dance",
+      "棋类": "Chess",
+      "阅读": "Reading",
+      "写作": "Writing",
+      "口语": "Speaking",
+      "其他": "Other"
+    }
+  },
+  "schedule": {
+    "pageTitle": "Smart Schedule",
+    "scheduleOf": "{name}'s Schedule",
+    "todayProgress": "{done}/{total} done today",
+    "dateFmt": "{month}/{day} {weekday}",
+    "weekdayNames": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    },
+    "viewModes": {
+      "day": "Day",
+      "week": "Week",
+      "timeline": "Timeline"
+    },
+    "addSchedule": "Add Schedule",
+    "aiSchedule": "AI Planner",
+    "empty": "No schedule for today",
+    "emptyHint": "Tap a button above to add one, or let the AI plan for you",
+    "typeNames": {
+      "study": "Study",
+      "rest": "Rest",
+      "meal": "Meals",
+      "exercise": "Exercise",
+      "play": "Play",
+      "class": "Class",
+      "homework": "Homework",
+      "sleep": "Sleep",
+      "other": "Other"
+    },
+    "editor": {
+      "editTitle": "Edit Schedule",
+      "addTitle": "Add Schedule",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Enter a title",
+      "typeLabel": "Type",
+      "startTimeLabel": "Start Time",
+      "endTimeLabel": "End Time",
+      "descLabel": "Description (optional)",
+      "descPlaceholder": "Add a description...",
+      "saveChanges": "Save Changes",
+      "createTitle": "Create Schedule"
+    },
+    "aiModal": {
+      "title": "AI Smart Planner",
+      "desc": "The AI will generate a scientific daily schedule based on your child's age and study habits",
+      "includes": "The plan includes:",
+      "items": {
+        "wake": "Wake-up time",
+        "study": "Study sessions",
+        "meal": "Meal times",
+        "exercise": "Exercise time",
+        "play": "Play & leisure",
+        "sleep": "Bedtime"
+      },
+      "cancel": "Cancel",
+      "generating": "Generating...",
+      "start": "Start Generating"
+    }
   }
 }

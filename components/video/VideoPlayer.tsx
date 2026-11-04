@@ -4,6 +4,7 @@ import type React from "react"
 
 import type { GeneratedVideo } from "@/types/ai-video"
 import { AnimatePresence, motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
 
 interface VideoPlayerProps {
@@ -13,6 +14,7 @@ interface VideoPlayerProps {
 }
 
 export default function VideoPlayer({ video, onClose, onViewCountUpdate }: VideoPlayerProps) {
+  const t = useTranslations("videos.player")
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [showControls, setShowControls] = useState(true)
@@ -104,7 +106,7 @@ export default function VideoPlayer({ video, onClose, onViewCountUpdate }: Video
                   whileTap={{ scale: 0.95 }}
                   onClick={() => { setIsPlaying(true); }}
                   className="w-20 h-20 rounded-full bg-white/90 hover:bg-white/70 active:bg-white/60 flex items-center justify-center shadow-xl transition-colors"
-                  aria-label="播放"
+                  aria-label={t("play")}
                 >
                   <i className="ri-play-fill text-4xl text-slate-900 ml-1" />
                 </motion.button>
@@ -150,7 +152,7 @@ export default function VideoPlayer({ video, onClose, onViewCountUpdate }: Video
                   <button
                     onClick={() => { setIsPlaying((prev) => !prev); }}
                     className="p-2.5 rounded-lg text-white hover:bg-white/15 active:bg-white/25 transition-colors"
-                    aria-label={isPlaying ? "暂停" : "播放"}
+                    aria-label={isPlaying ? t("pause") : t("play")}
                   >
                     <i className={`${isPlaying ? "ri-pause-fill" : "ri-play-fill"} text-2xl`} />
                   </button>
@@ -163,7 +165,7 @@ export default function VideoPlayer({ video, onClose, onViewCountUpdate }: Video
                   {/* 音量 */}
                   <button
                     className="p-2.5 rounded-lg text-white/90 hover:bg-white/15 active:bg-white/25 transition-colors"
-                    aria-label="音量"
+                    aria-label={t("volume")}
                   >
                     <i className="ri-volume-up-line text-xl" />
                   </button>
@@ -176,7 +178,7 @@ export default function VideoPlayer({ video, onClose, onViewCountUpdate }: Video
                   {/* 全屏 */}
                   <button
                     className="p-2.5 rounded-lg text-white/90 hover:bg-white/15 active:bg-white/25 transition-colors"
-                    aria-label="全屏"
+                    aria-label={t("fullscreen")}
                   >
                     <i className="ri-fullscreen-line text-xl" />
                   </button>
@@ -190,7 +192,7 @@ export default function VideoPlayer({ video, onClose, onViewCountUpdate }: Video
         <button
           onClick={onClose}
           className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-white/20 active:bg-white/30 transition-colors"
-          aria-label="关闭"
+          aria-label={t("close")}
         >
           <i className="ri-close-line text-xl" />
         </button>

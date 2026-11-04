@@ -609,5 +609,296 @@
         "status": "已结束 · 2024-09"
       }
     }
+  },
+  "videos": {
+    "pageTitle": "AI视频工坊",
+    "pageSubtitle": "将美好回忆变成精彩视频",
+    "filters": {
+      "all": "全部",
+      "slideshow": "幻灯片",
+      "imageToVideo": "动态图",
+      "storyAnimation": "故事动画",
+      "memoryRecap": "成长回忆"
+    },
+    "createNew": "创建新视频",
+    "myFavorites": "我的收藏",
+    "allVideos": "全部视频",
+    "empty": "还没有视频",
+    "createFirst": "创建第一个视频",
+    "durationMinsSecs": "{mins}分{secs}秒",
+    "durationSecs": "{secs}秒",
+    "deleteConfirm": "确定删除这个视频吗？",
+    "player": {
+      "play": "播放",
+      "pause": "暂停",
+      "volume": "音量",
+      "fullscreen": "全屏",
+      "close": "关闭"
+    }
+  },
+  "creative": {
+    "pageTitle": "AI创意工坊",
+    "help": "使用帮助",
+    "tabs": {
+      "generate": "AI绘画",
+      "gallery": "作品集",
+      "write": "续写创作",
+      "stories": "我的故事"
+    },
+    "describeTitle": "描述你想画的内容",
+    "promptPlaceholder": "例如：一只可爱的小猫咪在花园里玩耍，旁边有蝴蝶飞舞...",
+    "tryThis": "试试这个",
+    "examplePrompt": "一只穿着红色斗篷的小兔子在森林里冒险",
+    "styleTitle": "选择绘画风格",
+    "artStyleNames": {
+      "cartoon": "卡通风格",
+      "watercolor": "水彩画",
+      "pixel": "像素艺术",
+      "sketch": "素描",
+      "3d_render": "3D渲染",
+      "anime": "动漫风格"
+    },
+    "canvasTitle": "选择画布比例",
+    "ratios": {
+      "square": "正方形",
+      "landscape": "横向",
+      "portrait": "竖向",
+      "widescreen": "宽屏"
+    },
+    "generating": "AI正在创作中... {progress}%",
+    "startCreating": "开始创作",
+    "addChildFirst": "请先在设置中添加孩子档案",
+    "galleryEmpty": "还没有作品，快去创作吧！",
+    "newStoryTitle": "开始新故事",
+    "storyTitleLabel": "故事标题",
+    "storyTitlePlaceholder": "给你的故事起个名字...",
+    "keywordsLabel": "关键词（用逗号分隔）",
+    "keywordsPlaceholder": "例如：小兔子, 森林, 冒险...",
+    "styleLabel": "故事风格",
+    "storyStyleNames": {
+      "fairy_tale": "童话故事",
+      "adventure": "冒险故事",
+      "sci_fi": "科幻故事",
+      "fantasy": "奇幻故事",
+      "mystery": "悬疑故事"
+    },
+    "writtenByMe": "我写的",
+    "aiContinued": "AI续写",
+    "chooseDirection": "选择故事发展方向：",
+    "inputPlaceholder": "写下你想添加的内容，或者让AI继续...",
+    "thinking": "思考中...",
+    "addAndContinue": "添加并续写",
+    "aiContinue": "AI续写",
+    "storiesEmpty": "还没有故事，开始创作吧！",
+    "statusCompleted": "已完成",
+    "statusCreating": "创作中",
+    "notStarted": "故事还没开始...",
+    "segmentsCount": "{count} 段落",
+    "continueCreating": "继续创作"
+  },
+  "interactions": {
+    "pageTitle": "成长互动记录",
+    "subtitle": "记录每一次温暖陪伴",
+    "interactionWith": "与{name}的互动",
+    "weeklyCount": "本周 {count} 次互动",
+    "stats": {
+      "total": "总互动",
+      "duration": "总时长",
+      "avgQuality": "平均质量",
+      "thisWeek": "本周"
+    },
+    "qualityScore": "{score}分",
+    "filterAll": "全部",
+    "recordNew": "记录互动",
+    "typeNames": {
+      "play": "游戏",
+      "study": "学习",
+      "outdoor": "户外",
+      "reading": "阅读",
+      "art": "艺术",
+      "music": "音乐",
+      "sports": "运动",
+      "conversation": "对话",
+      "other": "其他"
+    },
+    "moodNames": {
+      "excellent": "优秀",
+      "good": "良好",
+      "fair": "一般",
+      "poor": "较差"
+    },
+    "empty": "还没有互动记录",
+    "emptyHint": "点击\"记录互动\"开始记录",
+    "card": {
+      "duration": "{duration}分钟",
+      "notRecorded": "未记录",
+      "aiAnalysis": "AI分析",
+      "qualityLabel": "互动质量",
+      "sentimentLabel": "情感倾向",
+      "keywordsLabel": "关键词",
+      "suggestionsLabel": "建议"
+    },
+    "editor": {
+      "editTitle": "编辑记录",
+      "newTitle": "记录互动",
+      "typeLabel": "互动类型",
+      "titleLabel": "标题",
+      "titlePlaceholder": "给这次互动起个名字",
+      "contentLabel": "详细描述",
+      "contentPlaceholder": "记录这次互动的过程和感受...",
+      "durationLabel": "互动时长（分钟）",
+      "locationLabel": "地点",
+      "locationPlaceholder": "如：家里客厅",
+      "moodLabel": "心情",
+      "tagsLabel": "标签",
+      "tagPlaceholder": "输入标签按回车添加",
+      "add": "添加",
+      "cancel": "取消",
+      "save": "保存",
+      "defaultParticipant": "妈妈"
+    }
+  },
+  "curriculum": {
+    "pageTitle": "智能课程表",
+    "scheduleOf": "{name}的课程表",
+    "weeklyClasses": "本周共 {count} 节课",
+    "views": {
+      "week": "周视图",
+      "day": "日视图",
+      "list": "列表"
+    },
+    "addCourse": "添加课程",
+    "stats": {
+      "school": "校内课程",
+      "extra": "兴趣班",
+      "online": "线上课程",
+      "weekly": "本周课时"
+    },
+    "weekdayNames": {
+      "1": "周一",
+      "2": "周二",
+      "3": "周三",
+      "4": "周四",
+      "5": "周五",
+      "6": "周六",
+      "7": "周日"
+    },
+    "classesCount": "{count} 节课",
+    "noCoursesToday": "今天没有课程安排",
+    "durationMinutes": "{duration}分钟",
+    "courseTypeNames": {
+      "school": "校内课程",
+      "extracurricular": "兴趣班",
+      "online": "线上课程"
+    },
+    "noCourses": "暂无课程",
+    "perWeek": "{count} 节/周",
+    "editor": {
+      "editTitle": "编辑课程",
+      "addTitle": "添加课程",
+      "nameLabel": "课程名称",
+      "namePlaceholder": "如：语文",
+      "subjectLabel": "学科",
+      "selectSubject": "选择学科",
+      "teacherLabel": "教师",
+      "teacherPlaceholder": "如：李老师",
+      "typeLabel": "课程类型",
+      "timeLabel": "上课时间",
+      "roomPlaceholder": "教室",
+      "add": "添加",
+      "conflict": "时间冲突：{names}",
+      "notesLabel": "备注",
+      "notesPlaceholder": "选填",
+      "cancel": "取消",
+      "save": "保存"
+    },
+    "subjectNames": {
+      "语文": "语文",
+      "数学": "数学",
+      "英语": "英语",
+      "物理": "物理",
+      "化学": "化学",
+      "生物": "生物",
+      "历史": "历史",
+      "地理": "地理",
+      "政治": "政治",
+      "体育": "体育",
+      "音乐": "音乐",
+      "美术": "美术",
+      "科学": "科学",
+      "钢琴": "钢琴",
+      "编程": "编程",
+      "书法": "书法",
+      "舞蹈": "舞蹈",
+      "棋类": "棋类",
+      "阅读": "阅读",
+      "写作": "写作",
+      "口语": "口语",
+      "其他": "其他"
+    }
+  },
+  "schedule": {
+    "pageTitle": "智能日程",
+    "scheduleOf": "{name}的日程",
+    "todayProgress": "今日完成 {done}/{total} 项",
+    "dateFmt": "{month}月{day}日 {weekday}",
+    "weekdayNames": {
+      "0": "周日",
+      "1": "周一",
+      "2": "周二",
+      "3": "周三",
+      "4": "周四",
+      "5": "周五",
+      "6": "周六"
+    },
+    "viewModes": {
+      "day": "日",
+      "week": "周",
+      "timeline": "线"
+    },
+    "addSchedule": "添加日程",
+    "aiSchedule": "AI排程",
+    "empty": "今天还没有日程",
+    "emptyHint": "点击上方按钮添加日程或让AI帮你安排",
+    "typeNames": {
+      "study": "学习",
+      "rest": "休息",
+      "meal": "用餐",
+      "exercise": "运动",
+      "play": "游戏",
+      "class": "课程",
+      "homework": "作业",
+      "sleep": "睡眠",
+      "other": "其他"
+    },
+    "editor": {
+      "editTitle": "编辑日程",
+      "addTitle": "添加日程",
+      "titleLabel": "标题",
+      "titlePlaceholder": "输入日程标题",
+      "typeLabel": "类型",
+      "startTimeLabel": "开始时间",
+      "endTimeLabel": "结束时间",
+      "descLabel": "描述 (可选)",
+      "descPlaceholder": "添加描述...",
+      "saveChanges": "保存修改",
+      "createTitle": "创建日程"
+    },
+    "aiModal": {
+      "title": "AI智能排程",
+      "desc": "AI将根据孩子的年龄和学习习惯，自动生成科学的每日日程安排",
+      "includes": "生成内容包含:",
+      "items": {
+        "wake": "起床时间",
+        "study": "学习安排",
+        "meal": "用餐时间",
+        "exercise": "运动时间",
+        "play": "休闲娱乐",
+        "sleep": "睡眠时间"
+      },
+      "cancel": "取消",
+      "generating": "生成中...",
+      "start": "开始生成"
+    }
   }
 }

@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations, useLocale } from "next-intl"
 import Navigation from "@/components/Navigation"
 import PageHeader from "@/components/headers/PageHeader"
 import { useSchedule } from "@/hooks/useSchedule"
@@ -22,6 +23,8 @@ import {
 type ViewMode = "day" | "week" | "timeline"
 
 export default function SchedulePage() {
+  const t = useTranslations("schedule")
+  const locale = useLocale()
   const [viewMode, setViewMode] = useState<ViewMode>("day")
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [showEditor, setShowEditor] = useState(false)
@@ -84,8 +87,11 @@ export default function SchedulePage() {
 
   const formatDate = (date: Date) => {
     const d = new Date(date)
-    const weekdays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"]
-    return `${d.getMonth() + 1}月${d.getDate()}日 ${weekdays[d.getDay()]}`
+    return t("dateFmt", {
+      month: d.getMonth() + 1,
+      day: d.getDate(),
+      weekday: t(`weekdayNames.${d.getDay()}`),
+    })
   }
 
   const navigateDate = (delta: number) => {
@@ -96,7 +102,7 @@ export default function SchedulePage() {
 
   return (
     <div className="min-h-screen bg-linear-to-b from-blue-50 to-white pb-24">
-      <PageHeader title="智能日程" showBack />
+      <PageHeader title={t("pageTitle")} showBack />
 
       <div className="px-4 py-4 space-y-4">
         {currentChild && (
@@ -111,9 +117,9 @@ export default function SchedulePage() {
                   {currentChild.name.charAt(0)}
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-800">{currentChild.name}的日程</h3>
+                  <h3 className="font-bold text-slate-800">{t("scheduleOf", { name: currentChild.name })}</h3>
                   <p className="text-xs text-slate-500">
-                    今日完成 {completedCount}/{totalCount} 项
+                    {t("todayProgress", { done: completedCount, total: totalCount })}
                   </p>
                 </div>
               </div>
@@ -145,9 +151,9 @@ export default function SchedulePage() {
 
           <div className="flex gap-1 bg-white rounded-full p-1 shadow-sm">
             {[
-              { id: "day" as ViewMode, icon: "ri-calendar-line", label: "日" },
-              { id: "week" as ViewMode, icon: "ri-calendar-2-line", label: "周" },
-              { id: "timeline" as ViewMode, icon: "ri-time-line", label: "线" },
+              { id: "day" as ViewMode, icon: "ri-calendar-line", labelKey: "viewModes.day" },
+              { id: "week" as ViewMode, icon: "ri-calendar-2-line", labelKey: "viewModes.week" },
+              { id: "timeline" as ViewMode, icon: "ri-time-line", labelKey: "viewModes.timeline" },
             ].map((mode) => (
               <motion.button
                 key={mode.id}
@@ -158,7 +164,7 @@ export default function SchedulePage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {mode.label}
+                {t(mode.labelKey)}
               </motion.button>
             ))}
           </div>
@@ -172,7 +178,7 @@ export default function SchedulePage() {
             whileTap={{ scale: 0.98 }}
           >
             <i className="ri-add-line" />
-            添加日程
+            {t("addSchedule")}
           </motion.button>
           <motion.button
             className="px-4 py-3 bg-linear-to-r from-green-500 to-teal-500 text-white rounded-xl font-bold flex items-center justify-center gap-2"
@@ -181,7 +187,7 @@ export default function SchedulePage() {
             whileTap={{ scale: 0.98 }}
           >
             <i className="ri-magic-line" />
-            AI排程
+            {t("aiSchedule")}
           </motion.button>
         </div>
 
@@ -241,16 +247,21 @@ function DayView({
   onEdit: (schedule: Schedule) => void
   onDelete: (id: string) => void
 }) {
+  const t = useTranslations("schedule")
+  const locale = useLocale()
   const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })
+    return new Date(date).toLocaleTimeString(locale === "en" ? "en-US" : "zh-CN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
   }
 
   if (schedules.length === 0) {
     return (
       <motion.div className="text-center py-12" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <div className="text-5xl mb-4">📅</div>
-        <h3 className="font-bold text-slate-700 mb-2">今天还没有日程</h3>
-        <p className="text-sm text-slate-500">点击上方按钮添加日程或让AI帮你安排</p>
+        <h3 className="font-bold text-slate-700 mb-2">{t("empty")}</h3>
+        <p className="text-sm text-slate-500">{t("emptyHint")}</p>
       </motion.div>
     )
   }
@@ -286,7 +297,7 @@ function DayView({
                 >
                   <i className={getScheduleIcon(schedule.type)} />
                 </span>
-                <span className="text-xs text-slate-500">{getScheduleLabel(schedule.type)}</span>
+                <span className="text-xs text-slate-500">{t(`typeNames.${schedule.type}`)}</span>
                 {schedule.aiGenerated && (
                   <span className="px-1.5 py-0.5 bg-purple-100 text-purple-600 text-xs rounded">AI</span>
                 )}
@@ -338,8 +349,12 @@ function TimelineView({
   schedules: Schedule[]
   onEdit: (schedule: Schedule) => void
 }) {
+  const locale = useLocale()
   const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })
+    return new Date(date).toLocaleTimeString(locale === "en" ? "en-US" : "zh-CN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
   }
 
   const hours = Array.from({ length: 17 }, (_, i) => i + 6)
@@ -399,17 +414,19 @@ function ScheduleEditorModal({
       endTime: schedule ? new Date(schedule.endTime).toISOString().slice(0, 16) : "",
       color: schedule?.color || getScheduleColor("other"),
     }
-    
+
     if (schedule?.repeat !== undefined) {
       baseData.repeat = schedule.repeat
     }
-    
+
     if (schedule?.reminder !== undefined) {
       baseData.reminder = schedule.reminder
     }
-    
+
     return baseData
   })
+  const t = useTranslations("schedule.editor")
+  const tRoot = useTranslations("schedule")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -433,7 +450,7 @@ function ScheduleEditorModal({
         onClick={(e) => { e.stopPropagation(); }}
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold">{schedule ? "编辑日程" : "添加日程"}</h2>
+          <h2 className="text-xl font-bold">{schedule ? t("editTitle") : t("addTitle")}</h2>
           <motion.button
             className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
             onClick={onClose}
@@ -446,19 +463,19 @@ function ScheduleEditorModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">标题</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("titleLabel")}</label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => { setFormData({ ...formData, title: e.target.value }); }}
               className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:border-blue-400"
-              placeholder="输入日程标题"
+              placeholder={t("titlePlaceholder")}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">类型</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("typeLabel")}</label>
             <div className="grid grid-cols-4 gap-2">
               {Object.entries(SCHEDULE_TYPE_CONFIG).map(([type, config]) => {
                 const typedConfig = config
@@ -477,7 +494,7 @@ function ScheduleEditorModal({
                     whileTap={{ scale: 0.95 }}
                   >
                     <i className={`${typedConfig.icon} text-lg`} style={{ color: typedConfig.color }} />
-                    <p className="text-xs mt-1">{typedConfig.label}</p>
+                    <p className="text-xs mt-1">{tRoot(`typeNames.${type}`)}</p>
                   </motion.button>
                 )
               })}
@@ -486,7 +503,7 @@ function ScheduleEditorModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">开始时间</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("startTimeLabel")}</label>
               <input
                 type="datetime-local"
                 value={typeof formData.startTime === 'string' ? formData.startTime : new Date(formData.startTime).toISOString().slice(0, 16)}
@@ -496,7 +513,7 @@ function ScheduleEditorModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">结束时间</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t("endTimeLabel")}</label>
               <input
                 type="datetime-local"
                 value={typeof formData.endTime === 'string' ? formData.endTime : new Date(formData.endTime).toISOString().slice(0, 16)}
@@ -508,13 +525,13 @@ function ScheduleEditorModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">描述 (可选)</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("descLabel")}</label>
             <textarea
               value={formData.description}
               onChange={(e) => { setFormData({ ...formData, description: e.target.value }); }}
               className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:border-blue-400 resize-none"
               rows={2}
-              placeholder="添加描述..."
+              placeholder={t("descPlaceholder")}
             />
           </div>
 
@@ -524,7 +541,7 @@ function ScheduleEditorModal({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            {schedule ? "保存修改" : "创建日程"}
+            {schedule ? t("saveChanges") : t("createTitle")}
           </motion.button>
         </form>
       </motion.div>
@@ -540,6 +557,7 @@ function AIScheduleGeneratorModal({
   onClose: () => void
 }) {
   const [isGenerating, setIsGenerating] = useState(false)
+  const t = useTranslations("schedule.aiModal")
 
   const handleGenerate = () => {
     setIsGenerating(true)
@@ -570,24 +588,24 @@ function AIScheduleGeneratorModal({
           >
             <i className="ri-magic-line" />
           </motion.div>
-          <h2 className="text-xl font-bold text-slate-800">AI智能排程</h2>
-          <p className="text-sm text-slate-500 mt-2">AI将根据孩子的年龄和学习习惯，自动生成科学的每日日程安排</p>
+          <h2 className="text-xl font-bold text-slate-800">{t("title")}</h2>
+          <p className="text-sm text-slate-500 mt-2">{t("desc")}</p>
         </div>
 
         <div className="bg-slate-50 rounded-2xl p-4 mb-6">
-          <h4 className="font-medium text-slate-700 mb-3">生成内容包含:</h4>
+          <h4 className="font-medium text-slate-700 mb-3">{t("includes")}</h4>
           <div className="grid grid-cols-2 gap-2 text-sm">
             {[
-              { icon: "ri-sun-line", label: "起床时间" },
-              { icon: "ri-book-open-line", label: "学习安排" },
-              { icon: "ri-restaurant-line", label: "用餐时间" },
-              { icon: "ri-run-line", label: "运动时间" },
-              { icon: "ri-gamepad-line", label: "休闲娱乐" },
-              { icon: "ri-moon-line", label: "睡眠时间" },
+              { icon: "ri-sun-line", labelKey: "items.wake" },
+              { icon: "ri-book-open-line", labelKey: "items.study" },
+              { icon: "ri-restaurant-line", labelKey: "items.meal" },
+              { icon: "ri-run-line", labelKey: "items.exercise" },
+              { icon: "ri-gamepad-line", labelKey: "items.play" },
+              { icon: "ri-moon-line", labelKey: "items.sleep" },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-slate-600">
                 <i className={`${item.icon} text-blue-500`} />
-                <span>{item.label}</span>
+                <span>{t(item.labelKey)}</span>
               </div>
             ))}
           </div>
@@ -600,7 +618,7 @@ function AIScheduleGeneratorModal({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            取消
+            {t("cancel")}
           </motion.button>
           <motion.button
             className="flex-1 py-3 bg-linear-to-r from-green-500 to-teal-500 text-white rounded-xl font-bold flex items-center justify-center gap-2"
@@ -616,12 +634,12 @@ function AIScheduleGeneratorModal({
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
                 />
-                生成中...
+                {t("generating")}
               </>
             ) : (
               <>
                 <i className="ri-magic-line" />
-                开始生成
+                {t("start")}
               </>
             )}
           </motion.button>
