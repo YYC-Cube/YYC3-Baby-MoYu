@@ -145,7 +145,22 @@
     "dimLanguage": "Language",
     "dimMotor": "Motor",
     "dimSocial": "Social-Emotional",
-    "dimSelfCare": "Self-Care"
+    "dimSelfCare": "Self-Care",
+    "timeline": {
+      "titleOf": "{name}'s Growth Timeline",
+      "filterAll": "All",
+      "types": {
+        "milestone": "Milestones",
+        "observation": "Observations",
+        "emotion": "Emotions",
+        "learning": "Learning",
+        "health": "Health"
+      },
+      "aiInsightLabel": "AI Insight",
+      "monthLabel": "{month}/{year}",
+      "empty": "No {label} yet",
+      "emptyAll": "No records yet"
+    }
   },
   "courses": {
     "title": "Courses",
@@ -266,7 +281,8 @@
       "english": "English",
       "math": "Math",
       "nature": "Nature"
-    }
+    },
+    "backToShelf": "Back to Shelf"
   },
   "ai": {
     "assistant": "AI Assistant",
@@ -540,7 +556,172 @@
     "shareText": "I earned the {title} badge in the YYC³ growth companion! {description}",
     "shareUnsupported": "Your browser does not support sharing",
     "empty": "No badges match the current filters",
-    "pointsPer": "{points} pts each"
+    "pointsPer": "{points} pts each",
+    "badgeDefs": {
+      "record-first": {
+        "title": "First Cry",
+        "description": "Complete your 1st growth record"
+      },
+      "record-10": {
+        "title": "Dedicated Recorder",
+        "description": "10 growth records in total"
+      },
+      "record-50": {
+        "title": "Growth Archivist",
+        "description": "50 growth records in total"
+      },
+      "record-100": {
+        "title": "Century Album",
+        "description": "100 growth records in total"
+      },
+      "record-200": {
+        "title": "Time Collector",
+        "description": "200 growth records in total"
+      },
+      "observe-5": {
+        "title": "Curious Eyes",
+        "description": "Complete 5 observation logs"
+      },
+      "observe-20": {
+        "title": "Keen Observer",
+        "description": "Complete 20 observation logs"
+      },
+      "observe-50": {
+        "title": "Child Behaviorist",
+        "description": "Complete 50 observation logs"
+      },
+      "emotion-10": {
+        "title": "Emotion Catcher",
+        "description": "Record 10 emotional moments"
+      },
+      "emotion-30": {
+        "title": "Heart Reader",
+        "description": "Record 30 emotional moments"
+      },
+      "emotion-60": {
+        "title": "Empathy Master",
+        "description": "Record 60 emotional moments"
+      },
+      "learning-10": {
+        "title": "Thirst for Knowledge",
+        "description": "Record 10 learning moments"
+      },
+      "learning-30": {
+        "title": "Sea of Knowledge",
+        "description": "Record 30 learning moments"
+      },
+      "milestone-3": {
+        "title": "First Footprint",
+        "description": "Unlock 3 growth milestones"
+      },
+      "milestone-10": {
+        "title": "Milestone Expert",
+        "description": "Unlock 10 growth milestones"
+      },
+      "milestone-25": {
+        "title": "Growth Navigator",
+        "description": "Unlock 25 growth milestones"
+      },
+      "homework-5": {
+        "title": "Homework Starter",
+        "description": "Complete 5 homework tasks"
+      },
+      "homework-20": {
+        "title": "Scholar in the Making",
+        "description": "Complete 20 homework tasks"
+      },
+      "homework-50": {
+        "title": "Homework Conqueror",
+        "description": "Complete 50 homework tasks"
+      },
+      "streak-7": {
+        "title": "7-Day Streak",
+        "description": "Record for 7 consecutive days"
+      },
+      "streak-30": {
+        "title": "Companion Star",
+        "description": "Record for 30 consecutive days"
+      },
+      "weeks-8": {
+        "title": "Two-Month Grower",
+        "description": "Records in 8 different weeks"
+      },
+      "anniversary-365": {
+        "title": "First Anniversary",
+        "description": "One year since the first record"
+      },
+      "all-types": {
+        "title": "Panoramic Recorder",
+        "description": "Use all four record types"
+      },
+      "ai-analysis-10": {
+        "title": "AI Brain Trust",
+        "description": "10 records with AI analysis"
+      },
+      "ai-analysis-50": {
+        "title": "Wise Companion",
+        "description": "50 records with AI analysis"
+      },
+      "tags-15": {
+        "title": "Tag Collector",
+        "description": "Use 15 different tags"
+      },
+      "multi-child": {
+        "title": "Growing Family",
+        "description": "Care for 2+ baby profiles"
+      },
+      "renaissance": {
+        "title": "Renaissance Guardian",
+        "description": "Records, observations, emotions, homework and AI — all flourishing"
+      },
+      "balanced-100": {
+        "title": "Century Guardian",
+        "description": "Reach 100 achievement points"
+      }
+    },
+    "badgeConds": {
+      "all-types": {
+        "c1": "Complete a milestone record",
+        "c2": "Complete an observation record",
+        "c3": "Complete an emotion record",
+        "c4": "Complete a learning record"
+      },
+      "ai-analysis-10": {
+        "c1": "10 records with AI analysis in total (auto-counted)"
+      },
+      "ai-analysis-50": {
+        "c1": "50 records with AI analysis in total"
+      },
+      "multi-child": {
+        "c1": "Create at least 2 baby profiles"
+      },
+      "renaissance": {
+        "c1": "30 records in total",
+        "c2": "5 observations and 5 emotion records",
+        "c3": "5 homework tasks completed",
+        "c4": "10 AI analyses"
+      },
+      "balanced-100": {
+        "c1": "Reach 100 achievement points (auto-accumulated)"
+      }
+    },
+    "badgeLevels": {
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "platinum": "Diamond"
+    },
+    "badgeCats": {
+      "成长记录": "Growth Records",
+      "观察记录": "Observations",
+      "情绪记录": "Emotions",
+      "学习成长": "Learning",
+      "里程碑": "Milestones",
+      "作业任务": "Homework",
+      "坚持陪伴": "Consistency",
+      "综合成就": "Achievements"
+    },
+    "condProgress": "{desc} (current {cur}/{goal})"
   },
   "messageCenter": {
     "pageTitle": "Message Center",
@@ -634,6 +815,14 @@
       "volume": "Volume",
       "fullscreen": "Fullscreen",
       "close": "Close"
+    },
+    "styleNames": {
+      "warm": "Warm",
+      "playful": "Playful",
+      "elegant": "Elegant",
+      "adventure": "Adventure",
+      "dreamy": "Dreamy",
+      "nature": "Nature"
     }
   },
   "creative": {
@@ -900,5 +1089,93 @@
       "generating": "Generating...",
       "start": "Start Generating"
     }
+  },
+  "videoGen": {
+    "chooseType": "Choose Video Type",
+    "types": {
+      "slideshow": {
+        "name": "Photo Slideshow",
+        "desc": "Turn multiple photos into a beautiful video"
+      },
+      "imageToVideo": {
+        "name": "Photo to Motion",
+        "desc": "Bring static photos to life"
+      },
+      "storyAnimation": {
+        "name": "Story Animation",
+        "desc": "Turn written stories into animated videos"
+      },
+      "memoryRecap": {
+        "name": "Memory Recap",
+        "desc": "Auto-generate a growth recap video"
+      }
+    },
+    "addContent": "Add Content",
+    "videoTitle": "Video Title",
+    "titlePlaceholder": "Name your video...",
+    "defaultTitle": "My Amazing Video",
+    "storyLabel": "Story Text",
+    "storyPlaceholder": "Write the story you want to animate...",
+    "selectImages": "Select Photos ({count}/12)",
+    "prev": "Back",
+    "next": "Next",
+    "chooseStyle": "Choose Style",
+    "styleLabel": "Video Style",
+    "styleNames": {
+      "warm": "Warm",
+      "playful": "Playful",
+      "elegant": "Elegant",
+      "adventure": "Adventure",
+      "dreamy": "Dreamy",
+      "nature": "Nature"
+    },
+    "templateLabel": "Choose Template (optional)",
+    "templates": {
+      "template1": {
+        "name": "Growth Moments",
+        "desc": "Capture your baby's growth"
+      },
+      "template2": {
+        "name": "Birthday Party",
+        "desc": "A joyful birthday celebration"
+      },
+      "template3": {
+        "name": "Daily Life",
+        "desc": "Everyday life snapshots"
+      }
+    },
+    "seconds": "{secs}s",
+    "durationLabel": "Duration: {secs}s",
+    "audioSettings": "Audio Settings",
+    "aiVoiceover": "AI Voiceover",
+    "voiceNames": {
+      "xiaoyu": {
+        "name": "Xiaoyu",
+        "desc": "Cute child voice"
+      },
+      "xiaoming": {
+        "name": "Xiaoming",
+        "desc": "Lively boy voice"
+      },
+      "narrator": {
+        "name": "Narrator",
+        "desc": "Professional narration"
+      },
+      "child": {
+        "name": "Child",
+        "desc": "Natural kid voice"
+      }
+    },
+    "bgm": "Background Music",
+    "musicNames": {
+      "happy": "Happy",
+      "gentle": "Gentle",
+      "energetic": "Energetic",
+      "calm": "Calm"
+    },
+    "volume": "Volume: {vol}%",
+    "startGenerating": "Start Generating",
+    "generatingTitle": "Generating Video",
+    "createTitle": "Create Video"
   }
 }

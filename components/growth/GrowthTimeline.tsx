@@ -1,6 +1,7 @@
 "use client"
 
 import { AnimatePresence, motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 import { useState } from "react"
 
 interface TimelineEvent {
@@ -85,25 +86,25 @@ const defaultEvents: TimelineEvent[] = [
   },
 ]
 
+// 类型标签走 growth.timeline.types 词条（bgColor/borderColor/textColor 为纯视觉属性保留）
 const typeConfig = {
   milestone: {
-    label: "里程碑",
     bgColor: "bg-yellow-100",
     borderColor: "border-yellow-400",
     textColor: "text-yellow-700",
   },
   observation: {
-    label: "观察记录",
     bgColor: "bg-purple-100",
     borderColor: "border-purple-400",
     textColor: "text-purple-700",
   },
-  emotion: { label: "情感记录", bgColor: "bg-pink-100", borderColor: "border-pink-400", textColor: "text-pink-700" },
-  learning: { label: "学习记录", bgColor: "bg-blue-100", borderColor: "border-blue-400", textColor: "text-blue-700" },
-  health: { label: "健康记录", bgColor: "bg-green-100", borderColor: "border-green-400", textColor: "text-green-700" },
+  emotion: { bgColor: "bg-pink-100", borderColor: "border-pink-400", textColor: "text-pink-700" },
+  learning: { bgColor: "bg-blue-100", borderColor: "border-blue-400", textColor: "text-blue-700" },
+  health: { bgColor: "bg-green-100", borderColor: "border-green-400", textColor: "text-green-700" },
 }
 
 export default function GrowthTimeline({ events = defaultEvents, childName = "小云" }: GrowthTimelineProps) {
+  const t = useTranslations("growth.timeline")
   const [selectedType, setSelectedType] = useState<string>("all")
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<"timeline" | "grid">("timeline")
@@ -126,7 +127,7 @@ export default function GrowthTimeline({ events = defaultEvents, childName = "�
       <div className="bg-linear-to-r from-blue-500 to-purple-500 rounded-2xl p-5 text-white">
         <h3 className="text-lg font-bold mb-2">
           <i className="ri-time-line mr-2" />
-          {childName}的成长时间线
+          {t("titleOf", { name: childName })}
         </h3>
         <div className="grid grid-cols-5 gap-2 mt-4">
           {Object.entries(typeConfig).map(([type, config]) => {
@@ -134,7 +135,7 @@ export default function GrowthTimeline({ events = defaultEvents, childName = "�
             return (
               <div key={type} className="text-center">
                 <div className="text-2xl font-bold">{count}</div>
-                <div className="text-xs opacity-80">{config.label}</div>
+                <div className="text-xs opacity-80">{t(`types.${type}`)}</div>
               </div>
             )
           })}
@@ -150,7 +151,7 @@ export default function GrowthTimeline({ events = defaultEvents, childName = "�
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          全部
+          {t("filterAll")}
         </motion.button>
         {Object.entries(typeConfig).map(([type, config]) => (
           <motion.button
@@ -163,7 +164,7 @@ export default function GrowthTimeline({ events = defaultEvents, childName = "�
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            {config.label}
+            {t(`types.${type}`)}
           </motion.button>
         ))}
       </div>
@@ -195,10 +196,10 @@ export default function GrowthTimeline({ events = defaultEvents, childName = "�
               {/* 月份标签 */}
               <div className="relative flex items-center mb-4">
                 <div className="w-12 h-12 bg-surface rounded-full border-4 border-blue-400 flex items-center justify-center z-10">
-                  <span className="text-xs font-bold text-blue-600">{month.split("-")[1]}月</span>
+                  <span className="text-xs font-bold text-blue-600">{t("monthLabel", { year: month.split("-")[0], month: month.split("-")[1] })}</span>
                 </div>
                 <span className="ml-4 text-lg font-bold text-adaptive">
-                  {month.split("-")[0]}年{month.split("-")[1]}月
+                  {t("monthLabel", { year: month.split("-")[0], month: month.split("-")[1] })}
                 </span>
               </div>
 
@@ -234,7 +235,7 @@ export default function GrowthTimeline({ events = defaultEvents, childName = "�
                             <div className="flex items-center justify-between">
                               <h4 className="font-bold text-adaptive">{event.title}</h4>
                               <span className={`text-xs px-2 py-1 rounded-full ${config.bgColor} ${config.textColor}`}>
-                                {config.label}
+                                {t(`types.${event.type}`)}
                               </span>
                             </div>
                             <p className="text-sm text-adaptive-muted mt-1">
@@ -268,7 +269,7 @@ export default function GrowthTimeline({ events = defaultEvents, childName = "�
                                     <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl p-3 mt-2">
                                       <div className="flex items-center gap-2 text-xs text-adaptive-muted mb-1">
                                         <i className="ri-sparkling-line" />
-                                        AI小语洞察
+                                        {t("aiInsightLabel")}
                                       </div>
                                       <p className="text-sm text-adaptive-muted">{event.aiInsight}</p>
                                     </div>
@@ -334,7 +335,7 @@ export default function GrowthTimeline({ events = defaultEvents, childName = "�
       {filteredEvents.length === 0 && (
         <div className="text-center py-12 text-slate-400">
           <i className="ri-inbox-line text-4xl mb-2" />
-          <p>暂无{selectedType !== "all" ? typeConfig[selectedType as keyof typeof typeConfig].label : "记录"}</p>
+          <p>{selectedType !== "all" ? t("empty", { label: t(`types.${selectedType}`) }) : t("emptyAll")}</p>
         </div>
       )}
     </div>

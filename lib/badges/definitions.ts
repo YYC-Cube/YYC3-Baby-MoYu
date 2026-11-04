@@ -35,6 +35,9 @@ function countBadge(
       const cur = get(s)
       return [`${description}（当前 ${Math.min(cur, goal)}/${goal}）`]
     },
+    titleKey: `badgeDefs.${id}.title`,
+    descriptionKey: `badgeDefs.${id}.description`,
+    progressGoal: goal,
   }
 }
 
@@ -47,7 +50,8 @@ function compoundBadge(
   level: BadgeLevel,
   category: BadgeDefinition["category"],
   unlockWhen: (s: Parameters<BadgeDefinition["evaluate"]>[0]) => boolean,
-  conditions: string[]
+  conditions: string[],
+  condKeys: string[]
 ): BadgeDefinition {
   return {
     id,
@@ -58,6 +62,9 @@ function compoundBadge(
     category,
     evaluate: (s) => (unlockWhen(s) ? 100 : null),
     conditions: () => conditions,
+    titleKey: `badgeDefs.${id}.title`,
+    descriptionKey: `badgeDefs.${id}.description`,
+    condKeys,
   }
 }
 
@@ -103,33 +110,39 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   compoundBadge(
     "all-types", "全景记录者", "四种记录类型全部使用过", "🧩", "silver", "综合成就",
     (s) => (["milestone", "observation", "emotion", "learning"] as const).every((t) => (s.recordsByType[t] ?? 0) > 0),
-    ["完成里程碑记录", "完成观察记录", "完成情绪记录", "完成学习记录"]
+    ["完成里程碑记录", "完成观察记录", "完成情绪记录", "完成学习记录"],
+    ["badgeConds.all-types.c1", "badgeConds.all-types.c2", "badgeConds.all-types.c3", "badgeConds.all-types.c4"]
   ),
   compoundBadge(
     "ai-analysis-10", "AI 智囊团", "10 条记录获得 AI 分析", "🤖", "bronze", "综合成就",
     (s) => s.aiAnalysisCount >= 10,
-    ["累计 10 条记录包含 AI 分析（当前按数据自动统计）"]
+    ["累计 10 条记录包含 AI 分析（当前按数据自动统计）"],
+    ["badgeConds.ai-analysis-10.c1"]
   ),
   compoundBadge(
     "ai-analysis-50", "智慧同行者", "50 条记录获得 AI 分析", "🧠", "gold", "综合成就",
     (s) => s.aiAnalysisCount >= 50,
-    ["累计 50 条记录包含 AI 分析"]
+    ["累计 50 条记录包含 AI 分析"],
+    ["badgeConds.ai-analysis-50.c1"]
   ),
   countBadge("tags-15", "标签收藏家", "使用 15 个不同标签", "🏷️", "silver", "综合成就", (s) => s.distinctTags, 15),
   compoundBadge(
     "multi-child", "多宝家庭", "同时守护 2 个以上宝宝档案", "👨‍👩‍👧‍👦", "gold", "综合成就",
     (s) => s.childCount >= 2,
-    ["建立至少 2 个宝宝档案"]
+    ["建立至少 2 个宝宝档案"],
+    ["badgeConds.multi-child.c1"]
   ),
   compoundBadge(
     "renaissance", "全能守护者", "记录、观察、情绪、作业、AI 全面开花", "👑", "platinum", "综合成就",
     (s) => s.totalRecords >= 30 && (s.recordsByType.observation ?? 0) >= 5 && (s.recordsByType.emotion ?? 0) >= 5 && s.completedHomework >= 5 && s.aiAnalysisCount >= 10,
-    ["累计 30 条记录", "观察与情绪记录各 5 条", "完成 5 次作业", "10 条 AI 分析"]
+    ["累计 30 条记录", "观察与情绪记录各 5 条", "完成 5 次作业", "10 条 AI 分析"],
+    ["badgeConds.renaissance.c1", "badgeConds.renaissance.c2", "badgeConds.renaissance.c3", "badgeConds.renaissance.c4"]
   ),
   compoundBadge(
     "balanced-100", "百分守护", "成就点数达到 100", "💯", "gold", "综合成就",
     () => false, // 由引擎按点数动态判定（此处仅占位展示）
-    ["累计成就点数达到 100（自动累计）"]
+    ["累计成就点数达到 100（自动累计）"],
+    ["badgeConds.balanced-100.c1"]
   ),
 ]
 

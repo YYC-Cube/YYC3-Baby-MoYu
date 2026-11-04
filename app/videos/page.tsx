@@ -176,7 +176,7 @@ export default function VideosPage() {
                       className="absolute top-2 left-2 px-2 py-0.5 rounded text-xs text-white"
                       style={{ backgroundColor: VIDEO_STYLE_CONFIG[video.style].color }}
                     >
-                      {VIDEO_STYLE_CONFIG[video.style].name}
+                      {t(`styleNames.${video.style}`)}
                     </div>
                   </div>
 
@@ -245,7 +245,7 @@ export default function VideosPage() {
                         className="px-1.5 py-0.5 rounded text-white"
                         style={{ backgroundColor: VIDEO_STYLE_CONFIG[video.style].color }}
                       >
-                        {VIDEO_STYLE_CONFIG[video.style].name}
+                        {t(`styleNames.${video.style}`)}
                       </span>
                       <span>{formatDate(video.createdAt)}</span>
                       <span className="flex items-center gap-0.5">

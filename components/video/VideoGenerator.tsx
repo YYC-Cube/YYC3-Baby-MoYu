@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 import {
   type VideoStyle,
 } from "@/types/ai-video"
@@ -19,34 +20,34 @@ type VideoTemplate = {
 }
 type MusicStyle = "happy" | "gentle" | "energetic" | "calm"
 
-// 配置常量
+// 配置常量（name/description 属展示文案，渲染时走 videoGen 词条；此处仅保留 icon/color 等视觉属性）
 const VIDEO_STYLE_CONFIG: Record<VideoStyle, { name: string; description: string; thumbnail: string; icon: string; color: string }> = {
-  warm: { name: "温馨", description: "温馨可爱风格", thumbnail: "/placeholder.svg", icon: "🎨", color: "text-pink-500" },
-  playful: { name: "活泼", description: "活泼有趣风格", thumbnail: "/placeholder.svg", icon: "📷", color: "text-blue-500" },
-  elegant: { name: "优雅", description: "优雅精致风格", thumbnail: "/placeholder.svg", icon: "⭐", color: "text-purple-500" },
-  adventure: { name: "冒险", description: "冒险探索风格", thumbnail: "/placeholder.svg", icon: "🎭", color: "text-cyan-500" },
-  dreamy: { name: "梦幻", description: "梦幻唯美风格", thumbnail: "/placeholder.svg", icon: "🎬", color: "text-orange-500" },
-  nature: { name: "自然", description: "自然清新风格", thumbnail: "/placeholder.svg", icon: "🧱", color: "text-yellow-500" },
+  warm: { name: "warm", description: "warm", thumbnail: "/placeholder.svg", icon: "🎨", color: "text-pink-500" },
+  playful: { name: "playful", description: "playful", thumbnail: "/placeholder.svg", icon: "📷", color: "text-blue-500" },
+  elegant: { name: "elegant", description: "elegant", thumbnail: "/placeholder.svg", icon: "⭐", color: "text-purple-500" },
+  adventure: { name: "adventure", description: "adventure", thumbnail: "/placeholder.svg", icon: "🎭", color: "text-cyan-500" },
+  dreamy: { name: "dreamy", description: "dreamy", thumbnail: "/placeholder.svg", icon: "🎬", color: "text-orange-500" },
+  nature: { name: "nature", description: "nature", thumbnail: "/placeholder.svg", icon: "🧱", color: "text-yellow-500" },
 }
 
 const MUSIC_STYLE_CONFIG: Record<MusicStyle, { name: string; description: string; icon: string }> = {
-  happy: { name: "欢快", description: "愉悦欢快的旋律", icon: "🎵" },
-  gentle: { name: "温柔", description: "轻柔舒缓的音乐", icon: "🎶" },
-  energetic: { name: "活力", description: "充满活力的节奏", icon: "🎸" },
-  calm: { name: "宁静", description: "安静平和的氛围", icon: "🎹" },
+  happy: { name: "happy", description: "happy", icon: "🎵" },
+  gentle: { name: "gentle", description: "gentle", icon: "🎶" },
+  energetic: { name: "energetic", description: "energetic", icon: "🎸" },
+  calm: { name: "calm", description: "calm", icon: "🎹" },
 }
 
 const VOICE_CONFIG = {
-  xiaoyu: { name: "小语", description: "可爱童声" },
-  xiaoming: { name: "小明", description: "活泼男孩" },
-  narrator: { name: "旁白", description: "专业旁白" },
-  child: { name: "儿童", description: "自然童声" },
+  xiaoyu: { name: "xiaoyu", description: "xiaoyu" },
+  xiaoming: { name: "xiaoming", description: "xiaoming" },
+  narrator: { name: "narrator", description: "narrator" },
+  child: { name: "child", description: "child" },
 }
 
 const VIDEO_TEMPLATES: VideoTemplate[] = [
-  { id: "template1", name: "成长记录", description: "记录宝宝的成长点滴", thumbnail: "/placeholder.svg", duration: 30, suitableFor: ["all"] },
-  { id: "template2", name: "生日庆典", description: "欢乐生日派对", thumbnail: "/placeholder.svg", duration: 45, suitableFor: ["birthday"] },
-  { id: "template3", name: "日常生活", description: "日常生活剪影", thumbnail: "/placeholder.svg", duration: 30, suitableFor: ["daily"] },
+  { id: "template1", name: "template1", description: "template1", thumbnail: "/placeholder.svg", duration: 30, suitableFor: ["all"] },
+  { id: "template2", name: "template2", description: "template2", thumbnail: "/placeholder.svg", duration: 45, suitableFor: ["birthday"] },
+  { id: "template3", name: "template3", description: "template3", thumbnail: "/placeholder.svg", duration: 30, suitableFor: ["daily"] },
 ]
 
 interface VideoGeneratorProps {
@@ -58,6 +59,7 @@ interface VideoGeneratorProps {
 type GeneratorStep = "type" | "content" | "style" | "options" | "generating"
 
 export default function VideoGenerator({ childId: _childId, onComplete, onCancel }: VideoGeneratorProps) {
+  const t = useTranslations("videoGen")
   const [step, setStep] = useState<GeneratorStep>("type")
   const [videoType, setVideoType] = useState<VideoType>("slideshow")
   const [title, setTitle] = useState("")
@@ -100,7 +102,7 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
     try {
       await generateVideo({
         type: videoType as any,
-        title: title || "我的精彩视频",
+        title: title || t("defaultTitle"),
         sourceImages: selectedImages,
         storyText: videoType === "story-animation" ? storyText : undefined,
         duration,
@@ -135,11 +137,11 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
     }
   }
 
-  const videoTypes: { type: VideoType; name: string; icon: string; desc: string }[] = [
-    { type: "slideshow", name: "照片幻灯片", icon: "ri-slideshow-3-line", desc: "将多张照片制作成精美视频" },
-    { type: "image-to-video", name: "图片转动态", icon: "ri-movie-line", desc: "让静态图片动起来" },
-    { type: "story-animation", name: "故事动画", icon: "ri-book-read-line", desc: "将文字故事变成动画视频" },
-    { type: "memory-recap", name: "成长回忆", icon: "ri-history-line", desc: "自动生成成长回顾视频" },
+  const videoTypes: { type: VideoType; nameKey: string; icon: string; descKey: string }[] = [
+    { type: "slideshow", nameKey: "types.slideshow.name", icon: "ri-slideshow-3-line", descKey: "types.slideshow.desc" },
+    { type: "image-to-video", nameKey: "types.imageToVideo.name", icon: "ri-movie-line", descKey: "types.imageToVideo.desc" },
+    { type: "story-animation", nameKey: "types.storyAnimation.name", icon: "ri-book-read-line", descKey: "types.storyAnimation.desc" },
+    { type: "memory-recap", nameKey: "types.memoryRecap.name", icon: "ri-history-line", descKey: "types.memoryRecap.desc" },
   ]
 
   const renderStep = () => {
@@ -147,7 +149,7 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
       case "type":
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-slate-800">选择视频类型</h3>
+            <h3 className="text-lg font-semibold text-slate-800">{t("chooseType")}</h3>
             <div className="grid grid-cols-2 gap-4">
               {videoTypes.map((vt) => (
                 <motion.button
@@ -163,8 +165,8 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
                   }`}
                 >
                   <i className={`${vt.icon} text-2xl text-pink-500 mb-2 block`} />
-                  <h4 className="font-medium text-slate-800">{vt.name}</h4>
-                  <p className="text-xs text-slate-500 mt-1">{vt.desc}</p>
+                  <h4 className="font-medium text-slate-800">{t(vt.nameKey)}</h4>
+                  <p className="text-xs text-slate-500 mt-1">{t(vt.descKey)}</p>
                 </motion.button>
               ))}
             </div>
@@ -174,16 +176,16 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
       case "content":
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-slate-800">添加内容</h3>
+            <h3 className="text-lg font-semibold text-slate-800">{t("addContent")}</h3>
 
             {/* 标题输入 */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">视频标题</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t("videoTitle")}</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => { setTitle(e.target.value); }}
-                placeholder="给视频起个名字..."
+                placeholder={t("titlePlaceholder")}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-300 focus:border-pink-400 outline-none"
               />
             </div>
@@ -191,11 +193,11 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
             {/* 故事文本（故事动画模式） */}
             {videoType === "story-animation" && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">故事内容</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t("storyLabel")}</label>
                 <textarea
                   value={storyText}
                   onChange={(e) => { setStoryText(e.target.value); }}
-                  placeholder="输入你想变成动画的故事..."
+                  placeholder={t("storyPlaceholder")}
                   rows={4}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-300 focus:border-pink-400 outline-none resize-none"
                 />
@@ -205,7 +207,7 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
             {/* 图片选择 */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                选择图片 ({selectedImages.length}/12)
+                {t("selectImages", { count: selectedImages.length })}
               </label>
               <div className="grid grid-cols-4 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-50 rounded-xl">
                 {imageLibrary.map((img, idx) => (
@@ -237,14 +239,14 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
                 onClick={() => { setStep("type"); }}
                 className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50"
               >
-                上一步
+                {t("prev")}
               </button>
               <button
                 onClick={() => { setStep("style"); }}
                 disabled={selectedImages.length === 0}
                 className="flex-1 py-3 rounded-xl bg-pink-500 text-white hover:bg-pink-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                下一步
+                {t("next")}
               </button>
             </div>
           </div>
@@ -253,11 +255,11 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
       case "style":
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-slate-800">选择风格</h3>
+            <h3 className="text-lg font-semibold text-slate-800">{t("chooseStyle")}</h3>
 
             {/* 视频风格 */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">视频风格</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t("styleLabel")}</label>
               <div className="grid grid-cols-3 gap-3">
                 {Object.entries(VIDEO_STYLE_CONFIG).map(([key, config]) => (
                   <motion.button
@@ -270,7 +272,7 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
                     }`}
                   >
                     <i className={`${config.icon} text-xl`} style={{ color: config.color }} />
-                    <p className="text-sm font-medium text-slate-700 mt-1">{config.name}</p>
+                    <p className="text-sm font-medium text-slate-700 mt-1">{t(`styleNames.${key}`)}</p>
                   </motion.button>
                 ))}
               </div>
@@ -278,7 +280,7 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
 
             {/* 视频模板 */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">选择模板（可选）</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t("templateLabel")}</label>
               <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto">
                 {VIDEO_TEMPLATES.filter((t) => t.suitableFor.includes(videoType)).map((template) => (
                   <motion.button
@@ -296,8 +298,8 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
                       alt={template.name}
                       className="w-full h-20 object-cover rounded-lg mb-2"
                     />
-                    <p className="text-sm font-medium text-slate-700">{template.name}</p>
-                    <p className="text-xs text-slate-500">{template.duration}秒</p>
+                    <p className="text-sm font-medium text-slate-700">{t(`templates.${template.id}.name`)}</p>
+                    <p className="text-xs text-slate-500">{t("seconds", { secs: template.duration })}</p>
                   </motion.button>
                 ))}
               </div>
@@ -305,7 +307,7 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
 
             {/* 时长选择 */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">视频时长: {duration}秒</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t("durationLabel", { secs: duration })}</label>
               <input
                 type="range"
                 min={15}
@@ -316,8 +318,8 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
                 className="w-full accent-pink-500"
               />
               <div className="flex justify-between text-xs text-slate-400">
-                <span>15秒</span>
-                <span>120秒</span>
+                <span>{t("seconds", { secs: 15 })}</span>
+                <span>{t("seconds", { secs: 120 })}</span>
               </div>
             </div>
 
@@ -326,13 +328,13 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
                 onClick={() => { setStep("content"); }}
                 className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50"
               >
-                上一步
+                {t("prev")}
               </button>
               <button
                 onClick={() => { setStep("options"); }}
                 className="flex-1 py-3 rounded-xl bg-pink-500 text-white hover:bg-pink-600"
               >
-                下一步
+                {t("next")}
               </button>
             </div>
           </div>
@@ -341,12 +343,12 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
       case "options":
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-slate-800">音频设置</h3>
+            <h3 className="text-lg font-semibold text-slate-800">{t("audioSettings")}</h3>
 
             {/* 配音设置 */}
             <div className="p-4 bg-slate-50 rounded-xl">
               <div className="flex items-center justify-between mb-3">
-                <span className="font-medium text-slate-700">AI配音</span>
+                <span className="font-medium text-slate-700">{t("aiVoiceover")}</span>
                 <button
                   onClick={() => { setEnableVoiceover(!enableVoiceover); }}
                   className={`w-12 h-6 rounded-full transition-colors ${
@@ -371,8 +373,8 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
                         voiceType === key ? "bg-pink-100 border-pink-300 border" : "bg-white border border-slate-200"
                       }`}
                     >
-                      <span className="font-medium">{config.name}</span>
-                      <p className="text-xs text-slate-500">{config.description}</p>
+                      <span className="font-medium">{t(`voiceNames.${key}.name`)}</span>
+                      <p className="text-xs text-slate-500">{t(`voiceNames.${key}.desc`)}</p>
                     </button>
                   ))}
                 </div>
@@ -382,7 +384,7 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
             {/* 背景音乐设置 */}
             <div className="p-4 bg-slate-50 rounded-xl">
               <div className="flex items-center justify-between mb-3">
-                <span className="font-medium text-slate-700">背景音乐</span>
+                <span className="font-medium text-slate-700">{t("bgm")}</span>
                 <button
                   onClick={() => { setEnableMusic(!enableMusic); }}
                   className={`w-12 h-6 rounded-full transition-colors ${enableMusic ? "bg-pink-500" : "bg-slate-300"}`}
@@ -407,12 +409,12 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
                         }`}
                       >
                         <i className={`${config.icon} text-lg text-pink-500`} />
-                        <p className="text-xs font-medium mt-1">{config.name}</p>
+                        <p className="text-xs font-medium mt-1">{t(`musicNames.${key}`)}</p>
                       </button>
                     ))}
                   </div>
                   <div>
-                    <label className="text-xs text-slate-500 mb-1 block">音量: {musicVolume}%</label>
+                    <label className="text-xs text-slate-500 mb-1 block">{t("volume", { vol: musicVolume })}</label>
                     <input
                       type="range"
                       min={0}
@@ -431,13 +433,13 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
                 onClick={() => { setStep("style"); }}
                 className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50"
               >
-                上一步
+                {t("prev")}
               </button>
               <button
                 onClick={handleGenerate}
                 className="flex-1 py-3 rounded-xl bg-linear-to-r from-pink-500 to-purple-500 text-white hover:opacity-90"
               >
-                开始生成
+                {t("startGenerating")}
               </button>
             </div>
           </div>
@@ -454,7 +456,7 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
               <i className="ri-loader-4-line text-5xl text-pink-500" />
             </motion.div>
 
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">正在生成视频</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">{t("generatingTitle")}</h3>
             <p className="text-slate-500 mb-6">{currentTask}</p>
 
             <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
@@ -487,7 +489,7 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
       >
         {/* 头部 */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-slate-800">创建视频</h2>
+          <h2 className="text-xl font-bold text-slate-800">{t("createTitle")}</h2>
           {step !== "generating" && (
             <button
               onClick={onCancel}
