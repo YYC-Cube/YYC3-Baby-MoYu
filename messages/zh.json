@@ -156,7 +156,40 @@
     "allCourses": "全部课程",
     "startLearning": "开始学习",
     "continueLearning": "继续学习",
-    "viewProgress": "查看进度"
+    "viewProgress": "查看进度",
+    "pageTitle": "我的公益课程",
+    "searchPlaceholder": "搜索你想学的课程...",
+    "filterLabel": "🔍 分类:",
+    "categories": {
+      "all": "全部课程",
+      "math": "数学",
+      "chinese": "语文",
+      "science": "科学",
+      "art": "艺术",
+      "enrichment": "素质拓展"
+    },
+    "items": {
+      "c1": {
+        "title": "小学古诗词鉴赏 (上)",
+        "description": "掌握 50 首必背古诗，理解诗歌意境。",
+        "badge": "进行中"
+      },
+      "c2": {
+        "title": "趣味科学实验课",
+        "description": "探索 10 个居家小实验，激发科学兴趣。",
+        "badge": "新课上线",
+        "duration": "共 4 课时"
+      },
+      "c3": {
+        "title": "初级编程思维训练",
+        "description": "通过简单拖拽，学习编程逻辑和流程控制。",
+        "badge": "难度：中"
+      }
+    },
+    "progressLabel": "进度: {progress}%",
+    "unitsLearned": "已学 6/8 单元",
+    "startNow": "立即开始",
+    "viewDetails": "查看详情"
   },
   "homework": {
     "title": "作业中心",
@@ -215,7 +248,25 @@
     "categories": "图书分类",
     "startReading": "开始阅读",
     "continueReading": "继续阅读",
-    "addToFavorites": "添加收藏"
+    "addToFavorites": "添加收藏",
+    "pageTitle": "有声绘本",
+    "searchPlaceholder": "搜索绘本...",
+    "all": "全部",
+    "todayRecommended": "今日推荐",
+    "aiCreated": "AI创作",
+    "durationMinutes": "{duration}分钟",
+    "readCount": "{count}次",
+    "empty": "暂无绘本",
+    "categoryNames": {
+      "story": "故事",
+      "science": "科学",
+      "emotion": "情感",
+      "habit": "习惯",
+      "culture": "文化",
+      "english": "英语",
+      "math": "数学",
+      "nature": "自然"
+    }
   },
   "ai": {
     "assistant": "AI助手",
@@ -490,5 +541,73 @@
     "shareUnsupported": "您的浏览器不支持分享功能",
     "empty": "暂无符合条件的勋章",
     "pointsPer": "{points}分/枚"
+  },
+  "messageCenter": {
+    "pageTitle": "消息中心",
+    "markAllRead": "全部标为已读",
+    "sections": {
+      "homework": "作业反馈",
+      "system": "系统通知",
+      "activity": "活动通知"
+    },
+    "unreadCount": "({count} 条未读)",
+    "items": {
+      "m1": {
+        "title": "语文作业 [古诗词背诵] 已批改！",
+        "content": "本次作业完成度高，老师点赞你的朗读表现！",
+        "time": "10分钟前"
+      },
+      "m2": {
+        "title": "数学作业 [口算题] 待完善",
+        "content": "有 2 题计算错误，请在错题本中查看并重做。",
+        "time": "昨天"
+      },
+      "m3": {
+        "title": "学习提醒：今天是你学习天数第 30 天！",
+        "content": "恭喜你达成成就！保持习惯，继续加油！",
+        "time": "1小时前"
+      },
+      "m4": {
+        "title": "公益活动：故事伴读计划已成功启动！",
+        "content": "感谢你的参与，你的录音已成功被采纳！",
+        "time": "3天前"
+      }
+    }
+  },
+  "activities": {
+    "pageTitle": "公益活动中心",
+    "myParticipation": "我的参与",
+    "tabOngoing": "💚 正在进行 ({count})",
+    "tabHistory": "📚 历史回顾 (5)",
+    "ongoing": {
+      "act-1": {
+        "title": "\"我的绿色小星球\" 线上种植活动",
+        "description": "通过线上工具，模拟种植一棵树，学习环保知识。每完成一步，平台将捐赠一笔环保基金。",
+        "participants": "已有 1,200 名同学参与",
+        "deadline": "仅剩 5 天",
+        "banner": "🌍 认领一颗小树苗",
+        "button": "立即报名并开始"
+      },
+      "act-2": {
+        "title": "为乡村小朋友录制睡前故事",
+        "description": "同学们可以录制自己的声音，为偏远地区的儿童送去温暖的睡前故事。让你的声音成为陪伴。",
+        "participants": "已有 580 份音频完成",
+        "deadline": "持续招募中",
+        "banner": "📖 故事伴读计划",
+        "button": "查看详情并录制"
+      }
+    },
+    "history": {
+      "hist-1": {
+        "title": "2024 春季图书捐赠计划",
+        "description": "已为 6 所乡村学校送出 1200 本图书。",
+        "status": "已结束 · 2024-05"
+      },
+      "hist-2": {
+        "title": "\"给地球写封信\" 环保征文",
+        "description": "收到 300+ 篇小朋友作品，评选出 30 篇优秀来信。",
+        "status": "已结束 · 2024-09"
+      }
+    }
   }
 }
