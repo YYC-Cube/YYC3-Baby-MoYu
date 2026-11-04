@@ -11,6 +11,7 @@
 | `osv-audit.mjs` | OSV.dev 依赖审计（Critical 阻断，产出 `osv-results.json`） | 网络；`bun run audit:osv` |
 | `generate-docs.py` | 文档生成 | Python 3 |
 | `check-i18n-coverage.mjs` | i18n 边界巡检（页面覆盖率 + zh/en 词条键一致性） | `bun run check:i18n` |
+| `migrate-sqlite-to-pg.mjs` | SQLite → PostgreSQL 迁移（自动建表、幂等插入、行数比对） | `bun run db:migrate:pg` |
 | `ts-node-hooks.mjs` | `node --experimental-strip-types` 直测钩子 | Node ≥ 22.13 |
 
 ## 历史遗留（不可直接执行）

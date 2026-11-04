@@ -29,13 +29,23 @@ services:
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
       FAL_KEY: ${FAL_KEY:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
-      # 容器内固定落盘路径（由下方 volume 映射到宿主 ./data）
-      DATABASE_URL: /app/data/yyc3.db
+      # 驱动：默认 sqlite（落盘 ./data）；切 PG 时在 .env 设置
+      #   DB_DRIVER=postgres
+      #   DATABASE_URL=postgres://app:***@postgres:5432/yyc3
+      DB_DRIVER: ${DB_DRIVER:-sqlite}
+      DATABASE_URL: ${DATABASE_URL:-/app/data/yyc3.db}
+      PG_POOL_MAX: ${PG_POOL_MAX:-10}
+      SEED_DEMO: ${SEED_DEMO:-false}
+      TZ: ${TZ:-Asia/Shanghai}
       LOG_DIR: /app/logs
     volumes:
       # 数据库与日志必须在宿主持久化，容器重建不丢数据
       - ./data:/app/data
       - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
     healthcheck:
       test:
         - CMD
@@ -46,3 +56,25 @@ services:
       timeout: 5s
       start_period: 20s
       retries: 3
+
+  # 可选：PG15（仅在 .env 设置 DB_DRIVER=postgres 且启用 profile 时启动）
+  #   docker compose --profile pg up -d --build
+  # 若使用外部/云上 PG，则本服务不需要启用。
+  postgres:
+    image: postgres:15-alpine
+    profiles: ["pg"]
+    container_name: yyc3-baby-moyu-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${PG_USER:-app}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?PG_PASSWORD 未设置}
+      POSTGRES_DB: ${PG_DATABASE:-yyc3}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    # 不对外暴露端口：仅容器网络内可达（应用经 postgres:5432 访问）
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-app} -d ${PG_DATABASE:-yyc3}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

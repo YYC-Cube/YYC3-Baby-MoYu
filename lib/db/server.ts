@@ -1,7 +1,7 @@
 // 服务端数据访问层：API Route 专用
 // 职责：SQLite 单例、种子数据确保、JSON 列的序列化/反序列化归一
 
-import { getDatabase, SQLiteDatabase } from "./sqlite-client"
+import { getDatabase, type SQLiteDatabase } from "./driver"
 
 // 各表中以 JSON 字符串存储的列
 const JSON_COLUMNS: Record<string, string[]> = {
