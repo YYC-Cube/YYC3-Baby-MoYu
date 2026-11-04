@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
+import { formatDateByLocale } from "@/lib/i18n/format"
 import Navigation from "@/components/Navigation"
 import PageHeader from "@/components/headers/PageHeader"
 import { useInteractions } from "@/hooks/useInteractions"
@@ -220,6 +221,7 @@ function InteractionCard({
 }) {
   const [expanded, setExpanded] = useState(false)
   const t = useTranslations("interactions")
+  const locale = useLocale()
   const typeConfig = getInteractionConfig(record.type)
   const moodConfig = getMoodConfig(record.mood)
   const qualityLevel = record.aiAnalysis ? calculateQualityLevel(record.aiAnalysis.qualityScore) : null
@@ -266,7 +268,7 @@ function InteractionCard({
             <i className="ri-user-line" /> {record.participants.join("、")}
           </span>
           <span>·</span>
-          <span>{new Date(record.createdAt).toLocaleDateString("zh-CN")}</span>
+          <span>{formatDateByLocale(record.createdAt, locale)}</span>
         </div>
 
         {record.tags.length > 0 && (

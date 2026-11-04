@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTranslations } from "next-intl"
 import { useLocale } from "next-intl"
+import { localeTag } from "@/lib/i18n/format"
 import PageHeader from "@/components/PageHeader"
 import { useAIVideo } from "@/hooks/useAIVideo"
 import { useChildren } from "@/hooks/useChildren"
@@ -45,12 +46,8 @@ export default function VideosPage() {
     return mins > 0 ? t("durationMinsSecs", { mins, secs }) : t("durationSecs", { secs })
   }
 
-  const formatDate = (date: Date): string => {
-    return new Date(date).toLocaleDateString(locale === "en" ? "en-US" : "zh-CN", {
-      month: "short",
-      day: "numeric",
-    })
-  }
+  const formatDate = (date: Date): string =>
+    new Date(date).toLocaleDateString(localeTag(locale), { month: "short", day: "numeric" })
 
   return (
     <div className="min-h-screen bg-linear-to-br from-rose-50 via-white to-purple-50 pb-24">

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTranslations, useLocale } from "next-intl"
+import { formatDateByLocale } from "@/lib/i18n/format"
 
 interface PDFGeneratorClass {
   new(): PDFGeneratorInstance
@@ -164,9 +165,7 @@ export default function AssessmentReport({ result, report, onClose }: Assessment
               </p>
               <p className="text-sm text-white/60">
                 {t("assessedAt", {
-                  date: new Date(currentReport?.assessmentDate || "").toLocaleDateString(
-                    locale === "en" ? "en-US" : "zh-CN"
-                  ),
+                  date: formatDateByLocale(currentReport?.assessmentDate || "", locale),
                 })}
               </p>
             </div>

@@ -43,6 +43,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://yyc3.app"),
   alternates: {
     canonical: "/",
+    // P4(i18n)：hreflang 双语互链（zh 默认无前缀，en 带前缀；相对路径由 metadataBase 拼接）
+    languages: {
+      "zh-CN": "/",
+      en: "/en",
+      "x-default": "/",
+    },
   },
   openGraph: {
     title: "YYC³ AI小语 - 智能成长守护系统",

@@ -47,6 +47,10 @@ jobs:
       - name: Test (node:sqlite 直测)
         run: bun run test:node
 
+      # P4(i18n) 收口：镜像路由缺失/词条键不一致时阻断（脚本 exit 1）
+      - name: i18n boundary (strict)
+        run: bun run check:i18n:strict
+
       - name: Build
         run: bun run build
 
