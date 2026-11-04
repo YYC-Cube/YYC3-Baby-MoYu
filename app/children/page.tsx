@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { motion, AnimatePresence } from "framer-motion"
 import Navigation from "@/components/Navigation"
 import PageHeader from "@/components/headers/PageHeader"
@@ -13,16 +14,17 @@ import { ChildQVersionAvatar, GenderSelector } from "@/components/ui/QVersionCha
 
 export default function ChildrenPage() {
   // 数据统一：经服务端 API（httpOnly Cookie 认证 + 租户隔离）
+  const t = useTranslations("children")
   const { children, isLoading, error, refreshChildren, deleteChild } = useChildren()
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingChild, setEditingChild] = useState<Child | null>(null)
 
   const handleDelete = async (id: string) => {
-    if (confirm("确定要删除该儿童档案吗？相关的成长记录也将被删除。")) {
+    if (confirm(t("deleteConfirm"))) {
       try {
         await deleteChild(id)
       } catch (err) {
-        alert(err instanceof Error ? err.message : "删除失败，请先登录")
+        alert(err instanceof Error ? err.message : t("deleteFailed"))
       }
     }
   }
@@ -34,9 +36,9 @@ export default function ChildrenPage() {
     const months = today.getMonth() - birth.getMonth()
 
     if (years < 1) {
-      return `${Math.max(0, years * 12 + months)}个月`
+      return `${Math.max(0, years * 12 + months)}${t("monthUnit")}`
     }
-    return `${years}岁${months > 0 ? months + "个月" : ""}`
+    return `${years}${t("yearUnit")}${months > 0 ? Math.max(0, months) + t("monthUnit") : ""}`
   }
 
   const getStageColor = (stage?: string): string => {
@@ -54,11 +56,11 @@ export default function ChildrenPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-b from-sky-50 to-white">
-      <PageHeader title="儿童档案" subtitle="管理孩子的成长档案" showBack />
+      <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} showBack />
 
       {error && (
         <div className="mx-4 mt-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
-          {error}——请先在首页登录后再管理档案
+          {error}{t("errorSuffix")}
         </div>
       )}
       <main className="flex-1 px-4 pb-24 pt-4">
@@ -71,20 +73,20 @@ export default function ChildrenPage() {
             whileTap={{ scale: 0.98 }}
           >
             <i className="ri-add-circle-line text-2xl" />
-            <span className="font-medium">添加孩子档案</span>
+            <span className="font-medium">{t("addChild")}</span>
           </motion.button>
 
           {/* 儿童列表 */}
           {isLoading ? (
             <div className="text-center py-12 text-slate-400">
               <i className="ri-loader-4-line animate-spin text-3xl" />
-              <p className="mt-2">加载中...</p>
+              <p className="mt-2">{t("loading")}</p>
             </div>
           ) : children.length === 0 ? (
             <div className="text-center py-12 text-slate-400">
               <i className="ri-user-smile-line text-6xl mb-4" />
-              <p>还没有添加孩子档案</p>
-              <p className="text-sm mt-1">点击上方按钮添加第一个档案</p>
+              <p>{t("emptyTitle")}</p>
+              <p className="text-sm mt-1">{t("emptyHint")}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -111,7 +113,7 @@ export default function ChildrenPage() {
                         <span
                           className={`text-xs px-2 py-0.5 rounded-full ${child.gender === "male" ? "bg-blue-100 text-blue-600" : "bg-pink-100 text-pink-600"}`}
                         >
-                          {child.gender === "male" ? "男" : "女"}
+                          {child.gender === "male" ? t("male") : t("female")}
                         </span>
                       </div>
 
@@ -157,21 +159,21 @@ export default function ChildrenPage() {
                       className="flex-1 py-2 px-3 bg-blue-50 text-blue-600 rounded-lg text-center text-sm hover:bg-blue-100 transition"
                     >
                       <i className="ri-line-chart-line mr-1" />
-                      成长记录
+                      {t("quickGrowth")}
                     </a>
                     <a
                       href={`/growth/assessment?child=${child.id}`}
                       className="flex-1 py-2 px-3 bg-purple-50 text-purple-600 rounded-lg text-center text-sm hover:bg-purple-100 transition"
                     >
                       <i className="ri-file-list-3-line mr-1" />
-                      发展评估
+                      {t("quickAssessment")}
                     </a>
                     <a
                       href={`/homework?child=${child.id}`}
                       className="flex-1 py-2 px-3 bg-orange-50 text-orange-600 rounded-lg text-center text-sm hover:bg-orange-100 transition"
                     >
                       <i className="ri-book-open-line mr-1" />
-                      作业管理
+                      {t("quickHomework")}
                     </a>
                   </div>
                 </motion.div>
@@ -213,10 +215,10 @@ export default function ChildrenPage() {
                     })
                 if (!res.ok) {
                   const result = (await res.json().catch(() => ({}))) as { message?: string }
-                  throw new Error(result.message ?? "保存失败，请先登录")
+                  throw new Error(result.message ?? t("saveFailed"))
                 }
               } catch (err) {
-                alert(err instanceof Error ? err.message : "保存失败")
+                alert(err instanceof Error ? err.message : t("saveFailedShort"))
                 return // 保留弹窗，用户可重试
               }
               await refreshChildren()
@@ -248,6 +250,7 @@ function ChildFormModal({
     gender: child?.gender || ("male"),
   })
   const [isSaving, setIsSaving] = useState(false)
+  const t = useTranslations("children")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -274,12 +277,12 @@ function ChildFormModal({
         exit={{ scale: 0.9, opacity: 0 }}
         onClick={(e) => { e.stopPropagation(); }}
       >
-        <h2 className="text-xl font-bold text-slate-800 mb-4">{child ? "编辑档案" : "添加孩子档案"}</h2>
+        <h2 className="text-xl font-bold text-slate-800 mb-4">{child ? t("editTitle") : t("addTitle")}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-600 mb-1">
-              姓名 <span className="text-red-500">*</span>
+              {t("labelName")} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -291,19 +294,19 @@ function ChildFormModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-600 mb-1">昵称</label>
+            <label className="block text-sm font-medium text-slate-600 mb-1">{t("labelNickname")}</label>
             <input
               type="text"
               value={formData.nickname}
               onChange={(e) => { setFormData({ ...formData, nickname: e.target.value }); }}
               className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="可选"
+              placeholder={t("optional")}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-600 mb-1">
-              出生日期 <span className="text-red-500">*</span>
+              {t("labelBirth")} <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
@@ -316,7 +319,7 @@ function ChildFormModal({
 
           <div>
             <label className="block text-sm font-medium text-slate-600 mb-2">
-              选择宝宝性别 <span className="text-red-500">*</span>
+              {t("labelGender")} <span className="text-red-500">*</span>
             </label>
             <GenderSelector
               value={formData.gender}
@@ -331,14 +334,14 @@ function ChildFormModal({
               onClick={onClose}
               className="flex-1 py-3 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition"
             >
-              取消
+              {t("cancel")}
             </button>
             <button
               type="submit"
               disabled={isSaving}
               className="flex-1 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
             >
-              {isSaving ? "保存中..." : "保存"}
+              {isSaving ? t("saving") : t("save")}
             </button>
           </div>
         </form>
