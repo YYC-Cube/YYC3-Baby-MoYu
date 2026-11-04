@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import type { PictureBook } from "@/types/ai-creative"
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
@@ -23,6 +24,7 @@ export default function BookReader({
   onPause,
   onClose,
 }: BookReaderProps) {
+  const t = useTranslations("books")
   const [showControls, setShowControls] = useState(true)
   const [highlightedWord, setHighlightedWord] = useState(-1)
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -133,7 +135,7 @@ export default function BookReader({
                 className="flex items-center gap-2 text-adaptive-muted hover:text-adaptive transition-colors"
               >
                 <i className="ri-arrow-left-line text-xl" />
-                <span className="text-sm font-medium">返回书架</span>
+                <span className="text-sm font-medium">{t("backToShelf")}</span>
               </button>
 
               <h1 className="text-base font-semibold text-adaptive truncate max-w-[200px]">{book.title}</h1>

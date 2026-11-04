@@ -52,6 +52,13 @@ export interface BadgeDefinition {
   evaluate: (stats: BadgeStats) => number | null
   /** 展示用的条件说明（可含动态进度文案） */
   conditions: (stats: BadgeStats) => string[]
+  /** i18n：词条键（badgeDefs.<id>.title / .description），UI 优先走词条渲染 */
+  titleKey?: string
+  descriptionKey?: string
+  /** i18n：复合型徽章的固定条件词条键列表（badgeConds.<id>.c1..cn） */
+  condKeys?: string[]
+  /** i18n：计数型徽章的目标值（配合 condProgress 模板渲染动态进度） */
+  progressGoal?: number
 }
 
 // 评估结果

@@ -26,6 +26,11 @@ export default function BadgesPage() {
   const { currentChild } = useChildren()
   const { badges, stats, totalPoints, unlockedCount, newUnlocks, loading, error, clearNewUnlocks, refresh } = useBadges(currentChild?.id)
 
+  // P3 数据层词条：30 枚勋章文案/等级/分类/条件全部走 badges 命名空间（zh 与 lib/badges/definitions.ts 逐字一致）
+  const badgeTitle = (d: { id: string }) => t(`badgeDefs.${d.id}.title`)
+  const badgeDesc = (d: { id: string }) => t(`badgeDefs.${d.id}.description`)
+  const badgeLevelLabel = (lv: BadgeLevel) => t(`badgeLevels.${lv}`)
+
   const categories = ["all", ...Array.from(new Set(badges.map((b) => b.definition.category)))]
 
   const filteredBadges = badges.filter((b) => {
@@ -45,8 +50,8 @@ export default function BadgesPage() {
     if ("share" in navigator) {
       try {
         await navigator.share({
-          title: t("shareTitle", { title: badge.definition.title }),
-          text: t("shareText", { title: badge.definition.title, description: badge.definition.description }),
+          title: t("shareTitle", { title: badgeTitle(badge.definition) }),
+          text: t("shareText", { title: badgeTitle(badge.definition), description: badgeDesc(badge.definition) }),
           url: window.location.href,
         })
       } catch (err) {
@@ -125,9 +130,9 @@ export default function BadgesPage() {
                 <p className="font-bold">
                   {newUnlocks.length > 1
                     ? t("unlockedMulti", { count: newUnlocks.length })
-                    : t("unlockedSingle", { title: newUnlocks[0].definition.title })}
+                    : t("unlockedSingle", { title: badgeTitle(newUnlocks[0].definition) })}
                 </p>
-                <p className="text-sm text-white/85">{newUnlocks.map((b) => b.definition.title).join(" · ")}</p>
+                <p className="text-sm text-white/85">{newUnlocks.map((b) => badgeTitle(b.definition)).join(" · ")}</p>
               </div>
               <Button size="sm" variant="secondary" onClick={clearNewUnlocks}>{t("dismiss")}</Button>
             </motion.div>
@@ -142,7 +147,7 @@ export default function BadgesPage() {
               return (
                 <div key={level} className={`rounded-xl p-3 text-center bg-linear-to-br ${meta.bg} border ${meta.border}`}>
                   <div className="text-2xl">{meta.icon}</div>
-                  <div className={`text-sm font-bold ${meta.text}`}>{meta.label}</div>
+                  <div className={`text-sm font-bold ${meta.text}`}>{badgeLevelLabel(level)}</div>
                   <div className="text-xs text-slate-500">{count}/{total} · {t("pointsPer", { points: meta.points })}</div>
                 </div>
               )
@@ -196,7 +201,7 @@ export default function BadgesPage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {category === "all" ? t("categoryAll") : category}
+                  {category === "all" ? t("categoryAll") : t(`badgeCats.${category}`)}
                 </motion.button>
               ))}
             </div>
@@ -265,9 +270,9 @@ export default function BadgesPage() {
                           </div>
 
                           <div className="flex-1 w-full">
-                            <h4 className={`font-bold ${levelColor.text} text-sm mb-1`}>{def.title}</h4>
-                            <p className="text-xs text-slate-600 line-clamp-2">{def.description}</p>
-                            <Badge variant="secondary" className="mt-2 text-xs">{def.category}</Badge>
+                            <h4 className={`font-bold ${levelColor.text} text-sm mb-1`}>{badgeTitle(def)}</h4>
+                            <p className="text-xs text-slate-600 line-clamp-2">{badgeDesc(def)}</p>
+                            <Badge variant="secondary" className="mt-2 text-xs">{t(`badgeCats.${def.category}`)}</Badge>
                           </div>
 
                           {!badge.unlocked && badge.progress > 0 && (
@@ -310,15 +315,15 @@ export default function BadgesPage() {
                 <DialogTitle className="flex items-center gap-3">
                   <span className="text-4xl">{selectedBadge.definition.icon}</span>
                   <div>
-                    <div className="text-lg">{selectedBadge.definition.title}</div>
+                    <div className="text-lg">{badgeTitle(selectedBadge.definition)}</div>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="secondary">{BADGE_LEVELS[selectedBadge.definition.level].icon} {BADGE_LEVELS[selectedBadge.definition.level].label}</Badge>
-                      <Badge variant="outline">{selectedBadge.definition.category}</Badge>
-                      <Badge variant="outline">{BADGE_LEVELS[selectedBadge.definition.level].points} 点</Badge>
+                      <Badge variant="secondary">{BADGE_LEVELS[selectedBadge.definition.level].icon} {badgeLevelLabel(selectedBadge.definition.level)}</Badge>
+                      <Badge variant="outline">{t(`badgeCats.${selectedBadge.definition.category}`)}</Badge>
+                      <Badge variant="outline">{t("pointsPer", { points: BADGE_LEVELS[selectedBadge.definition.level].points })}</Badge>
                     </div>
                   </div>
                 </DialogTitle>
-                <DialogDescription className="text-base">{selectedBadge.definition.description}</DialogDescription>
+                <DialogDescription className="text-base">{badgeDesc(selectedBadge.definition)}</DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4 mt-4">
@@ -334,7 +339,21 @@ export default function BadgesPage() {
                 <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
                   <p className="text-amber-700 font-medium mb-2">{t("conditionsTitle")}</p>
                   <ul className="space-y-1 text-sm text-amber-600">
-                    {(stats ? selectedBadge.definition.conditions(stats) : selectedBadge.definition.description ? [selectedBadge.definition.description] : []).map((condition, i) => (
+                    {(() => {
+                      const def = selectedBadge.definition
+                      // P3 i18n：复合型走 condKeys 词条；计数型用 progress 反推当前值渲染动态进度模板
+                      if (def.condKeys) return def.condKeys.map((k) => t(k))
+                      if (def.progressGoal !== undefined && stats) {
+                        const cur = Math.min(
+                          Math.round((selectedBadge.progress * def.progressGoal) / 100),
+                          def.progressGoal
+                        )
+                        return [
+                          t("condProgress", { desc: badgeDesc(def), cur, goal: def.progressGoal }),
+                        ]
+                      }
+                      return [badgeDesc(def)]
+                    })().map((condition, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <i className="ri-arrow-right-line mt-0.5" />
                         {condition}

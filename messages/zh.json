@@ -145,7 +145,22 @@
     "dimLanguage": "语言能力",
     "dimMotor": "运动发展",
     "dimSocial": "社会情感",
-    "dimSelfCare": "自理能力"
+    "dimSelfCare": "自理能力",
+    "timeline": {
+      "titleOf": "{name}的成长时间线",
+      "filterAll": "全部",
+      "types": {
+        "milestone": "里程碑",
+        "observation": "观察记录",
+        "emotion": "情感记录",
+        "learning": "学习记录",
+        "health": "健康记录"
+      },
+      "aiInsightLabel": "AI小语洞察",
+      "monthLabel": "{year}年{month}月",
+      "empty": "暂无{label}",
+      "emptyAll": "暂无记录"
+    }
   },
   "courses": {
     "title": "课程学习",
@@ -266,7 +281,8 @@
       "english": "英语",
       "math": "数学",
       "nature": "自然"
-    }
+    },
+    "backToShelf": "返回书架"
   },
   "ai": {
     "assistant": "AI助手",
@@ -540,7 +556,172 @@
     "shareText": "我在YYC³成长陪伴系统中获得了{title}勋章！{description}",
     "shareUnsupported": "您的浏览器不支持分享功能",
     "empty": "暂无符合条件的勋章",
-    "pointsPer": "{points}分/枚"
+    "pointsPer": "{points}分/枚",
+    "badgeDefs": {
+      "record-first": {
+        "title": "初试啼声",
+        "description": "完成第 1 条成长记录"
+      },
+      "record-10": {
+        "title": "用心记录者",
+        "description": "累计 10 条成长记录"
+      },
+      "record-50": {
+        "title": "成长档案馆",
+        "description": "累计 50 条成长记录"
+      },
+      "record-100": {
+        "title": "百年纪念册",
+        "description": "累计 100 条成长记录"
+      },
+      "record-200": {
+        "title": "时光收藏家",
+        "description": "累计 200 条成长记录"
+      },
+      "observe-5": {
+        "title": "好奇目光",
+        "description": "完成 5 条观察日志"
+      },
+      "observe-20": {
+        "title": "敏锐观察家",
+        "description": "完成 20 条观察日志"
+      },
+      "observe-50": {
+        "title": "儿童行为学家",
+        "description": "完成 50 条观察日志"
+      },
+      "emotion-10": {
+        "title": "情绪捕手",
+        "description": "记录 10 次情绪变化"
+      },
+      "emotion-30": {
+        "title": "心灵读译者",
+        "description": "记录 30 次情绪变化"
+      },
+      "emotion-60": {
+        "title": "共情大师",
+        "description": "记录 60 次情绪变化"
+      },
+      "learning-10": {
+        "title": "求知若渴",
+        "description": "记录 10 条学习成长"
+      },
+      "learning-30": {
+        "title": "学海拾贝",
+        "description": "记录 30 条学习成长"
+      },
+      "milestone-3": {
+        "title": "第一个脚印",
+        "description": "解锁 3 个成长里程碑"
+      },
+      "milestone-10": {
+        "title": "里程碑达人",
+        "description": "解锁 10 个成长里程碑"
+      },
+      "milestone-25": {
+        "title": "成长领航员",
+        "description": "解锁 25 个成长里程碑"
+      },
+      "homework-5": {
+        "title": "作业启航",
+        "description": "完成 5 次作业任务"
+      },
+      "homework-20": {
+        "title": "学霸养成中",
+        "description": "完成 20 次作业任务"
+      },
+      "homework-50": {
+        "title": "作业终结者",
+        "description": "完成 50 次作业任务"
+      },
+      "streak-7": {
+        "title": "七日之约",
+        "description": "连续 7 天记录"
+      },
+      "streak-30": {
+        "title": "陪伴之星",
+        "description": "连续 30 天记录"
+      },
+      "weeks-8": {
+        "title": "双月耕耘",
+        "description": "8 个不同周都有记录"
+      },
+      "anniversary-365": {
+        "title": "一周年之礼",
+        "description": "首次记录满一周年"
+      },
+      "all-types": {
+        "title": "全景记录者",
+        "description": "四种记录类型全部使用过"
+      },
+      "ai-analysis-10": {
+        "title": "AI 智囊团",
+        "description": "10 条记录获得 AI 分析"
+      },
+      "ai-analysis-50": {
+        "title": "智慧同行者",
+        "description": "50 条记录获得 AI 分析"
+      },
+      "tags-15": {
+        "title": "标签收藏家",
+        "description": "使用 15 个不同标签"
+      },
+      "multi-child": {
+        "title": "多宝家庭",
+        "description": "同时守护 2 个以上宝宝档案"
+      },
+      "renaissance": {
+        "title": "全能守护者",
+        "description": "记录、观察、情绪、作业、AI 全面开花"
+      },
+      "balanced-100": {
+        "title": "百分守护",
+        "description": "成就点数达到 100"
+      }
+    },
+    "badgeConds": {
+      "all-types": {
+        "c1": "完成里程碑记录",
+        "c2": "完成观察记录",
+        "c3": "完成情绪记录",
+        "c4": "完成学习记录"
+      },
+      "ai-analysis-10": {
+        "c1": "累计 10 条记录包含 AI 分析（当前按数据自动统计）"
+      },
+      "ai-analysis-50": {
+        "c1": "累计 50 条记录包含 AI 分析"
+      },
+      "multi-child": {
+        "c1": "建立至少 2 个宝宝档案"
+      },
+      "renaissance": {
+        "c1": "累计 30 条记录",
+        "c2": "观察与情绪记录各 5 条",
+        "c3": "完成 5 次作业",
+        "c4": "10 条 AI 分析"
+      },
+      "balanced-100": {
+        "c1": "累计成就点数达到 100（自动累计）"
+      }
+    },
+    "badgeLevels": {
+      "bronze": "铜牌",
+      "silver": "银牌",
+      "gold": "金牌",
+      "platinum": "钻石"
+    },
+    "badgeCats": {
+      "成长记录": "成长记录",
+      "观察记录": "观察记录",
+      "情绪记录": "情绪记录",
+      "学习成长": "学习成长",
+      "里程碑": "里程碑",
+      "作业任务": "作业任务",
+      "坚持陪伴": "坚持陪伴",
+      "综合成就": "综合成就"
+    },
+    "condProgress": "{desc}（当前 {cur}/{goal}）"
   },
   "messageCenter": {
     "pageTitle": "消息中心",
@@ -634,6 +815,14 @@
       "volume": "音量",
       "fullscreen": "全屏",
       "close": "关闭"
+    },
+    "styleNames": {
+      "warm": "温馨",
+      "playful": "活泼",
+      "elegant": "优雅",
+      "adventure": "冒险",
+      "dreamy": "梦幻",
+      "nature": "自然"
     }
   },
   "creative": {
@@ -900,5 +1089,93 @@
       "generating": "生成中...",
       "start": "开始生成"
     }
+  },
+  "videoGen": {
+    "chooseType": "选择视频类型",
+    "types": {
+      "slideshow": {
+        "name": "照片幻灯片",
+        "desc": "将多张照片制作成精美视频"
+      },
+      "imageToVideo": {
+        "name": "图片转动态",
+        "desc": "让静态图片动起来"
+      },
+      "storyAnimation": {
+        "name": "故事动画",
+        "desc": "将文字故事变成动画视频"
+      },
+      "memoryRecap": {
+        "name": "成长回忆",
+        "desc": "自动生成成长回顾视频"
+      }
+    },
+    "addContent": "添加内容",
+    "videoTitle": "视频标题",
+    "titlePlaceholder": "给视频起个名字...",
+    "defaultTitle": "我的精彩视频",
+    "storyLabel": "故事内容",
+    "storyPlaceholder": "输入你想变成动画的故事...",
+    "selectImages": "选择图片 ({count}/12)",
+    "prev": "上一步",
+    "next": "下一步",
+    "chooseStyle": "选择风格",
+    "styleLabel": "视频风格",
+    "styleNames": {
+      "warm": "温馨",
+      "playful": "活泼",
+      "elegant": "优雅",
+      "adventure": "冒险",
+      "dreamy": "梦幻",
+      "nature": "自然"
+    },
+    "templateLabel": "选择模板（可选）",
+    "templates": {
+      "template1": {
+        "name": "成长记录",
+        "desc": "记录宝宝的成长点滴"
+      },
+      "template2": {
+        "name": "生日庆典",
+        "desc": "欢乐生日派对"
+      },
+      "template3": {
+        "name": "日常生活",
+        "desc": "日常生活剪影"
+      }
+    },
+    "seconds": "{secs}秒",
+    "durationLabel": "视频时长: {secs}秒",
+    "audioSettings": "音频设置",
+    "aiVoiceover": "AI配音",
+    "voiceNames": {
+      "xiaoyu": {
+        "name": "小语",
+        "desc": "可爱童声"
+      },
+      "xiaoming": {
+        "name": "小明",
+        "desc": "活泼男孩"
+      },
+      "narrator": {
+        "name": "旁白",
+        "desc": "专业旁白"
+      },
+      "child": {
+        "name": "儿童",
+        "desc": "自然童声"
+      }
+    },
+    "bgm": "背景音乐",
+    "musicNames": {
+      "happy": "欢快",
+      "gentle": "温柔",
+      "energetic": "活力",
+      "calm": "宁静"
+    },
+    "volume": "音量: {vol}%",
+    "startGenerating": "开始生成",
+    "generatingTitle": "正在生成视频",
+    "createTitle": "创建视频"
   }
 }
