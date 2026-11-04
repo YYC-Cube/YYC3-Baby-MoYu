@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useLocale, useTranslations } from "next-intl"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import PageHeader from "@/components/headers/PageHeader"
@@ -18,6 +19,7 @@ import type { BadgeLevel, BadgeProgress } from "@/types/badges"
 const LEVEL_ORDER: BadgeLevel[] = ["bronze", "silver", "gold", "platinum"]
 
 export default function BadgesPage() {
+  const t = useTranslations("badges")
   const [filter, setFilter] = useState<"all" | "unlocked" | "locked">("all")
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [selectedBadge, setSelectedBadge] = useState<BadgeProgress | null>(null)
@@ -43,23 +45,24 @@ export default function BadgesPage() {
     if ("share" in navigator) {
       try {
         await navigator.share({
-          title: `我获得了${badge.definition.title}勋章！`,
-          text: `我在YYC³成长陪伴系统中获得了${badge.definition.title}勋章！${badge.definition.description}`,
+          title: t("shareTitle", { title: badge.definition.title }),
+          text: t("shareText", { title: badge.definition.title, description: badge.definition.description }),
           url: window.location.href,
         })
       } catch (err) {
         console.log("分享取消:", err)
       }
     } else {
-      alert("您的浏览器不支持分享功能")
+      alert(t("shareUnsupported"))
     }
   }
 
-  const formatDate = (iso?: string) => (iso ? new Date(iso).toLocaleDateString("zh-CN") : "")
+  const locale = useLocale()
+  const formatDate = (iso?: string) => (iso ? new Date(iso).toLocaleDateString(locale === "en" ? "en-US" : "zh-CN") : "")
 
   return (
     <div className="min-h-screen bg-linear-to-b from-amber-50 via-orange-50 to-yellow-50 pb-24">
-      <PageHeader title="勋章殿堂" showBack />
+      <PageHeader title={t("pageTitle")} showBack />
 
       <main className="px-4 py-4 space-y-6">
         {/* 成就总览（真实数据） */}
@@ -69,24 +72,24 @@ export default function BadgesPage() {
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">🏆</div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg">{currentChild.name}的成就</h3>
+                  <h3 className="font-bold text-lg">{t("achievementsOf", { name: currentChild.name })}</h3>
                   <p className="text-white/80 text-sm">
-                    已获得 {unlockedCount}/{badges.length} 枚 · {totalPoints} 成就点
+                    {t("unlockedSummary", { count: unlockedCount, total: badges.length, points: totalPoints })}
                   </p>
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-bold">{completionRate}%</div>
-                  <div className="text-xs text-white/70">完成率</div>
+                  <div className="text-xs text-white/70">{t("completionRate")}</div>
                 </div>
               </div>
               <Progress value={completionRate} className="mt-4 bg-white/20" />
               {stats && (
                 <div className="grid grid-cols-4 gap-2 mt-4 text-center">
                   {[
-                    { label: "成长记录", value: stats.totalRecords },
-                    { label: "完成作业", value: stats.completedHomework },
-                    { label: "连续天数", value: stats.streakDays },
-                    { label: "不同标签", value: stats.distinctTags },
+                    { label: t("statRecords"), value: stats.totalRecords },
+                    { label: t("statHomework"), value: stats.completedHomework },
+                    { label: t("statStreak"), value: stats.streakDays },
+                    { label: t("statTags"), value: stats.distinctTags },
                   ].map((item) => (
                     <div key={item.label} className="bg-white/10 rounded-lg py-2">
                       <div className="text-lg font-bold">{item.value}</div>
@@ -102,8 +105,8 @@ export default function BadgesPage() {
         {!currentChild && !loading && (
           <Card className="bg-amber-50 border-amber-200">
             <CardContent className="p-6 text-center">
-              <p className="text-amber-700">请先在设置中添加孩子档案</p>
-              <Link href="/children" className="text-blue-600 underline text-sm mt-2 inline-block">去添加</Link>
+              <p className="text-amber-700">{t("noChild")}</p>
+              <Link href="/children" className="text-blue-600 underline text-sm mt-2 inline-block">{t("goAdd")}</Link>
             </CardContent>
           </Card>
         )}
@@ -120,11 +123,13 @@ export default function BadgesPage() {
               <span className="text-3xl">{newUnlocks[0].definition.icon}</span>
               <div className="flex-1">
                 <p className="font-bold">
-                  🎉 恭喜解锁 {newUnlocks.length > 1 ? `${newUnlocks.length} 枚新勋章` : `「${newUnlocks[0].definition.title}」`}
+                  {newUnlocks.length > 1
+                    ? t("unlockedMulti", { count: newUnlocks.length })
+                    : t("unlockedSingle", { title: newUnlocks[0].definition.title })}
                 </p>
                 <p className="text-sm text-white/85">{newUnlocks.map((b) => b.definition.title).join(" · ")}</p>
               </div>
-              <Button size="sm" variant="secondary" onClick={clearNewUnlocks}>知道啦</Button>
+              <Button size="sm" variant="secondary" onClick={clearNewUnlocks}>{t("dismiss")}</Button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -138,7 +143,7 @@ export default function BadgesPage() {
                 <div key={level} className={`rounded-xl p-3 text-center bg-linear-to-br ${meta.bg} border ${meta.border}`}>
                   <div className="text-2xl">{meta.icon}</div>
                   <div className={`text-sm font-bold ${meta.text}`}>{meta.label}</div>
-                  <div className="text-xs text-slate-500">{count}/{total} · {meta.points}分/枚</div>
+                  <div className="text-xs text-slate-500">{count}/{total} · {t("pointsPer", { points: meta.points })}</div>
                 </div>
               )
             })}
@@ -148,15 +153,15 @@ export default function BadgesPage() {
         {/* 筛选 */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">筛选条件</CardTitle>
+            <CardTitle className="text-lg">{t("filterTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {[
-                { id: "all" as const, label: "全部", icon: "ri-apps-line" },
-                { id: "unlocked" as const, label: "已获得", icon: "ri-check-line" },
-                { id: "locked" as const, label: "未获得", icon: "ri-lock-line" },
-              ].map((item) => (
+              {([
+                { id: "all", labelKey: "filterAll", icon: "ri-apps-line" },
+                { id: "unlocked", labelKey: "filterUnlocked", icon: "ri-check-line" },
+                { id: "locked", labelKey: "filterLocked", icon: "ri-lock-line" },
+              ] as const).map((item) => (
                 <motion.button
                   key={item.id}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap ${
@@ -167,7 +172,7 @@ export default function BadgesPage() {
                   whileTap={{ scale: 0.95 }}
                 >
                   <i className={item.icon} />
-                  <span>{item.label}</span>
+                  <span>{t(item.labelKey)}</span>
                 </motion.button>
               ))}
               <motion.button
@@ -176,7 +181,7 @@ export default function BadgesPage() {
                 whileTap={{ scale: 0.95 }}
               >
                 <i className="ri-refresh-line" />
-                <span>刷新</span>
+                <span>{t("refresh")}</span>
               </motion.button>
             </div>
 
@@ -191,7 +196,7 @@ export default function BadgesPage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {category === "all" ? "全部分类" : category}
+                  {category === "all" ? t("categoryAll") : category}
                 </motion.button>
               ))}
             </div>
@@ -203,7 +208,7 @@ export default function BadgesPage() {
           <Card>
             <CardContent className="p-12 text-center text-slate-500">
               <i className="ri-loader-4-line animate-spin text-3xl mb-2 block" />
-              正在基于真实记录评估勋章…
+              {t("evaluating")}
             </CardContent>
           </Card>
         )}
@@ -211,7 +216,7 @@ export default function BadgesPage() {
           <Card className="border-red-200 bg-red-50">
             <CardContent className="p-6 text-center text-red-600">
               <p>{error}</p>
-              <Button size="sm" variant="outline" className="mt-3" onClick={refresh}>重试</Button>
+              <Button size="sm" variant="outline" className="mt-3" onClick={refresh}>{t("retry")}</Button>
             </CardContent>
           </Card>
         )}
@@ -273,7 +278,7 @@ export default function BadgesPage() {
                           )}
 
                           {badge.unlocked && badge.unlockedAt && (
-                            <p className="text-xs text-slate-500">{formatDate(badge.unlockedAt)} 获得</p>
+                            <p className="text-xs text-slate-500">{t("earnedAt", { date: formatDate(badge.unlockedAt) })}</p>
                           )}
                         </div>
                       </CardContent>
@@ -289,7 +294,7 @@ export default function BadgesPage() {
           <Card>
             <CardContent className="p-12 text-center">
               <i className="ri-trophy-line text-6xl text-slate-300 mb-4" />
-              <p className="text-slate-500">暂无符合条件的勋章</p>
+              <p className="text-slate-500">{t("empty")}</p>
             </CardContent>
           </Card>
         )}
@@ -321,13 +326,13 @@ export default function BadgesPage() {
                   <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                     <p className="text-green-700 font-medium flex items-center gap-2">
                       <i className="ri-check-circle-line" />
-                      已于 {formatDate(selectedBadge.unlockedAt)} 获得
+                      {t("earnedAtLong", { date: formatDate(selectedBadge.unlockedAt) })}
                     </p>
                   </div>
                 )}
 
                 <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
-                  <p className="text-amber-700 font-medium mb-2">获得条件：</p>
+                  <p className="text-amber-700 font-medium mb-2">{t("conditionsTitle")}</p>
                   <ul className="space-y-1 text-sm text-amber-600">
                     {(stats ? selectedBadge.definition.conditions(stats) : selectedBadge.definition.description ? [selectedBadge.definition.description] : []).map((condition, i) => (
                       <li key={i} className="flex items-start gap-2">
@@ -341,7 +346,7 @@ export default function BadgesPage() {
                 {!selectedBadge.unlocked && selectedBadge.progress > 0 && (
                   <div>
                     <div className="flex justify-between text-sm mb-2">
-                      <span className="text-slate-600">完成进度</span>
+                      <span className="text-slate-600">{t("progressLabel")}</span>
                       <span className="font-medium">{selectedBadge.progress}%</span>
                     </div>
                     <Progress value={selectedBadge.progress} />
@@ -354,7 +359,7 @@ export default function BadgesPage() {
                     className="w-full bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
                   >
                     <i className="ri-share-line mr-2" />
-                    分享成就
+                    {t("share")}
                   </Button>
                 )}
               </div>

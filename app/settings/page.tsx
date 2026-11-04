@@ -11,8 +11,10 @@ import { useChildren } from "@/hooks/useChildren"
 import { characterManager } from "@/lib/character-manager"
 import { motion } from "framer-motion"
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 
 export default function SettingsPage() {
+  const t = useTranslations("settings")
   const [eyeMode, setEyeMode] = useState(true)
   const [reminder, setReminder] = useState(false)
   const { user, logout } = useAuth()
@@ -21,7 +23,7 @@ export default function SettingsPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden relative bg-sky-100">
-      <PageHeader icon="ri-settings-4-fill" title="设置与管理" />
+      <PageHeader icon="ri-settings-4-fill" title={t("pageTitle")} />
 
       <main className="flex-1 overflow-y-auto w-full">
         <section className="max-w-5xl mx-auto w-full px-8 pb-28 pt-4 grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -79,48 +81,48 @@ export default function SettingsPage() {
             <SettingsItem
               icon="ri-account-circle-fill"
               iconColor="text-blue-400"
-              title="修改资料/昵称"
-              subtitle={user ? `当前昵称：${user.firstName || "未设置"}` : "请先登录"}
+              title={t("editProfile")}
+              subtitle={user ? `${t("nicknamePrefix")}${user.firstName || t("noNickname")}` : t("loginFirst")}
               hasArrow
             />
             <SettingsItem
               icon="ri-shield-fill"
               iconColor="text-green-400"
-              title="家长授权码"
-              subtitle="用于家长端绑定和管理"
+              title={t("parentCode")}
+              subtitle={t("parentCodeDesc")}
               action={
                 <button className="bg-green-400 text-white px-4 py-1.5 rounded-full text-sm font-bold hover:bg-green-500">
-                  查看
+                  {t("view")}
                 </button>
               }
             />
           </SettingsSection>
 
           {/* 界面主题 */}
-          <SettingsSection title="界面主题" icon="ri-palette-fill" iconColor="text-emerald-500" index={0}>
+          <SettingsSection title={t("themeSection")} icon="ri-palette-fill" iconColor="text-emerald-500" index={0}>
             <SettingsItem
               icon="ri-magic-fill"
               iconColor="text-emerald-400"
-              title="主题风格"
-              subtitle="暖阳 / 赛博霓虹 / 液态翡翠"
+              title={t("themeItem")}
+              subtitle={t("themeDesc")}
               action={<ThemeSwitcher compact />}
             />
           </SettingsSection>
 
           {/* 学习偏好 */}
-          <SettingsSection title="学习偏好" icon="ri-book-mark-fill" iconColor="text-purple-500" index={1}>
+          <SettingsSection title={t("prefSection")} icon="ri-book-mark-fill" iconColor="text-purple-500" index={1}>
             <SettingsItem
               icon="ri-eye-fill"
               iconColor="text-purple-400"
-              title="护眼模式"
-              subtitle="开启后界面将调整为暖色"
+              title={t("eyeMode")}
+              subtitle={t("eyeModeDesc")}
               action={<ToggleSwitch value={eyeMode} onChange={setEyeMode} />}
             />
             <SettingsItem
               icon="ri-notification-3-fill"
               iconColor="text-pink-400"
-              title="学习进度提醒"
-              subtitle="每天发送一次作业提醒"
+              title={t("reminder")}
+              subtitle={t("reminderDesc")}
               action={<ToggleSwitch value={reminder} onChange={setReminder} />}
               hasBorder
             />
@@ -135,7 +137,7 @@ export default function SettingsPage() {
               transition={{ duration: 0.4, delay: 0.4 }}
             >
               <i className="ri-parent-fill text-orange-500" />
-              家长与帮助
+              {t("helpSection")}
             </motion.h2>
 
             <motion.div
@@ -148,20 +150,20 @@ export default function SettingsPage() {
                 icon="ri-question-mark-circle-fill"
                 iconColor="text-yellow-500"
                 bgColor="bg-macaron-yellow hover:bg-yellow-100"
-                label="常见问题 (FAQ)"
+                label={t("faq")}
               />
               <ActionCard
                 icon="ri-customer-service-2-fill"
                 iconColor="text-green-500"
                 bgColor="bg-macaron-green hover:bg-green-100"
-                label="联系我们"
+                label={t("contact")}
               />
               {user ? (
                 <ActionCard
                   icon="ri-logout-box-r-fill"
                   iconColor="text-red-600"
                   bgColor="bg-red-100 hover:bg-red-200"
-                  label="退出登录"
+                  label={t("logout")}
                   textColor="text-red-600"
                   onClick={logout}
                 />
@@ -170,7 +172,7 @@ export default function SettingsPage() {
                   icon="ri-login-box-line"
                   iconColor="text-blue-600"
                   bgColor="bg-blue-100 hover:bg-blue-200"
-                  label="登录账号"
+                  label={t("loginAccount")}
                   textColor="text-blue-600"
                 />
               )}
