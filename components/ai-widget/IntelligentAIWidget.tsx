@@ -393,6 +393,21 @@ export const IntelligentAIWidget: React.FC<WidgetProps> = ({
     return () => { window.removeEventListener('resize', handleResize); }
   }, [])
 
+  // 挂载后按真实视口校正浮动位置（首帧与 SSR 输出一致，避免水合错配）
+  useEffect(() => {
+    setState(prev => {
+      if (prev.mode !== 'floating') return prev
+      return {
+        ...prev,
+        position: optimizePosition(
+          getInitialPosition(initialPosition, width, height),
+          window.innerWidth,
+          window.innerHeight
+        )
+      }
+    })
+  }, [initialPosition, width, height])
+
   // 渲染主组件
   if (!state.isVisible) return null
 
@@ -925,9 +940,11 @@ function generateMessageId(): string {
 }
 
 function getInitialPosition(position: string, width: number, height: number): WidgetPosition {
+  // SSR 安全：首帧渲染必须使用确定性常量（1920×1080），与服务器输出一致；
+  // 真实视口在挂载后由 useEffect 校正，避免水合错配
   const margin = 20
-  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920
-  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 1080
+  const viewportWidth = 1920
+  const viewportHeight = 1080
 
   switch (position) {
     case 'top-left':
