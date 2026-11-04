@@ -83,9 +83,8 @@ SSR 水合风险，且无法复用现有 `messages/*.json` 与 middleware 策略
 3. 翻译质量由产品/领域专家复核（育儿术语不使用机器直译）；
 4. 每阶段把 `check:i18n:strict` 纳入 CI（先告警，P4 起阻断）。
 
-**进度（2026-11-04，PR #21 合并后）**：P0 ✅；P1 ✅（首页/growth/homework，PR #19）；原 P3 清单中的 4 个中小页提前完成（ai-chat/settings/children/badges，PR #20）；
-**P2 次批 ✅（courses/books/messages/activities，PR #21）**——英文镜像 **11/16（69%）**，词条 **481/481** 一致。
-剩余：`curriculum`(700行)/`schedule`(632行)/`videos`/`interactions`/`ai-creative` 5 个大页词条化 → growth 子组件示例文案收口 → P3 数据层（badges 30 枚勋章定义/`BOOK_CATEGORY_CONFIG`/书籍 mock 数据）→ P4 收口（formatter/hreflang/`check:i18n:strict` 入 CI）。**不虚假宣称完成。**
+**进度（2026-11-04，PR #22 合并后）**：**P0–P2 全部完成 ✅**——**英文镜像 16/16（100%）**，词条 **716/716** 一致，全局导航/PageHeader/BackButton/VideoPlayer 组件级双语达成。受保护页（PROTECTED_PAGES 8 项）运行时验证采用带 Cookie 复验口径（middleware 会话门禁 307 属既有设计）。
+剩余：**P3 数据层**（badges 30 枚勋章定义、书籍/视频 mock 数据、`BOOK_CATEGORY_CONFIG`、`VIDEO_STYLE_CONFIG`/`MUSIC_STYLE_CONFIG`/配音配置、VideoGenerator 组件 63 处、growth 子组件示例文案、RSC payload 品牌 Header）→ **P4 收口**（formatter、hreflang、`check:i18n:strict` 入 CI）。**不虚假宣称完成。**
 
 ## 7. 变更记录
 
@@ -96,3 +95,4 @@ SSR 水合风险，且无法复用现有 `messages/*.json` 与 middleware 策略
 | 2026-11-04 | **P0 落地 + 诚实口径修正** | ① 根布局注入 zh Provider（根页面可 `useTranslations`）；② `Navigation` 8 项全部词条化（zh 逐字不变，视觉基线/e2e 不受影响）；③ `homework` 成为首个真双语页（单组件复用 + `/en/homework`）；④ 复核发现既有 3 个镜像为硬编码中文副本（假覆盖），已如实标注；⑤ 覆盖口径改为含首页：4/15=27%（词条化真实值：1 页 + 全局导航） |
 | 2026-11-04（P2 首批，PR #20） | **ai-chat/settings/children/badges 真双语** | ai-chat 角色/建议/降级文案全词条（`ai.roles.*` 6 角色×6 键）；settings 21 处、children 26 处（年龄单位词条）、badges 30 处；+4 镜像；messages 402/402 |
 | 2026-11-04（P2 次批，PR #21） | **courses/books/messages/activities 真双语** | courses 课程/分类改稳定 id（`categoryColors` 修复英文按中文科名失配隐患）；books 分类名词条化（zh 与数据层逐字一致）；messages 用 `messageCenter` 命名空间避开目录名；activities `icon.includes("plant")` 隐性匹配改显式 `theme` 字段、history Tab "(5)" 保基线标 TODO(P3)；+4 镜像；messages 481/481；tsc/lint 0 错误、单测 266 pass、e2e+视觉 11 pass、双语运行时抽查通过 |
+| 2026-11-04（P2 收口，PR #22） | **videos/ai-creative/interactions/curriculum/schedule 真双语（P2 全部完成）** | 5 大页全词条 + VideoPlayer aria-label + BackButton 默认"返回"走 common.back；curriculum 22 学科/星期/课程类型映射（option value 保数据层中文键）；修复 TIME_SLOTS.map((t)) 遮蔽隐患；+5 镜像 → **16/16（100%）**；词条 716/716；受保护页带 Cookie 复验口径确立（PROTECTED_PAGES 会话门禁 307 属既有设计）；全部门禁绿 |
