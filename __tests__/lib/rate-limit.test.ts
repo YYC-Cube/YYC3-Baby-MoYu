@@ -50,4 +50,20 @@ describe("checkRateLimit", () => {
     const second = checkRateLimit("k4", 1, 1)
     expect(second.allowed).toBe(true)
   })
+
+  test("超过 MAX_KEYS 上限时触发全量过期清理", async () => {
+    try {
+      // 灌入 > 10000 个 key，随后令其全部过期
+      for (let i = 0; i < 10_005; i++) {
+        checkRateLimit(`sweep:${i}`, 1, 5)
+      }
+      await new Promise((r) => setTimeout(r, 10))
+      // 该次检查触发 sweep 分支（buckets.size > MAX_KEYS）
+      const r = checkRateLimit("sweep:final", 1, 5)
+      expect(r.allowed).toBe(true)
+      expect(r.remaining).toBe(0)
+    } finally {
+      resetRateLimits()
+    }
+  })
 })

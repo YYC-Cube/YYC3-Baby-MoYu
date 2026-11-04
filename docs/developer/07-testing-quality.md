@@ -12,16 +12,16 @@ flowchart LR
 | 类型 | `bun run type-check` | **0 错误**（应用代码；`__tests__/`、`themes/` 排除） |
 | Lint | `bun run lint` | **0 error**，58 warning（见债务清单） |
 | 构建 | `bun run build` | 通过（类型门禁已恢复，无 ignoreBuildErrors） |
-| 测试 | `bun run test` | 422/422（25 文件，~2.7s；含鉴权/越权/限流类安全行为用例） |
-| 覆盖率 | `bun test --coverage` | 全仓 funcs **88.1%** / lines **89.2%**；utils/cookies/homework/guard/ai_roles 均 ~100%（2026-11-04 补齐） |
+| 测试 | `bun run test` | 451/451（26 文件，~2.6s；含鉴权/越权/限流类安全行为用例） |
+| 覆盖率 | `bun test --coverage` | 全仓 funcs/lines 均 **90.9%**；jwt/badges/rate-limit/utils/cookies/guard/homework/ai_roles 均 ~100%（2026-11-05 补齐） |
 | DB 直测 | `bun run test:node` | 7/7（SQLite）；设置 `PG_TEST_URL` 后 +5 条 PG 用例（共 12/12，CI 默认跳过 PG） |
 | e2e | `bun run test:e2e` | 3/3（登录→建娃→写记录→登出 / 匿名 401 矩阵 / 敏感页重定向；生产构建，账号自举不依赖种子） |
 | 视觉 | `bun run test:visual` | 8/8（首页/视频工坊 × 四主题；darwin/linux 分平台基线） |
 | i18n | `bun run check:i18n:strict` | 16/16 路由镜像 + 词条 977/977 一致（CI 阻断级） |
 | 依赖 | `bun run audit:osv` | OSV.dev 审计；Critical 阻断，报告输出 `osv-results.json`（ignored） |
 
-> 2026-11-04 复核实测：tsc 0 error · lint 0 error/58 warning · 422/422 · node 7/7 · e2e 3/3 · 四主题视觉 8/8 ·
-> 覆盖率全仓 funcs 88.1% / lines 89.2%（utils/cookies/homework/guard/ai_roles 已补齐至 ~100%）·
+> 2026-11-05 复核实测：tsc 0 error · lint 0 error/58 warning · 451/451 · node 7/7 · e2e 3/3 · 四主题视觉 8/8 ·
+> 覆盖率全仓 funcs/lines 均 90.9%（jwt dev-secret/badges/rate-limit sweep/character-manager 已补齐）·
 > OSV 0 Critical/0 High（brace-expansion 1.1.21/5.0.12 已升级关闭 4 条 high；残余 minimatch 2 条 moderate，
 > 修复版 11.0.1 为 ESM-only 待上游随链消除）。数字以本节为准，变更门禁时请同步刷新。
 
@@ -36,8 +36,10 @@ __tests__/
 │                           user-documents（kind 白名单/覆盖语义/隔离/体积与条数上限）
 │                           growth-assessments（401/400/403/201/分页夹取 + health 200/503）
 ├── lib/                    badges · auth · auth/jwt-type · auth/guard（CSRF/401×4/403×2/双通道）
+│                           auth/jwt-dev-secret（dev 密钥生成/复用/生产拒绝）
 │                           ai-roles（选角色/复杂度分析/协同响应/历史裁剪，100%）
-│                           character-manager · config · db/identifier · utils
+│                           character-manager（图片路径/主题色/CSS/预加载，95%+）
+│                           config · db/identifier · utils
 │                           utils/index（数组/对象/深比较/格式化/异步/函数式全家桶，utils.ts 100%）
 │                           api/auth-fetch（401→刷新→重试并发锁）
 ├── hooks/                  hooks.test.bun · useAccessibility · useGrowthRecords

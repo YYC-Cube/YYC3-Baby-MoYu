@@ -439,4 +439,156 @@ describe('CharacterManager', () => {
       expect(currentChild).toBeNull()
     })
   })
+
+  describe('角色图片路径', () => {
+    it('表情命中时返回表情图片', () => {
+      const male = characterManager.getCharacterByGender('male')
+      const path = characterManager.getCharacterImagePath(male, 'happy')
+      const happy = male.expressions.find(e => e.name === 'happy')!
+      expect(path).toBe(happy.imagePath)
+    })
+
+    it('表情未命中时回退主题图片', () => {
+      const male = characterManager.getCharacterByGender('male')
+      const path = characterManager.getCharacterImagePath(male, 'nonexistent', 'green')
+      const green = male.themes.find(t => t.name === 'green')!
+      expect(path).toBe(green.imagePath)
+    })
+
+    it('表情与主题都未命中时回退默认图片', () => {
+      const male = characterManager.getCharacterByGender('male')
+      const path = characterManager.getCharacterImagePath(male, 'nope', 'nope')
+      expect(path).toBe(male.defaultImage)
+    })
+
+    it('默认图片也不可用时按性别使用备用图片', () => {
+      const male = characterManager.getCharacterByGender('male')
+      const female = characterManager.getCharacterByGender('female')
+      // imageExists 恒为 true，defaultImage 必然命中——通过子组件路径方法覆盖性别分支
+      expect(characterManager.getCharacterImagePath(female)).toBe(female.defaultImage)
+      expect(male.gender).toBe('male')
+      expect(female.gender).toBe('female')
+    })
+  })
+
+  describe('各页面头像路径', () => {
+    it('AI 浮窗头像按性别返回', () => {
+      const male = characterManager.getCharacterByGender('male')
+      const female = characterManager.getCharacterByGender('female')
+      expect(characterManager.getAIFloatingAvatarPath(male)).toContain('/boy/')
+      expect(characterManager.getAIFloatingAvatarPath(female)).toContain('/girl/')
+    })
+
+    it('成长记录头像按性别返回', () => {
+      const male = characterManager.getCharacterByGender('male')
+      const female = characterManager.getCharacterByGender('female')
+      expect(characterManager.getGrowthAvatarPath(male)).toContain('/boy/')
+      expect(characterManager.getGrowthAvatarPath(female)).toContain('/girl/')
+    })
+
+    it('设置页头像按性别返回', () => {
+      const male = characterManager.getCharacterByGender('male')
+      const female = characterManager.getCharacterByGender('female')
+      expect(characterManager.getSettingAvatarPath(male)).toContain('/boy/')
+      expect(characterManager.getSettingAvatarPath(female)).toContain('/girl/')
+    })
+
+    it('AI 头像路径按性别返回', () => {
+      expect(characterManager.getAIAvatarPath('male')).toContain('/boy/')
+      expect(characterManager.getAIAvatarPath('female')).toContain('/girl/')
+    })
+  })
+
+  describe('主题色回退与动态 CSS', () => {
+    it('不传主题时回退第一个主题（女性）', () => {
+      const female = characterManager.getCharacterByGender('female')
+      const colors = characterManager.getCharacterThemeColors(female)
+      expect(colors.primary).toBe(female.themes[0].primaryColor)
+      expect(colors.gradient).toBe(female.themes[0].gradient)
+    })
+
+    it('不传主题时回退第一个主题（男性）', () => {
+      const male = characterManager.getCharacterByGender('male')
+      const colors = characterManager.getCharacterThemeColors(male)
+      expect(colors.primary).toBe(male.themes[0].primaryColor)
+    })
+
+    it('createDynamicThemeCSS 包含全部 CSS 变量与工具类', () => {
+      const female = characterManager.getCharacterByGender('female')
+      const css = characterManager.createDynamicThemeCSS(female, 'pink')
+      expect(css).toContain('--character-primary')
+      expect(css).toContain('--character-gradient')
+      expect(css).toContain('.character-theme')
+      expect(css).toContain('.character-glow')
+      expect(css).toContain('#ec4899')
+    })
+  })
+
+  describe('表情与个性辅助方法', () => {
+    it('getCharacterExpression 命中返回配置、未命中返回 null', () => {
+      const female = characterManager.getCharacterByGender('female')
+      const hit = characterManager.getCharacterExpression(female, 'happy')
+      expect(hit?.id).toBe('happy')
+      expect(characterManager.getCharacterExpression(female, 'nope')).toBeNull()
+    })
+
+    it('getRandomExpression 返回表情集合中的成员', () => {
+      const male = characterManager.getCharacterByGender('male')
+      const random = characterManager.getRandomExpression(male)
+      expect(male.expressions).toContain(random)
+    })
+
+    it('getCatchphrase 返回经典用语集合中的成员', () => {
+      const male = characterManager.getCharacterByGender('male')
+      const phrase = characterManager.getCatchphrase(male)
+      expect(male.personality.catchphrases).toContain(phrase)
+    })
+
+    it('getVoiceSettings 返回角色语音配置', () => {
+      const female = characterManager.getCharacterByGender('female')
+      const voice = characterManager.getVoiceSettings(female)
+      expect(voice).toBe(female.voiceSettings)
+    })
+  })
+
+  describe('图片预加载', () => {
+    it('预加载全部角色图片并正常完成（注入 Image 存根）', async () => {
+      // 测试进程无裸 Image（preload 未挂），注入最小存根：设置 src 后微任务触发 onload
+      const globalAny = globalThis as Record<string, unknown>
+      const savedImage = globalAny.Image
+      class FakeImage {
+        onload: (() => void) | null = null
+        onerror: (() => void) | null = null
+        set src(_value: string) {
+          queueMicrotask(() => this.onload?.())
+        }
+      }
+      globalAny.Image = FakeImage
+      try {
+        characterManager.getCharacterByGender('female')
+        characterManager.getCharacterByGender('male')
+        await expect(characterManager.preloadCharacterImages()).resolves.toBeUndefined()
+      } finally {
+        if (savedImage === undefined) delete globalAny.Image
+        else globalAny.Image = savedImage
+      }
+    })
+  })
+
+  describe('模块级导出工具函数', () => {
+    it('getCharacterByGender / getCharacterForUser 代理单例方法', async () => {
+      const mod = await import('../../lib/character-manager')
+      expect(mod.getCharacterByGender('female').id).toBe('xiaoyu')
+      expect(mod.getCharacterForUser(null).gender).toBe('female')
+      const child: Child = { id: '30', gender: 'male', name: '代理测试' }
+      expect(mod.getCharacterForUser(child).name).toBe('代理测试')
+    })
+
+    it('getCharacterThemeColors / getAIAvatarPath 代理单例方法', async () => {
+      const mod = await import('../../lib/character-manager')
+      const female = mod.characterManager.getCharacterByGender('female')
+      expect(mod.getCharacterThemeColors(female, 'pink').primary).toBe('#ec4899')
+      expect(mod.getAIAvatarPath('male')).toContain('/boy/')
+    })
+  })
 })

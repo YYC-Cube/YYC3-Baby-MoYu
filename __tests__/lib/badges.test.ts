@@ -2,9 +2,9 @@
  * @fileoverview 徽章评估引擎单元测试
  */
 
-import { describe, it, expect } from "bun:test"
-import { computeStats, evaluateAll, RawGrowthRecord } from "@/lib/badges/engine"
-import { BADGE_DEFINITIONS, BADGE_LEVELS } from "@/lib/badges/definitions"
+import { describe, it, expect, afterAll } from "bun:test"
+import { computeStats, evaluateAll, loadUnlockedMap, saveUnlockedMap, RawGrowthRecord } from "@/lib/badges/engine"
+import { BADGE_DEFINITIONS, BADGE_LEVELS, getBadgeById } from "@/lib/badges/definitions"
 
 function makeRecord(partial: Partial<RawGrowthRecord> = {}): RawGrowthRecord {
   return {
@@ -162,5 +162,65 @@ describe("BADGE_DEFINITIONS 完整性", () => {
       expect(["bronze", "silver", "gold", "platinum"]).toContain(def.level)
       expect(def.icon.length).toBeGreaterThan(0)
     }
+  })
+
+  it("每枚徽章 conditions 返回字符串数组（覆盖简单/复合两类工厂）", () => {
+    const stats = computeStats([], [], [])
+    for (const def of BADGE_DEFINITIONS) {
+      const conditions = def.conditions!(stats)
+      expect(Array.isArray(conditions)).toBe(true)
+      for (const c of conditions) {
+        expect(typeof c).toBe("string")
+        expect(c.length).toBeGreaterThan(0)
+      }
+    }
+  })
+
+  it("getBadgeById 命中与未命中", () => {
+    expect(getBadgeById(BADGE_DEFINITIONS[0].id)).toBeDefined()
+    expect(getBadgeById("nonexistent-badge")).toBeUndefined()
+  })
+})
+
+describe("徽章解锁持久化（localStorage 存根）", () => {
+  // 测试进程未暴露裸 localStorage（preload 仅挂 window/document/navigator），用 Map 存根
+  const backing = new Map<string, string>()
+  const stub = {
+    getItem: (key: string) => backing.get(key) ?? null,
+    setItem: (key: string, value: string) => { backing.set(key, value) },
+    removeItem: (key: string) => { backing.delete(key) },
+    clear: () => backing.clear(),
+  }
+  const globalAny = globalThis as Record<string, unknown>
+  const saved = { localStorage: globalAny.localStorage }
+
+  it("save → load 往返一致", () => {
+    globalAny.localStorage = stub
+    const map = { "first-record": "2026-01-01T00:00:00Z", "streak-7": "2026-02-02T00:00:00Z" }
+    saveUnlockedMap(map)
+    expect(loadUnlockedMap()).toEqual(map)
+  })
+
+  it("存储内容损坏时 load 返回空对象（容错降级）", () => {
+    globalAny.localStorage = stub
+    backing.set("yyc3_badge_unlocks_v1", "{not-valid-json")
+    expect(loadUnlockedMap()).toEqual({})
+  })
+
+  it("localStorage 抛错时 load/save 双向静默降级（隐私模式）", () => {
+    const throwing = {
+      getItem: () => { throw new Error("SecurityError") },
+      setItem: () => { throw new Error("QuotaExceededError") },
+      removeItem: () => {},
+      clear: () => {},
+    }
+    globalAny.localStorage = throwing
+    expect(loadUnlockedMap()).toEqual({})
+    expect(() => saveUnlockedMap({ "first-record": "t" })).not.toThrow()
+  })
+
+  afterAll(() => {
+    if (saved.localStorage === undefined) delete globalAny.localStorage
+    else globalAny.localStorage = saved.localStorage
   })
 })
