@@ -17,6 +17,7 @@ import ChildSelector from "@/components/ChildSelector"
 import { useGrowthStage } from "@/hooks/useGrowthStage"
 import { useChildren } from "@/hooks/useChildren"
 import { ChildQVersionAvatar } from "@/components/ui/QVersionCharacter"
+import { useTranslations } from "next-intl"
 
 type TabType = "overview" | "timeline" | "records" | "assessment"
 
@@ -66,22 +67,24 @@ const mockAssessmentResult = {
 }
 
 export default function GrowthPage() {
+  const t = useTranslations("growth")
   const [activeTab, setActiveTab] = useState<TabType>("overview")
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const { currentChild } = useChildren()
 
   const childBirthDate = currentChild?.birth_date ? new Date(currentChild.birth_date) : new Date("2018-09-15")
+  // 示例人名「小云」为演示角色名，暂保留原文（P2 随子组件示例数据一并词条化）
   const childName = currentChild?.name || "小云"
 
   const growthStageData = useGrowthStage(childBirthDate)
   const { currentStage: stage, exactAge, milestoneProgress, approachingNextStage: stageTransition, recommendations } = growthStageData
 
   const tabs = [
-    { id: "overview" as const, label: "总览", icon: "ri-dashboard-line" },
-    { id: "timeline" as const, label: "时间线", icon: "ri-time-line" },
-    { id: "records" as const, label: "成长记录", icon: "ri-file-list-3-line" },
-    { id: "assessment" as const, label: "智能评估", icon: "ri-bar-chart-box-line" },
-  ]
+    { id: "overview" as const, labelKey: "tabOverview", icon: "ri-dashboard-line" },
+    { id: "timeline" as const, labelKey: "tabTimeline", icon: "ri-time-line" },
+    { id: "records" as const, labelKey: "tabRecords", icon: "ri-file-list-3-line" },
+    { id: "assessment" as const, labelKey: "tabAssessment", icon: "ri-bar-chart-box-line" },
+  ] as const
 
   const handleCreateRecord = async (record: CreateRecordPayload) => {
     setIsCreateModalOpen(false)
@@ -106,16 +109,16 @@ export default function GrowthPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-b from-blue-50 via-purple-50 to-pink-50 pb-24">
-      <PageHeader title="成长记录" showBack />
+      <PageHeader title={t("title")} showBack />
 
       <main className="px-4 py-4 space-y-6">
         {currentChild && (
           <div className="bg-white/70 rounded-2xl p-4 flex items-center gap-4">
             <ChildQVersionAvatar child={currentChild} size="md" />
             <div className="flex-1">
-              <h3 className="font-bold text-slate-800">{currentChild.name}的成长记录</h3>
+              <h3 className="font-bold text-slate-800">{t("childHeader", { name: currentChild.name })}</h3>
               <p className="text-sm text-slate-500">
-                {stage?.name} · {exactAge?.years ?? 0}岁{exactAge?.months ?? 0}个月
+                {t("ageStage", { stage: stage?.name ?? "", years: exactAge?.years ?? 0, months: exactAge?.months ?? 0 })}
               </p>
             </div>
             <ChildSelector />
@@ -124,9 +127,9 @@ export default function GrowthPage() {
 
         {!currentChild && (
           <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200 text-center">
-            <p className="text-amber-700">请先在设置中添加孩子档案</p>
+            <p className="text-amber-700">{t("noChild")}</p>
             <Link href="/children" className="text-blue-600 underline text-sm mt-2 inline-block">
-              去添加
+              {t("goAdd")}
             </Link>
           </div>
         )}
@@ -144,7 +147,7 @@ export default function GrowthPage() {
               whileTap={{ scale: 0.95 }}
             >
               <i className={tab.icon} />
-              <span>{tab.label}</span>
+              <span>{t(tab.labelKey)}</span>
             </motion.button>
           ))}
         </div>
@@ -205,6 +208,7 @@ function OverviewTab({
   childName,
   childBirthDate,
 }: OverviewTabProps) {
+  const t = useTranslations("growth")
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -224,22 +228,22 @@ function OverviewTab({
           <div>
             <h2 className="text-xl font-bold">{childName}</h2>
             <p className="text-white/80">
-              {stage?.name || "成长中"} · {stage?.ageRange || ""}
+              {stage?.name || t("growing")} · {stage?.ageRange || ""}
             </p>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-4 mt-4">
           <div className="bg-white/10 rounded-xl p-3 text-center">
             <div className="text-2xl font-bold">156</div>
-            <div className="text-xs text-white/70">成长记录</div>
+            <div className="text-xs text-white/70">{t("statRecords")}</div>
           </div>
           <div className="bg-white/10 rounded-xl p-3 text-center">
             <div className="text-2xl font-bold">{milestoneProgress?.completed || 0}</div>
-            <div className="text-xs text-white/70">已达里程碑</div>
+            <div className="text-xs text-white/70">{t("statMilestones")}</div>
           </div>
           <div className="bg-white/10 rounded-xl p-3 text-center">
             <div className="text-2xl font-bold">89%</div>
-            <div className="text-xs text-white/70">发展达标</div>
+            <div className="text-xs text-white/70">{t("statProgress")}</div>
           </div>
         </div>
       </div>
@@ -249,12 +253,12 @@ function OverviewTab({
         <div className="bg-linear-to-r from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-200">
           <h3 className="font-bold text-amber-800 mb-2 flex items-center gap-2">
             <i className="ri-calendar-event-line" />
-            阶段转换提醒
+            {t("transitionTitle")}
           </h3>
           <p className="text-sm text-amber-700">
-            还有 <span className="font-bold">{stageTransition.daysUntil}</span> 天将进入
-            <span className="font-bold">「{stageTransition.nextStage ?? "下一阶段"}」</span>
-            阶段
+            {t("transitionPre")}<span className="font-bold">{stageTransition.daysUntil}</span>{t("transitionMid")}
+            <span className="font-bold">{stageTransition.nextStage ?? t("transitionNext")}</span>
+            {t("transitionPost")}
           </p>
         </div>
       )}
@@ -263,28 +267,28 @@ function OverviewTab({
       <div className="bg-white rounded-2xl p-5 shadow-sm">
         <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
           <i className="ri-line-chart-line text-blue-500" />
-          发展曲线
+          {t("curveTitle")}
         </h3>
-        <DevelopmentCurveChart dataPoints={mockDevelopmentData} metricName="身高" unit="cm" childName={childName} />
+        <DevelopmentCurveChart dataPoints={mockDevelopmentData} metricName={t("heightMetric")} unit="cm" childName={childName} />
       </div>
 
       {/* 最近里程碑 */}
       <div className="bg-white rounded-2xl p-5 shadow-sm">
         <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
           <i className="ri-trophy-line text-yellow-500" />
-          最近里程碑
+          {t("milestonesTitle")}
         </h3>
         <div className="space-y-3">
-          {[
-            { icon: "📚", title: "独立完成作业", date: "3天前", color: "bg-blue-50" },
-            { icon: "🎨", title: "第一幅完整画作", date: "1周前", color: "bg-pink-50" },
-            { icon: "🤝", title: "主动帮助同学", date: "2周前", color: "bg-green-50" },
-          ].map((item, i) => (
+          {([
+            { icon: "📚", titleKey: "m1Title", dateKey: "m1Date", color: "bg-blue-50" },
+            { icon: "🎨", titleKey: "m2Title", dateKey: "m2Date", color: "bg-pink-50" },
+            { icon: "🤝", titleKey: "m3Title", dateKey: "m3Date", color: "bg-green-50" },
+          ] as const).map((item, i) => (
             <div key={i} className={`flex items-center gap-3 p-3 ${item.color} rounded-xl`}>
               <span className="text-2xl">{item.icon}</span>
               <div className="flex-1">
-                <h4 className="font-medium text-slate-800">{item.title}</h4>
-                <p className="text-xs text-slate-500">{item.date}</p>
+                <h4 className="font-medium text-slate-800">{t(item.titleKey)}</h4>
+                <p className="text-xs text-slate-500">{t(item.dateKey)}</p>
               </div>
               <i className="ri-arrow-right-s-line text-slate-400" />
             </div>
@@ -297,12 +301,12 @@ function OverviewTab({
         <div className="bg-linear-to-r from-green-50 to-blue-50 rounded-2xl p-5 border border-green-100">
           <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
             <i className="ri-lightbulb-line text-green-500" />
-            阶段发展建议
+            {t("recTitle")}
           </h3>
           <div className="space-y-4">
             {recommendations.activities.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-slate-700 mb-2">推荐活动</h4>
+                <h4 className="text-sm font-medium text-slate-700 mb-2">{t("recActivities")}</h4>
                 <ul className="space-y-1">
                   {recommendations.activities.slice(0, 3).map((activity: string, i: number) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
@@ -315,7 +319,7 @@ function OverviewTab({
             )}
             {recommendations.books.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-slate-700 mb-2">推荐阅读</h4>
+                <h4 className="text-sm font-medium text-slate-700 mb-2">{t("recBooks")}</h4>
                 <ul className="space-y-1">
                   {recommendations.books.slice(0, 2).map((book: string, i: number) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
@@ -338,35 +342,25 @@ interface RecordsTabProps {
 }
 
 function RecordsTab({ onOpenCreateModal }: RecordsTabProps) {
+  const t = useTranslations("growth")
   const [recordType, setRecordType] = useState<"all" | "milestone" | "observation" | "emotion">("all")
 
+  // 示例记录以词条键驱动（P1 约定：数据不写死语言文案）
   const records = [
     {
-      type: "milestone",
-      title: "第一次独立完成数学作业",
-      content: "今天小云不需要任何帮助，独立完成了所有数学题！",
-      date: "2025-01-15",
-      tags: ["学习", "独立性"],
-      emoji: "🎯",
-      color: "yellow",
+      type: "milestone" as const,
+      titleKey: "r1Title", contentKey: "r1Content", tagKeys: ["r1Tag1", "r1Tag2"],
+      date: "2025-01-15", emoji: "🎯", color: "yellow",
     },
     {
-      type: "observation",
-      title: "观察记录：社交能力发展",
-      content: "今天在公园主动邀请其他小朋友一起玩耍，表现出良好的社交意愿",
-      date: "2025-01-10",
-      tags: ["社交", "友谊"],
-      emoji: "👥",
-      color: "purple",
+      type: "observation" as const,
+      titleKey: "r2Title", contentKey: "r2Content", tagKeys: ["r2Tag1", "r2Tag2"],
+      date: "2025-01-10", emoji: "👥", color: "purple",
     },
     {
-      type: "emotion",
-      title: "情绪记录：开心快乐",
-      content: "收到老师表扬后非常开心，主动分享给家人",
-      date: "2025-01-08",
-      tags: ["情绪", "快乐"],
-      emoji: "😊",
-      color: "pink",
+      type: "emotion" as const,
+      titleKey: "r3Title", contentKey: "r3Content", tagKeys: ["r3Tag1", "r3Tag2"],
+      date: "2025-01-08", emoji: "😊", color: "pink",
     },
   ]
 
@@ -381,12 +375,12 @@ function RecordsTab({ onOpenCreateModal }: RecordsTabProps) {
     >
       {/* 筛选器 */}
       <div className="flex gap-2 flex-wrap">
-        {[
-          { id: "all" as const, label: "全部记录", icon: "ri-list-check" },
-          { id: "milestone" as const, label: "里程碑", icon: "ri-flag-line" },
-          { id: "observation" as const, label: "观察日志", icon: "ri-eye-line" },
-          { id: "emotion" as const, label: "情感记录", icon: "ri-heart-line" },
-        ].map((filter) => (
+        {([
+          { id: "all", labelKey: "filterAll", icon: "ri-list-check" },
+          { id: "milestone", labelKey: "filterMilestone", icon: "ri-flag-line" },
+          { id: "observation", labelKey: "filterObservation", icon: "ri-eye-line" },
+          { id: "emotion", labelKey: "filterEmotion", icon: "ri-heart-line" },
+        ] as const).map((filter) => (
           <motion.button
             key={filter.id}
             className={`px-4 py-2 rounded-full flex items-center gap-2 ${
@@ -397,7 +391,7 @@ function RecordsTab({ onOpenCreateModal }: RecordsTabProps) {
             whileTap={{ scale: 0.95 }}
           >
             <i className={filter.icon} />
-            <span>{filter.label}</span>
+            <span>{t(filter.labelKey)}</span>
           </motion.button>
         ))}
       </div>
@@ -410,7 +404,7 @@ function RecordsTab({ onOpenCreateModal }: RecordsTabProps) {
         whileTap={{ scale: 0.98 }}
       >
         <i className="ri-add-circle-line text-2xl" />
-        <span>添加新记录</span>
+        <span>{t("addNewRecord")}</span>
       </motion.button>
 
       {/* 记录列表 */}
@@ -429,12 +423,12 @@ function RecordsTab({ onOpenCreateModal }: RecordsTabProps) {
                 {record.emoji}
               </div>
               <div className="flex-1">
-                <h4 className="font-bold text-slate-800 mb-1">{record.title}</h4>
-                <p className="text-slate-600 text-sm mb-2">{record.content}</p>
+                <h4 className="font-bold text-slate-800 mb-1">{t(record.titleKey as "r1Title")}</h4>
+                <p className="text-slate-600 text-sm mb-2">{t(record.contentKey as "r1Content")}</p>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {record.tags.map((tag, j) => (
+                  {record.tagKeys.map((tagKey, j) => (
                     <span key={j} className="px-2 py-1 bg-slate-100 rounded-full text-xs text-slate-600">
-                      #{tag}
+                      #{t(tagKey as "r1Tag1")}
                     </span>
                   ))}
                   <span className="text-xs text-slate-400 ml-auto">{record.date}</span>
@@ -449,23 +443,25 @@ function RecordsTab({ onOpenCreateModal }: RecordsTabProps) {
 }
 
 function AssessmentTab({ childName }: { childName: string }) {
+  const t = useTranslations("growth")
   const [showFullReport, setShowFullReport] = useState(false)
 
   const dimensions = [
-    { name: "认知发展", score: 85, icon: "ri-brain-line", color: "text-blue-500", bgColor: "bg-blue-400" },
-    { name: "语言能力", score: 92, icon: "ri-chat-1-line", color: "text-green-500", bgColor: "bg-green-400" },
-    { name: "运动发展", score: 78, icon: "ri-run-line", color: "text-orange-500", bgColor: "bg-orange-400" },
-    { name: "社会情感", score: 88, icon: "ri-heart-line", color: "text-pink-500", bgColor: "bg-pink-400" },
-    { name: "自理能力", score: 90, icon: "ri-user-line", color: "text-purple-500", bgColor: "bg-purple-400" },
-  ]
+    { nameKey: "dimCognitive", score: 85, icon: "ri-brain-line", color: "text-blue-500", bgColor: "bg-blue-400" },
+    { nameKey: "dimLanguage", score: 92, icon: "ri-chat-1-line", color: "text-green-500", bgColor: "bg-green-400" },
+    { nameKey: "dimMotor", score: 78, icon: "ri-run-line", color: "text-orange-500", bgColor: "bg-orange-400" },
+    { nameKey: "dimSocial", score: 88, icon: "ri-heart-line", color: "text-pink-500", bgColor: "bg-pink-400" },
+    { nameKey: "dimSelfCare", score: 90, icon: "ri-user-line", color: "text-purple-500", bgColor: "bg-purple-400" },
+  ] as const
 
   // 图表数据
+  // 图表维度标签同样走词条（图表组件按字符串渲染）
   const chartData = [
-    { date: "2023-01-15", dimension: "认知发展", score: 85 },
-    { date: "2023-01-15", dimension: "语言能力", score: 92 },
-    { date: "2023-01-15", dimension: "运动发展", score: 78 },
-    { date: "2023-01-15", dimension: "社会情感", score: 88 },
-    { date: "2023-01-15", dimension: "自理能力", score: 90 },
+    { date: "2023-01-15", dimension: t("dimCognitive"), score: 85 },
+    { date: "2023-01-15", dimension: t("dimLanguage"), score: 92 },
+    { date: "2023-01-15", dimension: t("dimMotor"), score: 78 },
+    { date: "2023-01-15", dimension: t("dimSocial"), score: 88 },
+    { date: "2023-01-15", dimension: t("dimSelfCare"), score: 90 },
   ]
 
   const mockAssessmentResultWithName = {
@@ -484,16 +480,16 @@ function AssessmentTab({ childName }: { childName: string }) {
       <div className="bg-white rounded-2xl p-5 shadow-sm">
         <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
           <i className="ri-bar-chart-box-line text-blue-500" />
-          发展评估概览
+          {t("assessTitle")}
         </h3>
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-linear-to-r from-green-400 to-blue-500 text-white">
             <div>
               <div className="text-3xl font-bold">87</div>
-              <div className="text-xs">综合分</div>
+              <div className="text-xs">{t("overallScore")}</div>
             </div>
           </div>
-          <p className="text-slate-500 text-sm mt-2">发展状况良好，继续保持！</p>
+          <p className="text-slate-500 text-sm mt-2">{t("goodStatus")}</p>
         </div>
 
         <div className="space-y-4">
@@ -502,9 +498,9 @@ function AssessmentTab({ childName }: { childName: string }) {
               <div className="flex justify-between text-sm">
                 <span className="flex items-center gap-2">
                   <i className={`${dim.icon} ${dim.color}`} />
-                  {dim.name}
+                  {t(dim.nameKey)}
                 </span>
-                <span className="font-medium">{dim.score}分</span>
+                <span className="font-medium">{t("scorePoints", { score: dim.score })}</span>
               </div>
               <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                 <motion.div
@@ -523,7 +519,7 @@ function AssessmentTab({ childName }: { childName: string }) {
       <div className="bg-white rounded-2xl p-5 shadow-sm">
         <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
           <i className="ri-pie-chart-line text-purple-500" />
-          能力分布图
+          {t("chartTitle")}
         </h3>
         <GrowthCharts data={chartData} />
       </div>
@@ -536,7 +532,7 @@ function AssessmentTab({ childName }: { childName: string }) {
         whileTap={{ scale: 0.98 }}
       >
         <i className={showFullReport ? "ri-eye-off-line" : "ri-eye-line"} />
-        {showFullReport ? "收起完整报告" : "查看完整AI评估报告"}
+        {showFullReport ? t("hideFull") : t("showFull")}
       </motion.button>
 
       {/* 完整评估报告 */}
@@ -560,18 +556,17 @@ function AssessmentTab({ childName }: { childName: string }) {
         whileTap={{ scale: 0.98 }}
       >
         <i className="ri-file-list-3-line mr-2" />
-        开始新的发展评估
+        {t("startAssess")}
       </motion.a>
 
       {/* AI洞察 */}
       <div className="bg-linear-to-r from-purple-50 to-blue-50 rounded-2xl p-5 border border-purple-100">
         <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
           <i className="ri-sparkling-line text-purple-500" />
-          AI小语洞察
+          {t("insightTitle")}
         </h3>
         <p className="text-sm text-slate-600 leading-relaxed">
-          根据最近的评估数据，{childName}在语言表达和社会情感方面表现出色。建议在运动发展方面增加更多户外活动，
-          特别是球类运动和平衡训练，可以帮助提升大运动协调能力。继续保持亲子阅读时间，这对语言发展非常有益。
+          {t("insightText", { name: childName })}
         </p>
       </div>
     </motion.div>

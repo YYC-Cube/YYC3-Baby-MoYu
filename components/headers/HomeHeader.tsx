@@ -4,8 +4,13 @@ import LoginModal from "@/components/auth/LoginModal"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { useLocale, useTranslations } from "next-intl"
 
 export default function HomeHeader() {
+  const t = useTranslations("header")
+  const locale = useLocale()
+  // zh 保持 zh-CN 格式（视觉基线/e2e 文案逐字不变）；en 用 en-US
+  const dateLocale = locale === "en" ? "en-US" : "zh-CN"
   const [time, setTime] = useState("08:30")
   const [date, setDate] = useState("11月24日 星期五")
   // 登录/注册入口：LoginModal 弹窗（/auth/* 页面路由不存在，历史链接为死链）
@@ -14,9 +19,9 @@ export default function HomeHeader() {
   useEffect(() => {
     const updateTime = () => {
       const now = new Date()
-      setTime(now.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }))
+      setTime(now.toLocaleTimeString(dateLocale, { hour: "2-digit", minute: "2-digit" }))
       setDate(
-        now.toLocaleDateString("zh-CN", {
+        now.toLocaleDateString(dateLocale, {
           month: "long",
           day: "numeric",
           weekday: "long",
@@ -27,7 +32,7 @@ export default function HomeHeader() {
     updateTime()
     const timer = setInterval(updateTime, 1000)
     return () => { clearInterval(timer); }
-  }, [])
+  }, [dateLocale])
 
   // 敏感页重定向回来的登录提示（middleware 写入的一次性 Cookie）
   useEffect(() => {
@@ -69,7 +74,7 @@ export default function HomeHeader() {
             transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
           />
           <span className="text-lg font-bold text-adaptive">23°C</span>
-          <span className="text-xs text-adaptive-muted">适宜户外</span>
+          <span className="text-xs text-adaptive-muted">{t("weatherSuitable")}</span>
         </motion.div>
       </div>
 
@@ -82,7 +87,7 @@ export default function HomeHeader() {
             whileTap={{ scale: 0.95 }}
             onClick={() => { setAuthModal("login") }}
           >
-            登录
+            {t("login")}
           </motion.button>
           <motion.button
             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
@@ -90,7 +95,7 @@ export default function HomeHeader() {
             whileTap={{ scale: 0.95 }}
             onClick={() => { setAuthModal("register") }}
           >
-            注册
+            {t("register")}
           </motion.button>
           <LoginModal
             isOpen={authModal !== null}
@@ -103,21 +108,21 @@ export default function HomeHeader() {
           href="/growth"
           icon="ri-calendar-check-fill"
           iconColor="text-blue-400"
-          label="学习打卡"
+          label={t("quickStudy")}
           hoverColor="hover:bg-blue-50"
         />
         <QuickActionButton
           href="/activities"
           icon="ri-heart-3-fill"
           iconColor="text-red-400"
-          label="公益活动"
+          label={t("quickActivity")}
           hoverColor="hover:bg-red-50"
         />
         <QuickActionButton
           href="/settings"
           icon="ri-parent-fill"
           iconColor="text-yellow-500"
-          label="家长须知"
+          label={t("quickParent")}
           hoverColor="hover:bg-yellow-50"
         />
       </div>

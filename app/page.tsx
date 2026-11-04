@@ -1,10 +1,12 @@
 /**
  * @fileoverview YYC³ AI小语智能成长守护系统 - 主页面
- * @description 应用主页面，展示儿童成长数据、角色交互和核心功能入口
+ * @description 应用主页面，展示儿童成长数据、角色交互和核心功能入口。
+ *   i18n（P1）：全部可见文案走 messages 的 home/header 命名空间；
+ *   zh 词条与历史文案逐字一致（视觉基线/e2e 不受影响），/en 经 [locale] Provider 渲染英文。
  * @author YYC³
- * @version 1.0.0
+ * @version 1.1.0
  * @created 2025-01-30
- * @modified 2025-01-30
+ * @modified 2026-11-04
  * @copyright Copyright (c) 2025 YYC³
  * @license MIT
  */
@@ -14,6 +16,7 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import HomeHeader from "@/components/headers/HomeHeader"
 import Navigation from "@/components/Navigation"
 import ChildSelector from "@/components/ChildSelector"
@@ -23,6 +26,7 @@ import { authFetch } from "@/lib/api/auth-fetch"
 import { getCharacterForUser, characterManager, type CharacterConfig } from "@/lib/character-manager"
 
 export default function HomePage() {
+  const t = useTranslations("home")
   const { isAuthenticated } = useAuth()
   const { currentChild } = useChildren()
   const [stats, setStats] = useState({ records: 0, milestones: 0, assessments: 0 })
@@ -102,7 +106,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-bold text-slate-700">{currentChild.name}</p>
-                    <p className="text-xs text-slate-400">{currentChild.current_stage || "成长中"}</p>
+                    <p className="text-xs text-slate-400">{currentChild.current_stage || t("stageGrowing")}</p>
                   </div>
                   <ChildSelector className="ml-auto" />
                 </motion.div>
@@ -112,9 +116,9 @@ export default function HomePage() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <p className="text-sm text-slate-500 mb-2">登录后可管理孩子档案</p>
+                  <p className="text-sm text-slate-500 mb-2">{t("loginHint")}</p>
                   <Link href="/settings" className="text-blue-500 text-sm font-medium hover:underline">
-                    去登录 →
+                    {t("goLogin")}
                   </Link>
                 </motion.div>
               )}
@@ -128,8 +132,8 @@ export default function HomePage() {
             >
               <p className="text-lg font-bold text-slate-700">
                 {currentChild
-                  ? `Hi, ${currentChild.nickname || currentChild.name}！今天也一起加油吧！`
-                  : "Hi, 小朋友！今天也一起加油吧！"}
+                  ? t("bubbleNamed", { name: currentChild.nickname || currentChild.name })
+                  : t("bubbleGuest")}
               </p>
             </motion.div>
 
@@ -154,7 +158,7 @@ export default function HomePage() {
                 )}
                 <motion.div
                   className="absolute bottom-10 right-10 text-6xl cursor-pointer"
-                  title="摸摸头"
+                  title={t("petDog")}
                   animate={{ rotate: [0, 10, -10, 0] }}
                   transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
                   whileHover={{ scale: 1.2 }}
@@ -167,8 +171,8 @@ export default function HomePage() {
             </div>
 
             <div className="mt-4 text-center">
-              <h2 className="text-2xl font-rounded font-bold text-slate-700">快乐学习助手</h2>
-              <p className="text-slate-500 mt-1">万象归元于云枢</p>
+              <h2 className="text-2xl font-rounded font-bold text-slate-700">{t("learningAssistant")}</h2>
+              <p className="text-slate-500 mt-1">{t("slogan")}</p>
             </div>
           </motion.section>
 
@@ -187,20 +191,20 @@ export default function HomePage() {
               >
                 <h3 className="font-bold mb-3 flex items-center gap-2">
                   <i className="ri-bar-chart-box-line" />
-                  {currentChild.name}的成长数据
+                  {t("statsTitle", { name: currentChild.name })}
                 </h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-white/20 rounded-xl p-3 text-center">
                     <p className="text-2xl font-bold">{stats.records}</p>
-                    <p className="text-xs opacity-80">成长记录</p>
+                    <p className="text-xs opacity-80">{t("statRecords")}</p>
                   </div>
                   <div className="bg-white/20 rounded-xl p-3 text-center">
                     <p className="text-2xl font-bold">{stats.milestones}</p>
-                    <p className="text-xs opacity-80">里程碑</p>
+                    <p className="text-xs opacity-80">{t("statMilestones")}</p>
                   </div>
                   <div className="bg-white/20 rounded-xl p-3 text-center">
                     <p className="text-2xl font-bold">{stats.assessments}</p>
-                    <p className="text-xs opacity-80">评估报告</p>
+                    <p className="text-xs opacity-80">{t("statAssessments")}</p>
                   </div>
                 </div>
               </motion.div>
@@ -218,9 +222,9 @@ export default function HomePage() {
 
             {/* 三个小功能卡片 */}
             <div className="grid grid-cols-3 gap-4 md:gap-6">
-              <FeatureCard icon="ri-eraser-fill" color="purple" label="错题本" href="/homework?tab=mistakes" />
-              <FeatureCard icon="ri-video-chat-fill" color="blue" label="公益课堂" href="/courses" />
-              <FeatureCard icon="ri-emotion-happy-fill" color="pink" label="心情记录" href="/growth?tab=mood" />
+              <FeatureCard icon="ri-eraser-fill" color="purple" labelKey="features.mistakeBook" href="/homework?tab=mistakes" />
+              <FeatureCard icon="ri-video-chat-fill" color="blue" labelKey="features.publicClass" href="/courses" />
+              <FeatureCard icon="ri-emotion-happy-fill" color="pink" labelKey="features.moodRecord" href="/growth?tab=mood" />
             </div>
           </motion.section>
         </section>
@@ -232,9 +236,11 @@ export default function HomePage() {
 }
 
 function DailyPlanCard() {
+  const t = useTranslations("home")
+  // 示例计划以词条驱动（P1 约定：数据不写死语言文案）
   const [plans, setPlans] = useState([
-    { id: "plan-1", text: "背诵古诗《静夜思》", done: false },
-    { id: "plan-2", text: "完成 10 道口算题", done: true },
+    { id: "plan-1", textKey: "plan1", done: false },
+    { id: "plan-2", textKey: "plan2", done: true },
   ])
 
   const togglePlan = (id: string) => {
@@ -253,7 +259,7 @@ function DailyPlanCard() {
         <div className="bg-yellow-400 text-white p-1.5 rounded-lg">
           <i className="ri-list-check" />
         </div>
-        <h3 className="text-xl font-bold text-slate-700">今日计划</h3>
+        <h3 className="text-xl font-bold text-slate-700">{t("todayPlan")}</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 z-10">
@@ -272,7 +278,7 @@ function DailyPlanCard() {
               {plan.done && <i className="ri-check-line text-white" />}
             </div>
             <span className={`font-medium ${plan.done ? "text-slate-400 line-through" : "text-slate-700"}`}>
-              {plan.text}
+              {t(plan.textKey as "plan1")}
             </span>
           </motion.div>
         ))}
@@ -282,6 +288,7 @@ function DailyPlanCard() {
 }
 
 function HomeworkCenterCard({ childName }: { childName?: string }) {
+  const t = useTranslations("home")
   return (
     <motion.div
       className="bg-white w-full p-6 md:p-8 rounded-3xl shadow-soft border-2 border-blue-50 flex flex-col md:flex-row items-center justify-between relative gap-6"
@@ -289,11 +296,13 @@ function HomeworkCenterCard({ childName }: { childName?: string }) {
       transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
     >
       <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-rounded font-extrabold text-slate-800 flex items-center gap-2">作业中心</h2>
-        <p className="text-slate-500">{childName ? `${childName}，保持专注，你最棒啦！` : "保持专注，你最棒啦！"}</p>
+        <h2 className="text-3xl font-rounded font-extrabold text-slate-800 flex items-center gap-2">{t("homeworkCenter")}</h2>
+        <p className="text-slate-500">
+          {childName ? t("cheerNamed", { name: childName }) : t("homeworkSubtitle")}
+        </p>
         <div className="mt-2 flex gap-2">
-          <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-md">语文</span>
-          <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-md">数学</span>
+          <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-md">{t("homeworkTags.chinese")}</span>
+          <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-md">{t("homeworkTags.math")}</span>
         </div>
       </div>
 
@@ -303,7 +312,7 @@ function HomeworkCenterCard({ childName }: { childName?: string }) {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <span className="text-xl md:text-2xl font-bold tracking-wide">开始作业</span>
+          <span className="text-xl md:text-2xl font-bold tracking-wide">{t("startHomework")}</span>
           <i className="ri-arrow-right-circle-fill text-2xl md:text-3xl opacity-80 group-hover:translate-x-1 transition-transform" />
         </motion.button>
       </Link>
@@ -314,14 +323,15 @@ function HomeworkCenterCard({ childName }: { childName?: string }) {
 function FeatureCard({
   icon,
   color,
-  label,
+  labelKey,
   href,
 }: {
   icon: string
   color: "purple" | "blue" | "pink"
-  label: string
+  labelKey: "features.mistakeBook" | "features.publicClass" | "features.moodRecord"
   href: string
 }) {
+  const t = useTranslations("home")
   const colorClasses = {
     purple: "bg-macaron-purple text-purple-400",
     blue: "bg-macaron-blue text-blue-400",
@@ -342,7 +352,7 @@ function FeatureCard({
         >
           <i className={`${icon} ${colorClasses[color].split(" ")[1]} text-2xl`} />
         </motion.div>
-        <span className="font-bold text-slate-700 text-sm md:text-base">{label}</span>
+        <span className="font-bold text-slate-700 text-sm md:text-base">{t(labelKey)}</span>
       </motion.div>
     </Link>
   )
