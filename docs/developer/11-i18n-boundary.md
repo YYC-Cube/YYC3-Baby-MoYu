@@ -83,8 +83,10 @@ SSR 水合风险，且无法复用现有 `messages/*.json` 与 middleware 策略
 3. 翻译质量由产品/领域专家复核（育儿术语不使用机器直译）；
 4. 每阶段把 `check:i18n:strict` 纳入 CI（先告警，P4 起阻断）。
 
-**进度（2026-11-04，PR #22 合并后）**：**P0–P2 全部完成 ✅**——**英文镜像 16/16（100%）**，词条 **716/716** 一致，全局导航/PageHeader/BackButton/VideoPlayer 组件级双语达成。受保护页（PROTECTED_PAGES 8 项）运行时验证采用带 Cookie 复验口径（middleware 会话门禁 307 属既有设计）。
-剩余：**P3 数据层**（badges 30 枚勋章定义、书籍/视频 mock 数据、`BOOK_CATEGORY_CONFIG`、`VIDEO_STYLE_CONFIG`/`MUSIC_STYLE_CONFIG`/配音配置、VideoGenerator 组件 63 处、growth 子组件示例文案、RSC payload 品牌 Header）→ **P4 收口**（formatter、hreflang、`check:i18n:strict` 入 CI）。**不虚假宣称完成。**
+**进度（2026-11-04，PR #23 合并后）**：**P0–P2 全部完成 ✅ + P3 数据层主项完成 ✅**——**英文镜像 16/16（100%）**，词条 **873/873** 一致。
+P3 已完成：30 枚勋章数据层（types 增 4 个 i18n 字段）、VideoGenerator 63 处、GrowthTimeline 骨架、videos 风格标签、BookReader。
+P3 残留（诚实登记，实测数值见 `docs/YYC3-Baby-MoYu-fullaudit-20261102/06-全维度测试实测数值总结-20261104.md` §3）：growth 低频弹层 7 组件 **86 处**（CreateRecordModal 23/GrowthCharts 22/TagSelector 18/DevCurveChart 11/AssessmentReport 7/StageIndicator 4/MediaUploader 1）+ 内容数据（时间线示例 25 处/书籍 mock/`BOOK_CATEGORY_CONFIG` 本体）+ 品牌 Header → 建议作 P3.5 上线后迭代。
+P4 收口待办：formatter、hreflang、`check:i18n:strict` 入 CI。**不虚假宣称完成。**
 
 ## 7. 变更记录
 
@@ -96,3 +98,4 @@ SSR 水合风险，且无法复用现有 `messages/*.json` 与 middleware 策略
 | 2026-11-04（P2 首批，PR #20） | **ai-chat/settings/children/badges 真双语** | ai-chat 角色/建议/降级文案全词条（`ai.roles.*` 6 角色×6 键）；settings 21 处、children 26 处（年龄单位词条）、badges 30 处；+4 镜像；messages 402/402 |
 | 2026-11-04（P2 次批，PR #21） | **courses/books/messages/activities 真双语** | courses 课程/分类改稳定 id（`categoryColors` 修复英文按中文科名失配隐患）；books 分类名词条化（zh 与数据层逐字一致）；messages 用 `messageCenter` 命名空间避开目录名；activities `icon.includes("plant")` 隐性匹配改显式 `theme` 字段、history Tab "(5)" 保基线标 TODO(P3)；+4 镜像；messages 481/481；tsc/lint 0 错误、单测 266 pass、e2e+视觉 11 pass、双语运行时抽查通过 |
 | 2026-11-04（P2 收口，PR #22） | **videos/ai-creative/interactions/curriculum/schedule 真双语（P2 全部完成）** | 5 大页全词条 + VideoPlayer aria-label + BackButton 默认"返回"走 common.back；curriculum 22 学科/星期/课程类型映射（option value 保数据层中文键）；修复 TIME_SLOTS.map((t)) 遮蔽隐患；+5 镜像 → **16/16（100%）**；词条 716/716；受保护页带 Cookie 复验口径确立（PROTECTED_PAGES 会话门禁 307 属既有设计）；全部门禁绿 |
+| 2026-11-04（P3 主项，PR #23） | **30 枚勋章/VideoGenerator/GrowthTimeline 数据层词条化 + 全维度实测文档** | types/badges 增 4 个 i18n 字段（titleKey/descriptionKey/condKeys/progressGoal），30 勋章+12 复合条件+4 等级+8 分类入词条，badges 页 9 处消费点改词条渲染（计数型条件 progress 反推动态模板）；VideoGenerator 63 处全词条；GrowthTimeline 骨架 8 组；videos 风格标签/BookReader 收尾；**新增 06 号实测数值总结文档（7/7 门禁 + Playwright 双语 6/6 FOUND 双向验证 + 诚实残留清单）**；词条 **873/873**；单测 266 pass、coverage lines 59.15%（如实呈报）、e2e 11 pass |
