@@ -134,7 +134,7 @@ bun run test
 | `bun run dev` | Next.js 开发服务器（:1228） |
 | `bun run build` / `start` | 生产构建 / 启动 |
 | `bun run test` | 单元测试（266 用例，全绿） |
-| `bun run type-check` | 类型检查（应用代码 **0 错误**，见 TYPECHECK_BASELINE.md） |
+| `bun run type-check` | 类型检查（应用代码 **0 错误**，见 [07 · 测试与质量门禁](./docs/developer/07-testing-quality.md)） |
 | `bun run lint` / `lint:fix` | ESLint 检查 / 自动修复 |
 | `bun run test:e2e` | Playwright 行为冒烟（3 例） |
 | `bun run test:visual` | 四主题视觉回归（首页/视频工坊 × 暖阳/液态/赛博/极光） |
@@ -191,7 +191,8 @@ bun run test
 - 安全响应头（CSP / X-Frame-Options / nosniff / Referrer-Policy）配置于 `next.config.mjs`。
 - 依赖审计：以 `bun.lock` 为准，接入 **OSV.dev** 审计源（`bun run audit:osv`，CI 定时/PR 扫描，Critical 阻断）；
   已升级 `next`/`zod`/`next-intl` 并通过 `overrides` 收敛 `undici`/`js-yaml`/`moment`/`source-map-js` 等传递依赖。
-  当前残余为 ESLint 工具链内的 `brace-expansion`/`minimatch` DoS 类通告（仅构建期，非运行时），见 [SECURITY.md](./SECURITY.md)。
+  `brace-expansion` 4 条 high 通告已随 2026-11-04 升级（1.1.21 / 5.0.12）关闭；
+  当前残余仅 `minimatch` 2 条 moderate（修复版 11.0.1 为 ESM-only，待上游 ESLint 工具链升级随链消除，仅构建期非运行时），见 [SECURITY.md](./SECURITY.md)。
 
 ## 开发者文档
 
@@ -210,7 +211,7 @@ bun run test
 | [08 · 部署](./docs/developer/08-deployment.md) | 本地生产、脚本、Docker 注意事项 |
 | [09 · 贡献指南](./docs/developer/09-contributing.md) | 分支模型、提交规范、徽章系统扩展指南 |
 | [10 · 可视化交互体系设计](./docs/developer/10-visual-interaction-system.md) | 设计令牌 / 四主题 / 交互状态机 / 数据可视化 / 动效 / WCAG 2.2 AA / 视觉回归 |
-| [11 · 国际化边界与治理](./docs/developer/11-i18n-boundary.md) | 英文试点范围（2/14 页）· `@yyc3/i18n-core` 不适用评估 · 全量国际化排期（P0–P4） |
+| [11 · 国际化边界与治理](./docs/developer/11-i18n-boundary.md) | i18n 全量闭环（16/16 页双语 · 词条 977/977）· `@yyc3/i18n-core` 不适用评估 · 单组件复用强约定 · 残余清单 |
 | [12 · 部署承载分析](./docs/developer/12-hosting-profile.md) | 本机/单机/托管三方案对比 · 环境与反代/PG/备份配置清单 · 上线验收项 |
 
 ## 开源协作
@@ -232,7 +233,9 @@ bun run test
 - ✅ 构建通过，生产冒烟 200（含 `/en` i18n 路由、`/manifest.json`、`/icon.svg`）
 - ✅ SQLite 真实持久化（写入 → 重启 → 数据在）；课表/日程/互动/视频经 `/api/user-documents` 跨设备同步（游客自动降级本地）
 - ✅ 测试 266/266 全绿（含鉴权/越权/限流等安全行为用例）；`test:node` 7/7；E2E 3/3；四主题视觉 8/8
-- ✅ 类型债 1,986 → **0**（[TYPECHECK_BASELINE.md](./TYPECHECK_BASELINE.md)，`tsc --noEmit` 0 error）
+- ✅ 类型债 1,986 → **0**（演进史见 [07 · 测试与质量门禁](./docs/developer/07-testing-quality.md)，`tsc --noEmit` 0 error）
+- ✅ i18n 全量闭环（P0–P4 完成）：16/16 页真双语、词条 977/977 一致、`check:i18n:strict` 入 CI 阻断、hreflang 三语声明
+- ✅ AI 悬浮窗水合错配修复（首帧确定性定位 + 挂载后视口校正，Playwright 8 路由 0 错误）
 - ✅ 关键依赖安全升级：`next` 16.4.3、`zod` 4.6.7、`next-intl` 4.14.9（关闭已知通告；项目以 `bun.lock` 为准）
 - ✅ OSV 依赖审计：`bun run audit:osv` + `.github/workflows/osv-audit.yml`（Critical 阻断、每周定时、PR/push 触发、报告 artifact）
 - ✅ 四主题视觉回归：`e2e/theme-visual.e2e.ts` 8 张基线（首页/视频工坊 × 暖阳/液态/赛博/极光），macOS 与 Linux 分平台
