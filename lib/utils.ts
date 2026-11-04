@@ -344,6 +344,11 @@ export function asyncMap<T, U>(
     let completed = 0
     let index = 0
 
+    if (items.length === 0) {
+      resolve(results)
+      return
+    }
+
     const processNext = () => {
       if (index >= items.length) {
         if (completed === items.length) {
@@ -384,6 +389,8 @@ export function createQueue<T>(concurrency: number = 1) {
 
     try {
       await task()
+    } catch {
+      // 单任务失败不阻塞后续：吞掉异常，finally 继续调度
     } finally {
       running--
       void process()
