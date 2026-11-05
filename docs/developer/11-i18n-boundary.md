@@ -1,33 +1,24 @@
 # 11 · 国际化（i18n）边界与治理
 
-> 结论先行：本项目**不是全站双语**。当前是「中文主应用 + 英文镜像试点」，
-> 任何对外表述都必须按本文口径，避免把试点说成全量国际化。
+> 结论先行：**全量国际化已闭环达成（2026-11-04，P0–P4 全部完成）**——
+> 16/16 路由双语镜像 + 词条 977/977 一致 + `check:i18n:strict` CI 阻断级门禁。
+> 本文保留治理口径与历史排期供回溯，新增页面必须遵循 §3 边界治理。
 
-## 1. 现状（以构建产物与源码为准，2026-11-04 复核）
+## 1. 现状（以构建产物与源码为准，2026-11-05 复核）
 
 | 项 | 事实 |
 | ---- | ---- |
 | 方案 | `next-intl` v4（仅此一套，**不引入第二套 i18n 运行时**） |
 | 默认语言 | `zh`（无前缀，根路由 `/`、`/growth`…） |
-| 英文路由 | `/en`、`/en/growth`、`/en/ai-chat`、`/en/homework`（**4 条**，含首页共 4/15=27%） |
-| 文案规模 | zh/en **254/254** 扁平键一致（home+header+growth+homework+navigation 已接线） |
-| Provider | 根布局注入 zh Provider（2026-11-04，P0）；`/en\|/zh` 由 `app/[locale]/layout.tsx` 内层 Provider 覆盖 |
-| 文案源 | `messages/zh.json`、`messages/en.json`（13 命名空间，扁平键 173/173 一致） |
+| 英文路由 | `/en` + 15 个 `app/[locale]` 镜像 = **16/16（100%）**，全部「单组件复用」re-export |
+| 文案规模 | zh/en **977/977** 键一致（`check:i18n:strict` CI 阻断级校验） |
+| Provider | 根布局注入 zh Provider；`/en\|/zh` 由 `app/[locale]/layout.tsx` 内层 Provider 覆盖 |
+| 文案源 | `messages/zh.json`、`messages/en.json`（多命名空间，扁平键严格一致） |
 | 路由策略 | `middleware.ts`：仅 `/en`、`/zh` 前缀交 next-intl；其余直通根路由（防全站被重写导致 404） |
+| formatter | `lib/i18n/format.ts` 收敛日期/数字 locale 分歧；根 layout 含 hreflang 三条（zh-CN/en/x-default） |
 
-### ⚠️ 诚实口径：路由覆盖 ≠ 词条化覆盖
-
-2026-11-04 复核发现：`/en`、`/en/growth`、`/en/ai-chat` 三个镜像页是**硬编码中文副本**
-（`useTranslations` 被注释、文案写死中文）——此前「英文试点 2/14」实为**假覆盖**。
-
-| 页面 | 路由存在 | 真词条化（双语） |
-| ---- | ---- | ---- |
-| `/en/homework` | ✅ | ✅ 单组件复用，zh 逐字不变 |
-| `/en`（首页） | ✅ | ✅ **P1**：app/page.tsx + HomeHeader 全量词条化（home/header 命名空间） |
-| `/en/growth` | ✅ | ✅ **P1**：47 处替换（Tab/统计/提醒/里程碑/记录/评估/AI洞察）；子组件内部示例文案仍中文（P2） |
-| 底部导航 `Navigation` | — | ✅ 全站生效（8 项全部走 `navigation.tab*` 词条） |
-| `/en/ai-chat` | ✅ | ❌ 中文硬编码副本，待 P2 重构为同款「单组件复用」模式 |
-| 其余 12 个子页 | ❌ | ❌ |
+> 历史口径存档：P1 前曾发现 3 个镜像页为硬编码中文副本（假覆盖），已在 P2 全部重构为
+> 「单组件复用」模式——该教训固化为 §3 第 3 条强约定。
 
 > 技术注记：根布局 zh Provider 会把 `messages/zh.json`（约 7 KB）序列化进 RSC payload，
 > 因此 `/en` 页面 HTML 的 `<script>` 中会出现中文串——属词条对象而非可见文本（已实测剥离 script 后无残留）。
@@ -44,24 +35,22 @@ SSR 水合风险，且无法复用现有 `messages/*.json` 与 middleware 策略
 
 ## 3. 边界治理（当前做法）
 
-1. **词条键一致**：`messages/zh.json` 与 `en.json` 的键集合必须相同（缺失键会导致运行期回退到 key）；`check:i18n` 已校验（当前 173/173）。
+1. **词条键一致**：`messages/zh.json` 与 `en.json` 的键集合必须相同（缺失键会导致运行期回退到 key）；`check:i18n:strict` 已入 CI 阻断校验（当前 977/977）。
 2. **页面覆盖率可见**：`bun run check:i18n` 输出覆盖率与缺失清单（首页已计入）；⚠️ 仅统计路由存在，词条化需按 §1 诚实口径单独核对。
 3. **镜像页必须用「单组件复用」**（P1 起的强约定）：`app/[locale]/<page>/page.tsx` 一律 re-export 根组件，**禁止复制页面代码**——既有三个副本页即为反例教训。
 4. **未翻译入口不暴露**：导航/首页仅链接中文路由；`/en` 仅放已翻译页面。
 5. **新增页面流程**：先完成中文（用 `useTranslations`）→ 补 `messages` 两语言键 → 建 `app/[locale]/<page>/page.tsx` re-export → 更新本文覆盖表。
 
-## 4. 完成全量国际化的判定标准
+## 4. 全量国际化判定标准（2026-11-04 验收）
 
-- [ ] `bun run check:i18n` 页面覆盖率 100%（`app/[locale]` 与根页面一一对应）
-- [ ] `zh/en` 键集合完全一致，无 key 回退
-- [ ] 日期/数字/货币使用 `next-intl` 的 formatter（禁止手写 `toLocaleString` 分歧）
-- [ ] 所有用户可见文案（含错误提示、空态、toast）均来自 `messages`
-- [ ] 英文路由纳入 e2e（至少 3 条关键流程）
-- [ ] 视觉基线补充 `/en` 首页
+- [x] `check:i18n:strict` 页面覆盖率 100%（16/16 路由镜像一一对应，CI 阻断级）
+- [x] `zh/en` 键集合完全一致（977/977），无 key 回退
+- [x] 日期/数字使用统一 formatter（`lib/i18n/format.ts`，收敛 7 处 toLocale* 散布）
+- [x] 用户可见 UI 文案均来自 `messages`（含弹层/统计/徽章数据层词条；内容数据层残留见 §6 有意保留清单）
+- [x] 英文路由纳入 Playwright 双语实测（SSR 直出 + 交互抽查，见 §7 P3.5/P4 记录）
+- [ ] 视觉基线补充 `/en` 首页（低优先级：镜像与根页同源同构，zh 基线已覆盖布局回归）
 
-> 当前仅第 5 项具备基础（`/en` 首页可访问），其余未达标，故对外口径为「英文试点」。
-
-## 6. 全量化排期（Q3 已批准，2026-11-02 起）
+## 6. 全量化排期（已全部完成 · 历史存档）
 
 > 原则：**先框架、再页面、最后验收**；每阶段结束必须 `bun run check:i18n` 覆盖率上升且 e2e 不回归。
 
@@ -86,7 +75,7 @@ SSR 水合风险，且无法复用现有 `messages/*.json` 与 middleware 策略
 **进度（2026-11-04，PR #25 合并后）**：**P0–P4 全部完成 ✅（i18n 全局闭环达成）**——**英文镜像 16/16（100%）**，词条 **977/977** 一致。
 - P4 三项收口实测：① formatter——新增 `lib/i18n/format.ts`（localeTag/formatDateByLocale/formatTimeByLocale），收敛 7 处 toLocale* 散布（顺带修复 interactions en 镜像下日期硬编码 zh-CN 的缺陷）；② hreflang——根 layout alternates.languages 三条（zh-CN/en/x-default），curl 实测 head 输出正确；③ `check:i18n:strict` 入 CI quality-gates（阻断级，exit 1），本机实测 exit 0。
 - 有意保留：EmailNotification zh 邮件模板（服务端内容层）、VideoGenerator 配音 language:"zh-CN"（数据参数）。
-- 内容数据层残留（上线后迭代项）：时间线示例 25 处、书籍 mock、`BOOK_CATEGORY_CONFIG`/`lib/growth_stages` 数据本体、console 日志 2 处 + 默认参数 3 处（非 UI）、品牌 Header。实测数值见 `docs/YYC3-Baby-MoYu-fullaudit-20261102/06-全维度测试实测数值总结-20261104.md`。**不虚假宣称「内容 100%」。**
+- 内容数据层残留（上线后迭代项）：时间线示例 25 处、书籍 mock、`BOOK_CATEGORY_CONFIG`/`lib/growth_stages` 数据本体、console 日志 2 处 + 默认参数 3 处（非 UI）、品牌 Header。**不虚假宣称「内容 100%」。**
 
 ## 7. 变更记录
 

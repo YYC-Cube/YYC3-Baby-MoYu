@@ -18,12 +18,14 @@ flowchart LR
 | e2e | `bun run test:e2e` | 3/3（登录→建娃→写记录→登出 / 匿名 401 矩阵 / 敏感页重定向；生产构建，账号自举不依赖种子） |
 | 视觉 | `bun run test:visual` | 8/8（首页/视频工坊 × 四主题；darwin/linux 分平台基线） |
 | i18n | `bun run check:i18n:strict` | 16/16 路由镜像 + 词条 977/977 一致（CI 阻断级） |
-| 依赖 | `bun run audit:osv` | OSV.dev 审计；Critical 阻断，报告输出 `osv-results.json`（ignored） |
+| 依赖 | `bun run audit:osv` | OSV.dev 审计；Critical 阻断，报告输出 `osv-results.json`（ignored）。当前 1 条 moderate（minimatch，dev 链，跟踪中） |
 
 > 2026-11-05 复核实测：tsc 0 error · lint 0 error/0 warning（58 条债务清零）· 459/459 · node 7/7 · e2e 3/3 · 四主题视觉 8/8 ·
 > 覆盖率全仓 funcs/lines 均 92.1%（jwt dev-secret/badges/rate-limit sweep/character-manager/auth refresh 路由已补齐）·
-> OSV 0 Critical/0 High（brace-expansion 1.1.21/5.0.12 已升级关闭 4 条 high；残余 minimatch 2 条 moderate，
-> 修复版 11.0.1 为 ESM-only 待上游随链消除）。数字以本节为准，变更门禁时请同步刷新。
+> OSV 0 Critical/0 High（brace-expansion 已升级关闭 4 条 high；残余 minimatch 10.2.6 1 条 moderate
+> GHSA-g3hv-75wg-m249：由 @typescript-eslint/typescript-estree 引入，上游最新 8.72.1 仍钉 ^10.2.2，
+> 修复版 11.0.1 为 major 且 bun 全局 override 无法按范围作用域（会连带 eslint 的 minimatch@3 链），待上游随链消除）。
+> 数字以本节为准，变更门禁时请同步刷新。
 
 ## 测试套件结构（按目录实况）
 

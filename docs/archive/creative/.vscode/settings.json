@@ -1,7 +1,0 @@
-{
-    "python.testing.pytestArgs": [
-        "守护沫语"
-    ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
-}

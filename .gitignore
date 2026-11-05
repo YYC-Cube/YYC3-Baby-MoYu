@@ -396,7 +396,9 @@ swagger-ui/
 
 # 本地文档资产（暂不提交远程；保留工作区与迁移基线供本地审计）
 /docs/YYC3-小语/
-/docs/成长守护-未来之语/
+/docs/YYC3-成长守护-未来之语/
+# 有日期后缀的会话执行日志：一次性产物，结论沉淀进 docs/developer/ 后本地留档
+/docs/YYC3-Baby-MoYu-*-20*/
 
 # Reports
 reports/
@@ -636,6 +638,7 @@ data/
 # 工作区 CI 依赖本地未入库的 docs/YYC3-小语（随工作区一起本地保留）
 /.github/workflows/yyc3-xy-workspace-ci.yml
 
-# 本地规范/闭环资料（团队 SSOT 以 ~/YYC-Cube/YYC3-团队通用-标准规范 为准，本仓不入库）
-docs/YYC3-团队通用-标规文档/YYC3-团队通用-开发标准.md
+# 本地规范/闭环资料（团队 SSOT 以 ~/YYC-Cube/YYC3-团队通用-标准规范 为准，本仓不自备副本）
+docs/YYC3-团队通用-标规文档/
+docs/YYC3-团队通用-开发指南/
 docs/YYC3-项目开发-闭环体系/

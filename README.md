@@ -36,7 +36,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/build-passing-22c55e" alt="build passing" />
-  <img src="https://img.shields.io/badge/tests-266%20passed-22c55e" alt="266 tests passed" />
+  <img src="https://img.shields.io/badge/tests-459%20passed-22c55e" alt="459 tests passed" />
   <img src="https://img.shields.io/badge/type--check-0%20errors-22c55e" alt="0 type errors" />
   <img src="https://img.shields.io/badge/a11y-WCAG%202.2%20AA-0f766e" alt="WCAG 2.2 AA" />
   <img src="https://img.shields.io/badge/%E5%BE%AB%E7%AB%A0-30%20%E6%9E%9A-d946ef?logo=medal&logoColor=white" alt="30 badges" />
@@ -80,7 +80,7 @@ bun run dev
 # 构建 / 生产启动
 bun run build && bun run start
 
-# 测试（266 个用例）
+# 测试（459 个用例）
 bun run test
 ```
 
@@ -133,7 +133,7 @@ bun run test
 | ------ | ------ |
 | `bun run dev` | Next.js 开发服务器（:1228） |
 | `bun run build` / `start` | 生产构建 / 启动 |
-| `bun run test` | 单元测试（266 用例，全绿） |
+| `bun run test` | 单元测试（459 用例，全绿） |
 | `bun run type-check` | 类型检查（应用代码 **0 错误**，见 [07 · 测试与质量门禁](./docs/developer/07-testing-quality.md)） |
 | `bun run lint` / `lint:fix` | ESLint 检查 / 自动修复 |
 | `bun run test:e2e` | Playwright 行为冒烟（3 例） |
@@ -166,12 +166,12 @@ bun run test
 ├── middleware.ts         # locale 路由中间件
 ├── hooks/ types/ config/ # 钩子、类型、配置
 ├── themes/               # Figma 三套主题参考（未接线，排除出 tsc）
-├── __tests__/            # 单元测试（266 用例）
+├── __tests__/            # 单元测试（459 用例）
 ├── public/               # 静态资源（icon/manifest/PWA/角色照片/CNAME）
 ├── scripts/              # 部署脚本 + 文档生成器（generate-docs.py）
 └── docs/                 # ★ 文档中心（唯一入口见 docs/README.md）
-    ├── developer/        #   现行开发文档（11 篇，唯一维护）
-    └── archive/          #   历史归档（architecture/audit/creative/snapshots/plans）
+    ├── developer/        #   现行开发文档（12 篇，唯一维护）
+    └── YYC3-成长守护-*   #   产品设计基线（开发指导/全栈内容/角色系统/日志系统）
 ```
 
 ## 容器与探活
@@ -232,7 +232,7 @@ bun run test
 
 - ✅ 构建通过，生产冒烟 200（含 `/en` i18n 路由、`/manifest.json`、`/icon.svg`）
 - ✅ SQLite 真实持久化（写入 → 重启 → 数据在）；课表/日程/互动/视频经 `/api/user-documents` 跨设备同步（游客自动降级本地）
-- ✅ 测试 266/266 全绿（含鉴权/越权/限流等安全行为用例）；`test:node` 7/7；E2E 3/3；四主题视觉 8/8
+- ✅ 测试 459/459 全绿（含鉴权/越权/限流等安全行为用例）；`test:node` 7/7；E2E 3/3；四主题视觉 8/8
 - ✅ 类型债 1,986 → **0**（演进史见 [07 · 测试与质量门禁](./docs/developer/07-testing-quality.md)，`tsc --noEmit` 0 error）
 - ✅ i18n 全量闭环（P0–P4 完成）：16/16 页真双语、词条 977/977 一致、`check:i18n:strict` 入 CI 阻断、hreflang 三语声明
 - ✅ AI 悬浮窗水合错配修复（首帧确定性定位 + 挂载后视口校正，Playwright 8 路由 0 错误）
