@@ -20,8 +20,9 @@ const PROTECTED_PAGES = [
   "/ai-creative",
 ]
 
-// 首页读取该一次性 Cookie 自动弹出登录框（middleware 写入，HomeHeader 消费后清除）
-const LOGIN_PROMPT_COOKIE = "yyc3_prompt_login"
+// 首页读取 ?login=1 自动弹出登录框（middleware 307 携带，HomeHeader 消费后 replaceState 清除）。
+// 不用 Cookie 传递：Link 预取的 307 会被浏览器落袋 Set-Cookie，导致未点击敏感页
+// 的用户在首页被误弹登录框；而预取缓存的是无参 "/"，URL 参数天然无此污染。
 
 /**
  * 混合路由架构：
@@ -37,10 +38,8 @@ export default function middleware(request: NextRequest) {
     if (!request.cookies.has("yyc3_at")) {
       const url = request.nextUrl.clone()
       url.pathname = "/"
-      url.search = ""
-      const res = NextResponse.redirect(url)
-      res.cookies.set(LOGIN_PROMPT_COOKIE, "1", { path: "/", maxAge: 60, sameSite: "lax" })
-      return res
+      url.search = "login=1"
+      return NextResponse.redirect(url)
     }
   }
 

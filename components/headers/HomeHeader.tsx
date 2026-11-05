@@ -35,14 +35,14 @@ export default function HomeHeader() {
     return () => { clearInterval(timer); }
   }, [dateLocale])
 
-  // 敏感页重定向回来的登录提示（middleware 写入的一次性 Cookie）：
-  // rAF 在首帧绘制前执行，与同步执行视觉等价，setState 位于回调中而非 effect 体内
+  // 敏感页重定向回来的登录提示（middleware 307 到 /?login=1）：
+  // rAF 在首帧绘制前执行，与同步执行视觉等价；消费后 replaceState 清除参数。
+  // 读 URL 参数而非 Cookie——预取的 307 只会缓存无参 "/"，不会被误触发
   useEffect(() => {
-    if (typeof document === "undefined") return
     const raf = requestAnimationFrame(() => {
-      if (document.cookie.split(";").some((c) => c.trim().startsWith("yyc3_prompt_login="))) {
+      if (new URLSearchParams(window.location.search).has("login")) {
         setAuthModal("login")
-        document.cookie = "yyc3_prompt_login=; path=/; max-age=0"
+        window.history.replaceState(null, "", window.location.pathname)
       }
     })
     return () => { cancelAnimationFrame(raf); }

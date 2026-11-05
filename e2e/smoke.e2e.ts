@@ -105,8 +105,7 @@ test("未登录访问数据 API 一律 401", async ({ request }) => {
 
 test("未登录访问敏感页 → 重定向首页并提示登录", async ({ page }) => {
   await page.goto("/growth")
-  // 中间件重定向到 /
-  expect(page.url()).toBe("http://localhost:1228/")
-  // 登录提示 Cookie 生效：登录弹窗自动弹出
+  // 中间件重定向到 /?login=1，HomeHeader 消费后 replaceState 清为 /
   await expect(page.getByText("欢迎回来")).toBeVisible({ timeout: 5_000 })
+  expect(page.url()).toBe("http://localhost:1228/")
 })
