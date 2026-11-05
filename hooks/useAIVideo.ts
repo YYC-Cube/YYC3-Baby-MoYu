@@ -50,12 +50,15 @@ export function useAIVideo() {
     }
   }, [])
 
+  // 挂载即从本地集合加载 + 订阅跨端同步：loadVideos 为同步初始化（挂载惯例，一次性级联渲染，安全豁免）
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadVideos()
     const unsubscribe = subscribeCollection(COLLECTION_KIND, loadVideos)
     void hydrateCollection(COLLECTION_KIND, VIDEO_STORAGE_KEY)
     return unsubscribe
-  }, [loadVideos])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // 保存视频
   const saveVideo = useCallback((video: GeneratedVideo) => {

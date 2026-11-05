@@ -9,7 +9,10 @@
 
 import { reportError } from "@/lib/global-error-handler"
 import { motion } from "framer-motion"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react"
+
+// 挂载检测专用的空订阅：值恒定，无需真实订阅源
+const noopSubscribe = () => () => {}
 
 interface VoiceInteractionProps {
   onTranscript: (text: string) => void
@@ -219,9 +222,9 @@ export default function VoiceInteraction({
     return () => { cleanup(); }
   }, [])
 
-  // 支持性依赖 window，须在客户端挂载后评估（避免 SSR 判定与水合不一致）
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  // 支持性依赖 window，须在客户端挂载后评估（避免 SSR 判定与水合不一致）：
+  // useSyncExternalStore 双快照实现挂载检测，规避 effect 内同步 setState 的级联渲染
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false)
   if (!mounted) return null
 
   if (!isSupported()) {
@@ -289,7 +292,7 @@ export default function VoiceInteraction({
             <motion.div
               key={i}
               className="w-1 bg-blue-500 rounded-full"
-              style={{ height: `${20 + audioLevel * 40 * Math.random()}px` }}
+              style={{ height: `${20 + audioLevel * 40 * (1 + (i % 3) * 0.2)}px` }}
               animate={{
                 scaleY: [1, 1 + audioLevel, 1]
               }}

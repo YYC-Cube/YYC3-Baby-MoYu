@@ -17,7 +17,7 @@ const registerSchema = z.object({
 // 客户端注册后统一走登录：新用户用刚提交的密码登录成功，重复邮箱登录失败（错误信息与"密码错误"不可区分）。
 export async function POST(request: Request) {
   try {
-    const body = await request.json().catch(() => null)
+    const body: unknown = await request.json().catch(() => null)
     const parsed = registerSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(

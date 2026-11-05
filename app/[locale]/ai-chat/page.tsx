@@ -32,8 +32,8 @@ export default function AIChatPage() {
     const saved = localStorage.getItem('yyc3-ai-chat-messages')
     if (saved) {
       try {
-        const parsedMessages = JSON.parse(saved)
-        return parsedMessages
+        const parsedMessages: unknown = JSON.parse(saved)
+        return parsedMessages as Message[]
       } catch (e) {
         console.error('Failed to parse saved messages:', e)
         return [{

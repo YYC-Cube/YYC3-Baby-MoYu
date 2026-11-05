@@ -37,29 +37,8 @@ export default function SmartHomeworkHelper({
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
 
-  // Handle image upload for homework correction
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setUploadedImage(e.target?.result as string)
-        void analyzeHomeworkImage(file)
-      }
-      reader.readAsDataURL(file)
-    }
-  }, [])
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "image/*": [".jpeg", ".jpg", ".png", ".webp"],
-    },
-    maxFiles: 1,
-  })
-
-  // Real API call for homework correction
-  const analyzeHomeworkImage = async (file: File) => {
+  // Real API call for homework correction（useCallback 稳定引用，供 onDrop 依赖）
+  const analyzeHomeworkImage = useCallback(async (file: File) => {
     setIsProcessing(true)
     try {
       // 图片转 base64 后交由服务端 API 代理调用 BigModel，密钥不出服务端
@@ -130,7 +109,7 @@ export default function SmartHomeworkHelper({
     } finally {
       setIsProcessing(false)
     }
-  }
+  }, [])
 
   // Voice recording functionality
   const startRecording = async () => {
@@ -234,6 +213,27 @@ export default function SmartHomeworkHelper({
       onHomeworkComplete(allResults)
     }
   }
+
+  // Handle image upload for homework correction（声明于 analyzeHomeworkImage 之后，满足定义前引用检查）
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setUploadedImage(e.target?.result as string)
+        void analyzeHomeworkImage(file)
+      }
+      reader.readAsDataURL(file)
+    }
+  }, [analyzeHomeworkImage])
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "image/*": [".jpeg", ".jpg", ".png", ".webp"],
+    },
+    maxFiles: 1,
+  })
 
   return (
     <div className="bg-surface rounded-3xl shadow-soft p-6 w-full max-w-2xl mx-auto">

@@ -18,14 +18,12 @@ import {
   SCHEDULE_TYPE_CONFIG,
   getScheduleColor,
   getScheduleIcon,
-  getScheduleLabel,
 } from "@/types/schedule"
 
 type ViewMode = "day" | "week" | "timeline"
 
 export default function SchedulePage() {
   const t = useTranslations("schedule")
-  const locale = useLocale()
   const [viewMode, setViewMode] = useState<ViewMode>("day")
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [showEditor, setShowEditor] = useState(false)

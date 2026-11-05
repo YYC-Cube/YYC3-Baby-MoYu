@@ -293,7 +293,7 @@ export class PostgresDatabase {
   }
 
   optimize(): void {
-    void this.query("ANALYZE").catch((err) => console.error("PG ANALYZE 失败：", err))
+    this.query("ANALYZE").catch((err) => { console.error("PG ANALYZE 失败：", err) })
   }
 
   async close(): Promise<void> {

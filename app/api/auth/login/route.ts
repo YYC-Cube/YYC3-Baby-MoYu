@@ -18,7 +18,7 @@ function clientIP(request: Request): string {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json().catch(() => null)
+    const body: unknown = await request.json().catch(() => null)
     const parsed = loginSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(

@@ -141,7 +141,9 @@ function streamAnswer(payload: { text: string; demo: boolean; role: AIRole; chun
 
   const stream = new ReadableStream({
     async start(controller) {
-      const send = (obj: unknown) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`))
+      const send = (obj: unknown): void => {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`))
+      }
 
       // 首帧声明能力状态：前端据此渲染「示例回答」标记，不再靠猜
       send({ type: "meta", demo, role, model: demo ? null : MODEL_ID })

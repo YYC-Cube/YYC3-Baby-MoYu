@@ -95,6 +95,8 @@ function Carousel({
 
   React.useEffect(() => {
     if (!api) return
+    // 订阅初始化：从 embla api 读取初始滚动状态同步进 React（外部系统 → React，官方认可用途，豁免保守告警）
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     onSelect(api)
     api.on('reInit', onSelect)
     api.on('select', onSelect)

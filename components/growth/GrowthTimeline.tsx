@@ -130,7 +130,7 @@ export default function GrowthTimeline({ events = defaultEvents, childName = "å°
           {t("titleOf", { name: childName })}
         </h3>
         <div className="grid grid-cols-5 gap-2 mt-4">
-          {Object.entries(typeConfig).map(([type, config]) => {
+          {Object.entries(typeConfig).map(([type]) => {
             const count = events.filter((e) => e.type === type).length
             return (
               <div key={type} className="text-center">

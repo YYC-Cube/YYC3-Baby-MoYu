@@ -26,11 +26,13 @@ export default function BookReader({
 }: BookReaderProps) {
   const t = useTranslations("books")
   const [showControls, setShowControls] = useState(true)
-  const [highlightedWord, setHighlightedWord] = useState(-1)
+  const [playingHighlight, setPlayingHighlight] = useState(-1)
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const page = book.pages.find((p) => p.pageNumber === currentPage)
   const progress = (currentPage / book.pages.length) * 100
+  // 未在播放时高亮恒为 -1：渲染期派生替代 effect 内同步重置（消除级联渲染）
+  const highlightedWord = isPlaying && page ? playingHighlight : -1
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -64,16 +66,14 @@ export default function BookReader({
       const words = page.text.split("")
       let index = 0
       const interval = setInterval(() => {
-        setHighlightedWord(index)
+        setPlayingHighlight(index)
         index++
         if (index >= words.length) {
           clearInterval(interval)
-          setHighlightedWord(-1)
+          setPlayingHighlight(-1)
         }
       }, 150)
       return () => { clearInterval(interval); }
-    } else {
-      setHighlightedWord(-1)
     }
   }, [isPlaying, page, currentPage])
 

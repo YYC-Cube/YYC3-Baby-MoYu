@@ -84,7 +84,7 @@ ${userInput ? `孩子新写的内容：${userInput}` : "请开始故事"}
       // 解析AI响应
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0])
+        const parsed: unknown = JSON.parse(jsonMatch[0])
         return NextResponse.json(parsed)
       }
     } catch (aiError) {

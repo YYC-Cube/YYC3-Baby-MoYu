@@ -10,9 +10,15 @@ import { resetRateLimits } from "@/lib/rate-limit"
 
 const users = new Map<string, { id: string; email: string; password_hash: string; role: string; is_active: number }>()
 
+// 故障注入：用户查询抛错 → 验证路由 500 兜底
+let failUserLookup = false
+
 mock.module("@/lib/auth/service", () => ({
   findUserByEmail: async (email: string) => users.get(email) ?? null,
-  findUserById: async (id: string) => [...users.values()].find((u) => u.id === id) ?? null,
+  findUserById: async (id: string) => {
+    if (failUserLookup) throw new Error("db down")
+    return [...users.values()].find((u) => u.id === id) ?? null
+  },
   toAuthUser: (row: any) => ({
     id: row.id, email: row.email, firstName: "", lastName: "", role: row.role ?? "parent",
     emailVerified: false, isActive: (row.is_active ?? 1) === 1, createdAt: "2026-01-01",
@@ -43,6 +49,7 @@ const j = async (res: Response) => ({ status: res.status, body: await res.json()
 beforeEach(() => {
   users.clear()
   users.set("known@t.cn", { id: "u-known", email: "known@t.cn", password_hash: "hash:right-pass", role: "parent", is_active: 1 })
+  failUserLookup = false
   resetRateLimits()
 })
 
@@ -113,5 +120,83 @@ describe("POST /api/auth/refresh", () => {
     const { status, body } = await j(await refreshRoute.POST(post("http://x/refresh", { refreshToken: login.body.data.tokens.refreshToken })))
     expect(status).toBe(200)
     expect(verifyToken(body.data.token, "access").userId).toBe("u-known")
+  })
+
+  test("429：超过每 IP 15 次/分钟限流（无效请求同样计入窗口）", async () => {
+    for (let i = 0; i < 15; i++) {
+      const r = await refreshRoute.POST(post("http://x/refresh", {}))
+      expect(r.status).toBe(400)
+    }
+    const { status, body } = await j(await refreshRoute.POST(post("http://x/refresh", {})))
+    expect(status).toBe(429)
+    expect(body.message).toContain("频繁")
+  })
+
+  test("400：refreshToken 类型非法（schema 校验失败）", async () => {
+    const { status } = await j(await refreshRoute.POST(post("http://x/refresh", { refreshToken: 123 })))
+    expect(status).toBe(400)
+  })
+
+  test("400：body 与 Cookie 均无 refreshToken", async () => {
+    const { status, body } = await j(await refreshRoute.POST(post("http://x/refresh", {})))
+    expect(status).toBe(400)
+    expect(body.message).toBe("refreshToken 为必填")
+  })
+
+  test("400：Cookie 存在但无 yyc3_rt 字段", async () => {
+    const req = new Request("http://x/refresh", {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: "sid=1; yyc3_at=stolen-access" },
+      body: JSON.stringify({}),
+    })
+    const { status } = await j(await refreshRoute.POST(req))
+    expect(status).toBe(400)
+  })
+
+  test("Cookie 浏览器路径：yyc3_rt 换取新 access 并重设 httpOnly Cookie", async () => {
+    const loginRes = await loginRoute.POST(post("http://x/login", { email: "known@t.cn", password: "right-pass" }))
+    const rt = (loginRes.headers.getSetCookie?.() ?? [])
+      .find((c) => c.startsWith("yyc3_rt="))
+      ?.split(";")[0]
+      ?.slice("yyc3_rt=".length)
+    expect(rt).toBeTruthy()
+
+    const req = new Request("http://x/refresh", {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: `sid=1; yyc3_rt=${rt}` },
+      body: JSON.stringify({}),
+    })
+    const res = await refreshRoute.POST(req)
+    const { status, body } = await j(res)
+    expect(status).toBe(200)
+    expect(verifyToken(body.data.token, "access").userId).toBe("u-known")
+    const all = (res.headers.getSetCookie?.() ?? [res.headers.get("set-cookie") ?? ""]).join("\n")
+    expect(all).toContain("yyc3_at=")
+    expect(all).toContain("HttpOnly")
+  })
+
+  test("401：令牌有效但用户已被删除", async () => {
+    const login = await j(await loginRoute.POST(post("http://x/login", { email: "known@t.cn", password: "right-pass" })))
+    users.clear()
+    const { status, body } = await j(await refreshRoute.POST(post("http://x/refresh", { refreshToken: login.body.data.tokens.refreshToken })))
+    expect(status).toBe(401)
+    expect(body.message).toBe("用户不存在")
+  })
+
+  test("403：账号已停用", async () => {
+    const login = await j(await loginRoute.POST(post("http://x/login", { email: "known@t.cn", password: "right-pass" })))
+    const row = users.get("known@t.cn")
+    if (row) row.is_active = 0
+    const { status, body } = await j(await refreshRoute.POST(post("http://x/refresh", { refreshToken: login.body.data.tokens.refreshToken })))
+    expect(status).toBe(403)
+    expect(body.message).toBe("账号已停用")
+  })
+
+  test("500：用户查询抛错走兜底日志路径", async () => {
+    const login = await j(await loginRoute.POST(post("http://x/login", { email: "known@t.cn", password: "right-pass" })))
+    failUserLookup = true
+    const { status, body } = await j(await refreshRoute.POST(post("http://x/refresh", { refreshToken: login.body.data.tokens.refreshToken })))
+    expect(status).toBe(500)
+    expect(body.message).toBe("刷新令牌失败")
   })
 })

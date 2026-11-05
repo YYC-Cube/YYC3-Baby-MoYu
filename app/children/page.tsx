@@ -101,7 +101,7 @@ export default function ChildrenPage() {
                   <div className="flex items-start gap-4">
                     {/* Q版角色头像 */}
                     <ChildQVersionAvatar
-                      child={child as any}
+                      child={child}
                       size="lg"
                     />
 
@@ -221,7 +221,7 @@ export default function ChildrenPage() {
                 alert(err instanceof Error ? err.message : t("saveFailedShort"))
                 return // 保留弹窗，用户可重试
               }
-              await refreshChildren()
+              refreshChildren()
               setShowAddModal(false)
               setEditingChild(null)
             }}

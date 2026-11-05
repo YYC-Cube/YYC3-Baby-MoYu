@@ -123,7 +123,7 @@ export class HomeworkCorrectionService {
         body: JSON.stringify(request),
       })
 
-      return await response.json()
+      return (await response.json()) as HomeworkCorrectionResponse
     } catch (error) {
       console.error("作业批改API调用失败:", error)
       throw new Error("作业批改服务暂时不可用，请稍后再试")
@@ -156,7 +156,7 @@ export class HomeworkCorrectionService {
         body: JSON.stringify(request),
       })
 
-      return await response.json()
+      return (await response.json()) as SmartCorrectionResponse[]
     } catch (error) {
       console.error("智能批改API调用失败:", error)
       throw new Error("智能批改服务暂时不可用，请稍后再试")
@@ -193,7 +193,7 @@ export class HomeworkCorrectionService {
         body: JSON.stringify(request),
       })
 
-      return await response.json()
+      return (await response.json()) as ResultAnalysisResponse
     } catch (error) {
       console.error("结果解析API调用失败:", error)
       throw new Error("结果解析服务暂时不可用，请稍后再试")

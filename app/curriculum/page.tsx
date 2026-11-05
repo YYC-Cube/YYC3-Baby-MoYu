@@ -403,7 +403,7 @@ function CourseList({
 
   return (
     <div className="space-y-4">
-      {COURSE_TYPES.map(({ value, label, icon }) => (
+      {COURSE_TYPES.map(({ value, icon }) => (
         <motion.div
           key={value}
           className="bg-white rounded-2xl p-4 shadow-sm"

@@ -40,7 +40,7 @@ export class TimeSeriesEngine extends BasePredictor {
     return new TimeSeriesEngine(config)
   }
 
-  protected getSearchSpace(): Record<string, any> {
+  protected getSearchSpace(): Record<string, unknown> {
     return {
       windowSize: { type: 'range', min: 5, max: 50 },
       alpha: { type: 'range', min: 0.1, max: 0.9 },
@@ -358,7 +358,7 @@ export class AnomalyDetectionEngine extends BasePredictor {
     return new AnomalyDetectionEngine(config)
   }
 
-  protected getSearchSpace(): Record<string, any> {
+  protected getSearchSpace(): Record<string, unknown> {
     return {
       threshold: { type: 'range', min: 1.5, max: 4.0 },
       windowSize: { type: 'range', min: 10, max: 100 },
@@ -597,7 +597,7 @@ export class AnomalyDetectionEngine extends BasePredictor {
     }
   }
 
-  private getAnomalyContext(anomaly: Anomaly): Record<string, any> {
+  private getAnomalyContext(anomaly: Anomaly): Record<string, unknown> {
     return {
       surroundingValues: this.baseline.slice(
         Math.max(0, anomaly.index - 5),

@@ -393,19 +393,23 @@ export const IntelligentAIWidget: React.FC<WidgetProps> = ({
     return () => { window.removeEventListener('resize', handleResize); }
   }, [])
 
-  // 挂载后按真实视口校正浮动位置（首帧与 SSR 输出一致，避免水合错配）
+  // 挂载后按真实视口校正浮动位置（首帧与 SSR 输出一致，避免水合错配）：
+  // rAF 在首帧绘制前执行，校正时机与同步执行视觉等价，setState 位于回调中而非 effect 体内
   useEffect(() => {
-    setState(prev => {
-      if (prev.mode !== 'floating') return prev
-      return {
-        ...prev,
-        position: optimizePosition(
-          getInitialPosition(initialPosition, width, height),
-          window.innerWidth,
-          window.innerHeight
-        )
-      }
+    const raf = requestAnimationFrame(() => {
+      setState(prev => {
+        if (prev.mode !== 'floating') return prev
+        return {
+          ...prev,
+          position: optimizePosition(
+            getInitialPosition(initialPosition, width, height),
+            window.innerWidth,
+            window.innerHeight
+          )
+        }
+      })
     })
+    return () => { cancelAnimationFrame(raf); }
   }, [initialPosition, width, height])
 
   // 渲染主组件

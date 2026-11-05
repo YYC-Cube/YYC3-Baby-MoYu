@@ -98,7 +98,7 @@ const STORAGE_KEY = "yyc3_badge_unlocks_v1"
 export function loadUnlockedMap(): Record<string, string> {
   if (typeof window === "undefined") return {}
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}")
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") as Record<string, string>
   } catch {
     return {}
   }

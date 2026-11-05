@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChildren } from '@/hooks/useChildren'
 import type { Child } from '@/lib/db/types'
@@ -34,6 +34,11 @@ export default function QVersionCharacter({
   const targetChild = childId
     ? children.find(child => child.id === childId)
     : currentChild
+
+  // 当前展示性别：优先真实档案，回退交互切换值（渲染期派生，无需 effect 同步 prop → state）
+  const currentGender = targetChild?.gender === 'male' || targetChild?.gender === 'female'
+    ? targetChild.gender
+    : displayGender
 
   // 根据性别确定角色名称
   const getCharacterName = (gender: 'male' | 'female', child?: Child | null): string => {
@@ -85,7 +90,7 @@ export default function QVersionCharacter({
 
     // 延迟切换性别，让动画先播放
     setTimeout(() => {
-      const newGender = displayGender === 'male' ? 'female' : 'male'
+      const newGender = currentGender === 'male' ? 'female' : 'male'
       setDisplayGender(newGender)
       onGenderChange?.(newGender)
     }, 300)
@@ -95,17 +100,6 @@ export default function QVersionCharacter({
       setIsAnimating(false)
     }, 600)
   }
-
-  // 根据儿童性别初始化显示性别
-  useEffect(() => {
-    if (targetChild?.gender === 'male' || targetChild?.gender === 'female') {
-      setDisplayGender(targetChild.gender)
-    }
-  }, [targetChild])
-
-  const currentGender = targetChild?.gender === 'male' || targetChild?.gender === 'female'
-    ? targetChild.gender
-    : displayGender
 
   const themeColors = getThemeColors(currentGender)
   const characterName = getCharacterName(currentGender, targetChild)

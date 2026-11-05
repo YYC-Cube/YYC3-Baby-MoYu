@@ -125,17 +125,21 @@ export function deepClone<T>(obj: T): T {
   }
 
   if (obj instanceof Array) {
-    return obj.map(item => deepClone(item)) as T
+    const clonedArray: unknown[] = []
+    for (const item of obj) {
+      clonedArray.push(deepClone(item))
+    }
+    return clonedArray as unknown as T
   }
 
   if (obj instanceof Object) {
-    const clonedObj = {} as T
+    const clonedObj = {} as Record<string, unknown>
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        clonedObj[key] = deepClone(obj[key])
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        clonedObj[key] = deepClone((obj as Record<string, unknown>)[key])
       }
     }
-    return clonedObj
+    return clonedObj as T
   }
 
   return obj
@@ -340,7 +344,7 @@ export function asyncMap<T, U>(
   concurrency: number = 5
 ): Promise<U[]> {
   return new Promise((resolve, reject) => {
-    const results: U[] = new Array(items.length)
+    const results: U[] = new Array<U>(items.length)
     let completed = 0
     let index = 0
 

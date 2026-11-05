@@ -24,13 +24,13 @@ export async function PUT(request: NextRequest) {
   const auth = await requireAuth(request)
   if (auth instanceof NextResponse) return auth
 
-  const body = await request.json().catch(() => ({}))
-  const { firstName, lastName, phone, avatarUrl } = body as {
+  const body = (await request.json().catch(() => ({}))) as {
     firstName?: string
     lastName?: string
     phone?: string
     avatarUrl?: string
   }
+  const { firstName, lastName, phone, avatarUrl } = body
 
   const { getServerDB } = await import("@/lib/db/server")
   const db = getServerDB()

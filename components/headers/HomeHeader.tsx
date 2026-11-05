@@ -35,13 +35,17 @@ export default function HomeHeader() {
     return () => { clearInterval(timer); }
   }, [dateLocale])
 
-  // 敏感页重定向回来的登录提示（middleware 写入的一次性 Cookie）
+  // 敏感页重定向回来的登录提示（middleware 写入的一次性 Cookie）：
+  // rAF 在首帧绘制前执行，与同步执行视觉等价，setState 位于回调中而非 effect 体内
   useEffect(() => {
     if (typeof document === "undefined") return
-    if (document.cookie.split(";").some((c) => c.trim().startsWith("yyc3_prompt_login="))) {
-      setAuthModal("login")
-      document.cookie = "yyc3_prompt_login=; path=/; max-age=0"
-    }
+    const raf = requestAnimationFrame(() => {
+      if (document.cookie.split(";").some((c) => c.trim().startsWith("yyc3_prompt_login="))) {
+        setAuthModal("login")
+        document.cookie = "yyc3_prompt_login=; path=/; max-age=0"
+      }
+    })
+    return () => { cancelAnimationFrame(raf); }
   }, [])
 
   return (

@@ -226,8 +226,8 @@ export class EnsembleEngine extends BasePredictor {
 
     // 检查是否为多步预测
     if (Array.isArray(predictions[0])) {
-      const horizon = (predictions[0]).length
-      const result = new Array(horizon).fill(0)
+      const horizon = predictions[0].length
+      const result: number[] = new Array<number>(horizon).fill(0)
 
       for (let i = 0; i < horizon; i++) {
         let sum = 0
@@ -250,8 +250,8 @@ export class EnsembleEngine extends BasePredictor {
 
     // 检查是否为多步预测
     if (Array.isArray(predictions[0])) {
-      const horizon = (predictions[0]).length
-      const result = new Array(horizon).fill(0)
+      const horizon = predictions[0].length
+      const result: number[] = new Array<number>(horizon).fill(0)
 
       for (let i = 0; i < horizon; i++) {
         let sum = 0

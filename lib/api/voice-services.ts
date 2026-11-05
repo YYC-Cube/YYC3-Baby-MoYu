@@ -164,7 +164,7 @@ export class VoiceService {
         body: formData,
       })
 
-      const result = await response.json()
+      const result = (await response.json()) as { text?: string }
       return result.text || ""
     } catch (error) {
       console.error("音频转写失败:", error)

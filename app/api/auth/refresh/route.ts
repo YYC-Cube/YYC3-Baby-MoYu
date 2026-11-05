@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "Rate Limit", message: "请求过于频繁" }, { status: 429 })
     }
 
-    const body = await request.json().catch(() => ({}))
+    const body: unknown = await request.json().catch(() => ({}))
     const parsed = refreshSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(

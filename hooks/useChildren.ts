@@ -22,7 +22,7 @@ interface UseChildrenReturn {
   addChild: (data: Omit<Child, "id" | "created_at" | "user_id">) => Promise<Child | null>
   updateChild: (id: string, data: Partial<Child>) => Promise<Child | null>
   deleteChild: (id: string) => Promise<boolean>
-  refreshChildren: () => Promise<void>
+  refreshChildren: () => void
 }
 
 function readSelectedId(): string | null {
@@ -73,9 +73,13 @@ export function useChildren(): UseChildrenReturn {
     }
   }, [applySelection])
 
+  // 挂载即拉取：loadChildren 内部 setState 均发生在 await 之后（异步回调），
+  // 非同步 effect 体内的 setState；编译器对间接引用保守告警，此处安全豁免
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadChildren()
-  }, [loadChildren])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const setCurrentChild = useCallback(
     (child: Child | null) => {
@@ -150,6 +154,8 @@ export function useChildren(): UseChildrenReturn {
     addChild,
     updateChild,
     deleteChild,
-    refreshChildren: loadChildren,
+    refreshChildren: () => {
+      void loadChildren()
+    },
   }
 }

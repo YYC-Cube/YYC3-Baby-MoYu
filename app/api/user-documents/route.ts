@@ -19,7 +19,6 @@ import { z } from "zod"
 
 /** 允许的集合类型（新增类型必须在此登记，防止把表当通用 KV 滥用） */
 const KINDS = ["schedule", "curriculum", "interaction", "video", "assessment"] as const
-type Kind = (typeof KINDS)[number]
 
 const MAX_ITEMS = 500
 const MAX_ITEM_BYTES = 64 * 1024

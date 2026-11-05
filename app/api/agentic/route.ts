@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json().catch(() => null)
+    const body: unknown = await request.json().catch(() => null)
     const parsed = inputSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(

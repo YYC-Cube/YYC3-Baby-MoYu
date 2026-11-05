@@ -5,11 +5,11 @@ import { motion } from "framer-motion"
 import { useTranslations } from "next-intl"
 import {
   type VideoStyle,
+  type VideoType,
 } from "@/types/ai-video"
 import { useAIVideo } from "@/hooks/useAIVideo"
 
 // 本地类型定义
-type VideoType = "slideshow" | "story-animation" | "cinema" | "image-to-video" | "memory-recap"
 type VideoTemplate = {
   id: string
   name: string
@@ -58,7 +58,7 @@ interface VideoGeneratorProps {
 
 type GeneratorStep = "type" | "content" | "style" | "options" | "generating"
 
-export default function VideoGenerator({ childId: _childId, onComplete, onCancel }: VideoGeneratorProps) {
+export default function VideoGenerator({ childId, onComplete, onCancel }: VideoGeneratorProps) {
   const t = useTranslations("videoGen")
   const [step, setStep] = useState<GeneratorStep>("type")
   const [videoType, setVideoType] = useState<VideoType>("slideshow")
@@ -101,7 +101,8 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
 
     try {
       await generateVideo({
-        type: videoType as any,
+        childId: childId ?? "default-child",
+        type: videoType,
         title: title || t("defaultTitle"),
         sourceImages: selectedImages,
         storyText: videoType === "story-animation" ? storyText : undefined,
@@ -121,14 +122,15 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
         music: enableMusic
           ? {
               enabled: true,
-              style: musicStyle,
+              // 本地音乐风格映射到权威 MusicStyle（gentle/energetic 为展示扩展，发送时取最近邻合法值）
+              style: musicStyle === "gentle" ? "calm" : musicStyle === "energetic" ? "happy" : musicStyle,
               volume: musicVolume,
               fadeIn: true,
               fadeOut: true,
             }
           : undefined,
         captions: true,
-      } as any)
+      })
 
       onComplete()
     } catch (error) {
@@ -365,7 +367,7 @@ export default function VideoGenerator({ childId: _childId, onComplete, onCancel
 
               {enableVoiceover && (
                 <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(VOICE_CONFIG).map(([key, config]) => (
+                  {Object.entries(VOICE_CONFIG).map(([key]) => (
                     <button
                       key={key}
                       onClick={() => { setVoiceType(key as typeof voiceType); }}

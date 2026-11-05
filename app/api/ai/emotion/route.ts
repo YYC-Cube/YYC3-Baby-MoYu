@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   if (guard instanceof NextResponse) return guard
 
   try {
-    const { text, includeAdvice = false }: EmotionAnalysisRequest = await request.json()
+    const { text, includeAdvice = false } = (await request.json()) as EmotionAnalysisRequest
 
     // 情感词典
     const emotionKeywords = {
