@@ -397,6 +397,7 @@ swagger-ui/
 # 本地文档资产（暂不提交远程；保留工作区与迁移基线供本地审计）
 /docs/YYC3-小语/
 /docs/YYC3-成长守护-未来之语/
+/docs/xy/
 # 有日期后缀的会话执行日志：一次性产物，结论沉淀进 docs/developer/ 后本地留档
 /docs/YYC3-Baby-MoYu-*-20*/
 
