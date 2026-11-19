@@ -53,6 +53,7 @@
     "check:i18n": "node scripts/check-i18n-coverage.mjs",
     "check:i18n:strict": "node scripts/check-i18n-coverage.mjs --strict",
     "audit:osv": "node scripts/osv-audit.mjs --fail-on=critical --output=osv-results.json",
+    "gen:metrics-token": "node scripts/generate-metrics-token.mjs",
     "audit:osv:high": "node scripts/osv-audit.mjs --fail-on=high"
   },
   "dependencies": {

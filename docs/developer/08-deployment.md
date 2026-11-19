@@ -76,7 +76,7 @@ PG 服务不对外暴露端口（仅容器网络内可达）；数据落 `./pgda
 
 ## 脚本（scripts/）
 
-**现行可用**：`osv-audit.mjs`（依赖审计）、`generate-docs.py`（文档生成）、`ts-node-hooks.mjs`（node 直测钩子）。
+**现行可用**：`osv-audit.mjs`（依赖审计）、`generate-metrics-token.mjs`（指标令牌生成）、`generate-docs.py`（文档生成）、`ts-node-hooks.mjs`（node 直测钩子）。
 
 | 脚本 | 状态 | 说明 |
 | ---- | ---- | ---- |
@@ -86,6 +86,25 @@ PG 服务不对外暴露端口（仅容器网络内可达）；数据落 `./pgda
 
 > 上述 `deploy-*.sh` 均为历史遗留（依赖仓库中不存在的 `services/xiaoyu-api/`、`microservices/` 等资产），
 > 现行部署路径只有两条：本机 `bun run build && bun run start`，或容器 `docker compose up -d --build`。
+
+## 指标令牌生成（`METRICS_TOKEN`，按环境独立）
+
+不要手写、不要跨环境复用，用 `scripts/generate-metrics-token.mjs` 生成（48 位十六进制、文件 0600、幂等）：
+
+```bash
+bun run gen:metrics-token                          # 默认 production → .env.production
+bun run gen:metrics-token -- staging production    # 预发与生产各生成一份
+bun run gen:metrics-token -- production --file .env # docker compose 读取的 .env
+bun run gen:metrics-token -- production --force     # 轮换（抓取端需同步更新）
+bun run gen:metrics-token -- production --print     # 额外输出明文与 Authorization 片段
+```
+
+| 行为 | 说明 |
+| ---- | ---- |
+| 已存在令牌 | 默认跳过并打印掩码 + `sha256` 指纹，避免误轮换导致抓取中断 |
+| 轮换 | 仅 `--force`；输出提示需同步更新 Prometheus `authorization.credentials` |
+| 文件写入 | 新文件 `0600`，已有文件写回后同样收紧为 `0600`；保留同文件内其他变量 |
+| 明文暴露 | 默认不打印明文；`--print` 才输出（用于一次性配置抓取端） |
 
 ## 备份与恢复
 
