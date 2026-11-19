@@ -59,18 +59,19 @@ describe("内存存储（默认）", () => {
   })
 
   test("窗口过期后应重置计数", async () => {
-    await checkRateLimit("k4", 1, 1)
-    expect((await checkRateLimit("k4", 1, 1)).allowed).toBe(false)
-    await new Promise((r) => setTimeout(r, 5))
-    expect((await checkRateLimit("k4", 1, 1)).allowed).toBe(true)
+    // 窗口取 50ms：异步化后两次 await 之间可能已超 1ms，过窄窗口在快速机器（CI）上必然 flaky
+    await checkRateLimit("k4", 1, 50)
+    expect((await checkRateLimit("k4", 1, 50)).allowed).toBe(false)
+    await new Promise((r) => setTimeout(r, 80))
+    expect((await checkRateLimit("k4", 1, 50)).allowed).toBe(true)
   })
 
   test("超过 MAX_KEYS 上限时触发全量过期清理", async () => {
     for (let i = 0; i < 10_005; i++) {
-      await checkRateLimit(`sweep:${i}`, 1, 5)
+      await checkRateLimit(`sweep:${i}`, 1, 50)
     }
-    await new Promise((r) => setTimeout(r, 10))
-    const r = await checkRateLimit("sweep:final", 1, 5)
+    await new Promise((r) => setTimeout(r, 80))
+    const r = await checkRateLimit("sweep:final", 1, 50)
     expect(r.allowed).toBe(true)
     expect(r.remaining).toBe(0)
   })
