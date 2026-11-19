@@ -17,17 +17,25 @@
 > 移出仓库：结论均已沉淀进 developer/ 各篇， git 历史可溯。团队通用规范/开发指南以
 > **SSOT `~/YYC-Cube/YYC3-团队通用-标准规范/` 为唯一事实源**，本仓不自备副本。
 
-## 现行门禁基线（实测 2026-11-05，详见 [developer/07](./developer/07-testing-quality.md)）
+## 现行门禁基线（实测 2026-11-20，详见 [developer/07](./developer/07-testing-quality.md)）
 
 | 门禁 | 基线 |
 | ---- | ---- |
 | `bunx tsc --noEmit` | **0 错误** |
-| `bun run lint` | **0 error / 0 warning**（58 条债务已清零） |
-| `bun run test` | **459/459**（26 文件） |
-| 覆盖率 | funcs/lines 均 **92.1%** |
-| `check:i18n:strict` | 16/16 路由镜像 · 词条 977/977（CI 阻断级） |
-| e2e / 视觉 | 3/3 · 8/8 |
-| OSV 依赖审计 | 0 Critical / 0 High |
+| `bun run lint` | **0 error / 0 warning** |
+| `bun run test` | **500/500**（31 文件） |
+| 覆盖率 | funcs/lines **92.1%**（2026-11 初基线，本轮未重跑） |
+| `check:i18n:strict` | 镜像路由 100% · 词条 986/986（CI 阻断级） |
+| e2e / 视觉 | 2/2 · 8/8 |
+| OSV 依赖审计 | 0 Critical / 0 High（余 1 条 moderate，dev 链） |
+| 生产冒烟 | 八项断言全过（含指标令牌门禁 401 / 带令牌 200） |
+
+## 测评与决策报告
+
+| 文档 | 内容 |
+| ---- | ---- |
+| [YYC3-谱系收敛-三仓归档执行总结.md](./YYC3-谱系收敛-三仓归档执行总结.md) | 三仓冻结/归档的判据、执行记录、偏差处理与边界规则 |
+| [YYC3-全局测评-Baby-MoYu-深度测评与演进规划.md](./YYC3-全局测评-Baby-MoYu-深度测评与演进规划.md) | 门禁/运行时/五维评估、风险登记册、P0–P2 路线图 |
 
 ## 文档使用路线
 
