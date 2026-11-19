@@ -1,8 +1,9 @@
 # 贡献指南 · CONTRIBUTING
 
 感谢关注 YYC³ 小语智能成长守护系统！本文说明如何高效、可追溯地参与贡献。
-动手前请先阅读 [团队通用标准规范（SSOT）](./docs/YYC3-团队通用-标规文档/README.md)、
-[README](./README.md)、[开发者文档](./docs/developer/README.md) 与 [行为准则](./CODE_OF_CONDUCT.md)。
+动手前请先阅读 [README](./README.md)、[开发者文档](./docs/developer/README.md) 与 [行为准则](./CODE_OF_CONDUCT.md)；
+团队级规范（命名/标头标尾/五维驱动等）以
+**[YYC3-团队通用-标准规范（外部 SSOT）](https://github.com/YYC-Cube)** 为准，本仓不自备副本。
 
 ## 1. 环境准备
 
@@ -113,19 +114,18 @@ Closes #123
 
 ```bash
 bun run type-check     # tsc --noEmit，0 error
-bun run lint           # ESLint，0 error（warning 需说明）
-bun run test            # 单元测试，266+ 全绿
-bun run test:node      # node:sqlite 直测，7/7
+bun run lint           # ESLint，0 error / 0 warning
+bun run test            # 单元测试，526+ 全绿
+bun run test:node      # node:sqlite 直测，7/7（PG 用例设 PG_TEST_URL 后自动启用）
 bun run build          # Next.js 生产构建
 bun run test:e2e       # Playwright 冒烟（需先 build）
 ```
 
 补充：
 
-- 改动涉及 `docs/` 归档工程时，使用工作区自带门禁：
-  `docs/YYC3-小语/YYC3-XY-WORKSPACE` 下 `pnpm typecheck && pnpm test:coverage && pnpm verify && pnpm build`。
+- 覆盖率用 `bun run test:coverage`（必须排除 `docs/**`，与门禁口径一致）；夜间 CI 自动执行并设 90% 门槛。
 - 修改视觉/主题需重生成对应平台基线（macOS/Linux），禁止只在本机通过。
-- 覆盖率不得低于阈值；新增代码应补充对应测试。
+- 新增代码应补充对应测试；预测引擎、鉴权、限流等重点模块保持高覆盖。
 
 ## 6. PR 流程与检查清单
 

@@ -36,22 +36,24 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/build-passing-22c55e" alt="build passing" />
-  <img src="https://img.shields.io/badge/tests-459%20passed-22c55e" alt="459 tests passed" />
+  <img src="https://img.shields.io/badge/tests-526%20passed-22c55e" alt="526 tests passed" />
   <img src="https://img.shields.io/badge/type--check-0%20errors-22c55e" alt="0 type errors" />
   <img src="https://img.shields.io/badge/a11y-WCAG%202.2%20AA-0f766e" alt="WCAG 2.2 AA" />
-  <img src="https://img.shields.io/badge/%E5%BE%AB%E7%AB%A0-30%20%E6%9E%9A-d946ef?logo=medal&logoColor=white" alt="30 badges" />
+  <img src="https://img.shields.io/badge/%E5%BE%BD%E7%AB%A0-30%20%E6%9E%9A-d946ef?logo=medal&logoColor=white" alt="30 badges" />
 </p>
 
 <p align="center">
   <strong>标签 / Keywords</strong><br />
   <code>#Next.js</code> <code>#React</code> <code>#TypeScript</code> <code>#shadcn/ui</code> <code>#Radix UI</code>
-  <code>#Tailwind CSS</code> <code>#Bun</code> <code>#SQLite</code> <code>#AI</code> <code>#Growth Companion</code>
-  <code>#Child Education</code> <code>#Accessibility</code> <code>#i18n</code> <code>#Open Source</code>
+  <code>#Tailwind CSS</code> <code>#Bun</code> <code>#SQLite</code> <code>#PostgreSQL</code> <code>#Prometheus</code>
+  <code>#AI</code> <code>#Growth Companion</code> <code>#Child Development</code> <code>#Early Childhood</code>
+  <code>#Accessibility</code> <code>#WCAG</code> <code>#i18n</code> <code>#Time Series</code> <code>#Open Source</code>
 </p>
 
 > YYC³ AI小语智能成长守护系统 — 0-3岁婴幼儿智能陪伴与成长守护平台。
-> 本仓库是多版本收敛后的**唯一开发基线**：代码源自 yyc3-xy-05 家族，整合 01/02/03 版本文档与测试、
-> ai_xy05 AI 模块、三套 Figma 主题参考。工作区已收敛为本目录单项目。
+> 本仓库是成长守护体系的**唯一现役主线（SSOT）**：历史上三个同源仓库
+> （Companion / AI-Growth-Guardian / Growth-Guardian）已于 2026-11 冻结归档，
+> 工程能力经定向吸收并入本仓，谱系与判据见 [docs/谱系收敛总结](./docs/YYC3-谱系收敛-三仓归档执行总结.md)。
 
 ## 技术栈
 
@@ -80,7 +82,7 @@ bun run dev
 # 构建 / 生产启动
 bun run build && bun run start
 
-# 测试（459 个用例）
+# 测试（526 个用例）
 bun run test
 ```
 
@@ -133,7 +135,8 @@ bun run test
 | ------ | ------ |
 | `bun run dev` | Next.js 开发服务器（:1228） |
 | `bun run build` / `start` | 生产构建 / 启动 |
-| `bun run test` | 单元测试（459 用例，全绿） |
+| `bun run test` | 单元测试（526 用例，全绿） |
+| `bun run test:coverage` | 覆盖率（排除 `docs/**`；夜间 CI 设 90% 门槛） |
 | `bun run type-check` | 类型检查（应用代码 **0 错误**，见 [07 · 测试与质量门禁](./docs/developer/07-testing-quality.md)） |
 | `bun run lint` / `lint:fix` | ESLint 检查 / 自动修复 |
 | `bun run test:e2e` | Playwright 行为冒烟（3 例） |
@@ -142,6 +145,7 @@ bun run test
 | `bun run audit:osv` | OSV.dev 依赖审计（Critical 阻断，生成 `osv-results.json`） |
 | `bun run audit:osv:high` | OSV 高危观察（不阻断，用于排查） |
 | `bun run check:i18n` | i18n 边界巡检（页面覆盖率 + zh/en 词条键一致性；`check:i18n:strict` 可阻断） |
+| `bun run gen:metrics-token` | 按环境生成 `/api/metrics` 访问令牌（幂等、0600 权限） |
 
 ## 目录结构
 
@@ -166,9 +170,10 @@ bun run test
 ├── middleware.ts         # locale 路由中间件
 ├── hooks/ types/ config/ # 钩子、类型、配置
 ├── themes/               # Figma 三套主题参考（未接线，排除出 tsc）
-├── __tests__/            # 单元测试（459 用例）
+├── __tests__/            # 单元测试（526 用例）
 ├── public/               # 静态资源（icon/manifest/PWA/角色照片/CNAME）
-├── scripts/              # 部署脚本 + 文档生成器（generate-docs.py）
+├── scripts/              # 运维脚本（osv-audit / 令牌生成 / 文档生成 / PG 迁移）
+├── deploy/monitoring/    # Prometheus 抓取与告警规则（可直接挂载使用）
 └── docs/                 # ★ 文档中心（唯一入口见 docs/README.md）
     ├── developer/        #   现行开发文档（12 篇，唯一维护）
     └── YYC3-成长守护-*   #   产品设计基线（开发指导/全栈内容/角色系统/日志系统）
@@ -197,6 +202,32 @@ bun run test
 ## 开发者文档
 
 文档中心见 **[docs/README.md](./docs/README.md)**（唯一入口），现行开发文档套见 **[docs/developer/](./docs/developer/)**：
+
+```mermaid
+flowchart LR
+    subgraph Entry["入口层"]
+        R[README] --> DR[docs/README 文档中心]
+        UM[用户使用手册]
+    end
+    subgraph Dev["developer/ 现行开发文档（唯一维护）"]
+        A["01 快速上手"] --> B["02 架构(Mermaid)"]
+        B --> C["03 数据模型"] --> D["04 API 参考"]
+        B --> E["05 前端组件"] --> F["06 AI 引擎"]
+        D --> G["07 测试与质量"] --> H["08 部署"]
+        E --> V["10 可视化交互体系"]
+        C --> I["11 i18n 边界"]
+        H --> J["12 部署承载分析"]
+    end
+    subgraph Prod["产品设计基线（演进时更新）"]
+        P1["开发指导"] --- P2["全栈内容"]
+        P3["角色系统"] --- P4["日志系统"]
+    end
+    subgraph Open["开源协作四件套"]
+        L[LICENSE] --- CT[CONTRIBUTING]
+        CC[CODE_OF_CONDUCT] --- S[SECURITY]
+    end
+    DR --> Dev & Prod & Open
+```
 
 | 文档 | 内容 |
 | ------ | ------ |
@@ -230,20 +261,22 @@ bun run test
 
 ## 当前状态
 
-- ✅ 构建通过，生产冒烟 200（含 `/en` i18n 路由、`/manifest.json`、`/icon.svg`）
+- ✅ 构建通过，生产冒烟 200（含 `/en` i18n 路由、`/manifest.json`、`/icon.svg`）；本地生产模式 28 项验收全过
 - ✅ SQLite 真实持久化（写入 → 重启 → 数据在）；课表/日程/互动/视频经 `/api/user-documents` 跨设备同步（游客自动降级本地）
-- ✅ 测试 459/459 全绿（含鉴权/越权/限流等安全行为用例）；`test:node` 7/7；E2E 3/3；四主题视觉 8/8
-- ✅ 类型债 1,986 → **0**（演进史见 [07 · 测试与质量门禁](./docs/developer/07-testing-quality.md)，`tsc --noEmit` 0 error）
-- ✅ i18n 全量闭环（P0–P4 完成）：16/16 页真双语、词条 977/977 一致、`check:i18n:strict` 入 CI 阻断、hreflang 三语声明
+- ✅ **PostgreSQL 切换演练通过**（2026-11-20）：schema 建表 + 数据迁移（行数一致校验）+ `DB_DRIVER=postgres` 生产模式注册/登录/建娃全链路 + PG 直测 12/12
+- ✅ 测试 **526/526** 全绿（含鉴权/越权/限流/预测引擎/Upstash 限流等行为用例）；`test:node` 7/7；E2E 3/3；四主题视觉 8/8；覆盖率 funcs 90.06% / lines 90.33%（夜间 CI 守门）
+- ✅ 类型债 1,986 → **0**（`tsc --noEmit` 0 error）；lint **0 error / 0 warning**
+- ✅ i18n 全量闭环（P0–P4 完成）：16/16 页真双语、词条 986/986 一致、`check:i18n:strict` 入 CI 阻断、hreflang 三语声明
+- ✅ 可观测性：`/api/metrics`（Prometheus 文本 + 三条业务计数器）**应用层令牌门禁**（匿名 401 / 生产未配置 503），配套抓取与告警规则见 `deploy/monitoring/`
+- ✅ 限流存储可插拔：默认进程内固定窗口，配置 Upstash 即多副本共享配额（存储异常自动回退内存）
 - ✅ AI 悬浮窗水合错配修复（首帧确定性定位 + 挂载后视口校正，Playwright 8 路由 0 错误）
-- ✅ 关键依赖安全升级：`next` 16.4.5、`zod` 4.6.7、`next-intl` 4.14.9（关闭已知通告；项目以 `bun.lock` 为准）
-- ✅ OSV 依赖审计：`bun run audit:osv` + `.github/workflows/osv-audit.yml`（Critical 阻断、每周定时、PR/push 触发、报告 artifact）
-- ✅ 四主题视觉回归：`e2e/theme-visual.e2e.ts` 8 张基线（首页/视频工坊 × 暖阳/液态/赛博/极光），macOS 与 Linux 分平台
+- ✅ 关键依赖安全升级：`next` 16.4.5、`zod` 4.6.7、`next-intl` 4.14.9；OSV 0 Critical / 0 High
+- ✅ 四主题视觉回归：8 张基线（首页/视频工坊 × 暖阳/液态/赛博/极光），macOS 与 Linux 分平台
 - ✅ 徽章系统：30 枚勋章 × 真实数据评估引擎（`lib/badges/`）
-- ✅ 鉴权（JWT 类型声明 + httpOnly Cookie + 限流 + 租户隔离）、Winston 日志体系、语音三件套、四主题系统、组件语义化（90%）
-- ✅ e2e 冒烟 3 例（登录→建娃→写记录→登出 / 匿名 401 / 敏感页重定向，`bun run test:e2e`，已入 CI）
-- ✅ CI 修复：Dependabot 改用 `bun` 生态、根 `tsc`/`bun run test` 排除 `docs/` 归档工程、Pages 空目录守卫与并发/超时约束
-- 📍 后续：按域持续消化 lint 债务（56 warn，0 error，见 [07 · 测试与质量门禁](./docs/developer/07-testing-quality.md)）
+- ✅ 鉴权（JWT 类型声明 + httpOnly Cookie + 限流 + 租户隔离）、Winston 日志体系、语音三件套、四主题系统
+- ✅ CI 五件套：quality-gates / visual / smoke（生产冒烟八项 + 指标令牌门禁）/ OSV 周扫 / nightly 覆盖率
+- ✅ **谱系收敛**：三个同源仓库已冻结归档，本仓为唯一现役主线（见 [谱系收敛总结](./docs/YYC3-谱系收敛-三仓归档执行总结.md)）
+- 📍 后续：P1 告警接线实测（Prometheus 部署）、`eslint-config-next` 跟随 patch、prediction 引擎覆盖率 60%+
 
 ---
 

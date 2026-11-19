@@ -2,6 +2,21 @@
 
 > **本目录是 YYC³ 全部文档资产的唯一入口。** 架构分层：
 
+```mermaid
+flowchart TB
+    R["仓库根 README<br/>(快速开始/技术栈/开源协作)"] --> C["📚 文档中心 docs/README"]
+    U["👤 用户使用手册 user-manual.md"] --> C
+
+    C --> D["★ developer/ 现行开发文档 ×12<br/>(01 上手 → 02 架构 → 03 数据 → 04 API<br/>05 前端 → 06 AI → 07 质量 → 08 部署<br/>09 贡献 → 10 视觉 → 11 i18n → 12 承载)"]
+    C --> P["YYC3-成长守护-* 产品基线 ×4<br/>(开发指导 / 全栈内容 / 角色系统 / 日志系统)"]
+    C --> A["测评与决策报告<br/>(谱系收敛 / 全局测评)"]
+
+    O["开源四件套<br/>LICENSE · CONTRIBUTING<br/>CODE_OF_CONDUCT · SECURITY"] -.-> R
+
+    style D fill:#e0f2fe
+    style C fill:#fef9c3
+```
+
 | 目录 | 定位 | 维护策略 |
 | ---- | ---- | -------- |
 | [developer/](./developer/) | ★ **现行开发文档**（12 篇，唯一被持续维护的文档集） | 随代码变更持续更新 |
@@ -23,7 +38,7 @@
 | ---- | ---- |
 | `bunx tsc --noEmit` | **0 错误** |
 | `bun run lint` | **0 error / 0 warning** |
-| `bun run test` | **500/500**（31 文件） |
+| `bun run test` | **526/526**（32 文件） |
 | 覆盖率 | funcs **90.06%** / lines **90.33%**（2026-11-20 实测；命令须排除 `docs/**`） |
 | `check:i18n:strict` | 镜像路由 100% · 词条 986/986（CI 阻断级） |
 | e2e / 视觉 | 2/2 · 8/8 |
