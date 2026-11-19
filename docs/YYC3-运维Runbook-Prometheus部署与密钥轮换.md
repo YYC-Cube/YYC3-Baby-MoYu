@@ -66,6 +66,9 @@ docker run --rm -v "$PWD/deploy/monitoring:/etc/prometheus:ro" \
 
 两条命令都应输出 `SUCCESS`。规则语法/缩进错误会在此步被拦下，不必等到进程起不来。
 
+> **注意执行顺序**：`promtool check config` 会实际读取 `credentials_file`，令牌文件不存在时直接失败
+> （`FAILED: stat /etc/prometheus/metrics_token: no such file or directory`）。所以必须先做步骤 1 再校验。
+
 ## 步骤 3 · 部署（三选一）
 
 ### A. 单容器（推荐）
@@ -73,17 +76,23 @@ docker run --rm -v "$PWD/deploy/monitoring:/etc/prometheus:ro" \
 ```bash
 # --user 让容器以宿主机用户身份读 0600 令牌（容器默认 uid 65534 读不到）
 # -p 仅监听 127.0.0.1，避免把指标与告警页暴露到公网
+# 数据目录用宿主绑定挂载（不要用命名卷：命名卷属主 root，--user 下会 permission denied）
+mkdir -p deploy/monitoring/data
 docker run -d --name yyc3-prometheus \
   --restart unless-stopped \
   --user "$(id -u):$(id -g)" \
   -p 127.0.0.1:9090:9090 \
   -v "$PWD/deploy/monitoring:/etc/prometheus:ro" \
-  -v yyc3-prometheus-data:/prometheus \
+  -v "$PWD/deploy/monitoring/data:/prometheus" \
   prom/prometheus:v3.1.0 \
   --config.file=/etc/prometheus/prometheus.yml \
   --storage.tsdb.path=/prometheus \
   --storage.tsdb.retention.time=15d
 ```
+
+> **实测踩坑**：`--user` 配合**命名卷**（`-v yyc3-prometheus-data:/prometheus`）会因命名卷属主为 root 而崩溃：
+> `Error opening query log file ... permission denied` → `panic: Unable to create mmap-ed active query log`。
+> 两个可行解：① 改用宿主目录绑定挂载（上例，目录已 gitignore）；② 沿用命名卷但去掉 `--user`，同时把令牌改为 0644。
 
 ### B. 并入 docker-compose.yml
 
@@ -96,14 +105,11 @@ docker run -d --name yyc3-prometheus \
       - "127.0.0.1:9090:9090"
     volumes:
       - ./deploy/monitoring:/etc/prometheus:ro
-      - prometheus-data:/prometheus
+      - ./deploy/monitoring/data:/prometheus   # 绑定挂载（命名卷在 --user 下不可写）
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
       - --storage.tsdb.retention.time=15d
-
-volumes:
-  prometheus-data:
 ```
 
 > **Linux 宿主机**：`host.docker.internal` 默认不存在，需为服务加
@@ -179,6 +185,10 @@ curl -s 'http://127.0.0.1:9090/api/v1/query?query=up%7Bjob%3D%22yyc3-baby-moyu%2
 printf '%s' "$METRICS_TOKEN" > deploy/monitoring/metrics_token && chmod 600 deploy/monitoring/metrics_token
 ```
 
+> **counter 首样本语义**：`increase()` 需要窗口内至少两个样本才能算出增量。第一次触发 503 后，
+> 增量事件发生在首个样本之前，`increase` 会读到 **0**，告警不会进入 pending。
+> 验证时应**连续触发两次**（计数 1→2），再等 `for: 1m` 观察 `firing`；生产环境持续出错时不受此影响。
+
 ## 步骤 6 · 故障排查
 
 | 现象 | 根因 | 处理 |
@@ -188,7 +198,9 @@ printf '%s' "$METRICS_TOKEN" > deploy/monitoring/metrics_token && chmod 600 depl
 | 日志 `permission denied ... metrics_token` | 容器 uid 与文件属主不匹配（0600） | 加 `--user "$(id -u):$(id -g)"`，或将该文件 0644（宿主机目录保持 700） |
 | `no such host host.docker.internal` | Linux 宿主机无该解析 | 加 `extra_hosts: host.docker.internal:host-gateway`，或改用 docker0 网关地址 |
 | 规则页为空 | `rule_files` 路径错 / 未挂载 `alerts.yml` | `promtool check config` 会直接报出路径问题 |
-| 告警长时间不触发 | 需满足 `for` 持续时间 + `evaluation_interval` 30s | 属正常；压测时把 `for` 临时调小验证链路 |
+| 容器反复重启，日志 `panic: Unable to create mmap-ed active query log` | `--user` + 命名卷：卷属主 root 不可写 | 改宿主目录绑定挂载（步骤 3-A），或去掉 `--user` 并把令牌改 0644 |
+| `promtool check config` 报 `stat ... metrics_token: no such file` | 校验会实际读取凭据文件 | 先执行步骤 1 生成令牌，再校验 |
+| 告警长时间不触发 | 需满足 `for` 持续时间 + `evaluation_interval` 30s；或计数只增了 1 次（首样本语义） | 见步骤 5「counter 首样本」说明；压测时把 `for` 临时调小 |
 | 9090 端口被扫描 | 直接 `-p 9090:9090` 暴露到公网 | 改 `127.0.0.1:9090:9090`，或反代加 Basic Auth |
 
 ## 资源与保留
@@ -204,12 +216,10 @@ printf '%s' "$METRICS_TOKEN" > deploy/monitoring/metrics_token && chmod 600 depl
 | `Yyc3TtsServiceUnavailable` | TTS 503 计数（10m 增量） | > 0，持续 1m | 503 表示未配置或 `BIGMODEL_API_KEY` 失效（占位符/过期）；502 才排查上游 |
 | `Yyc3EventLoopLagHigh` | `nodejs_eventloop_lag_p99_seconds` | > 100ms，持续 10m | 排查慢查询、同步 IO 或长任务阻塞 |
 
-> **接线验证（2026-11-20 实测）**：本机无 promtool/docker 时按降级方案验证——
-> ① 两份 YAML 结构校验（规则/抓取/挂载字段）通过；② 以生产模式启动应用并真实触发
-> TTS 503 与 AI `no-provider` 请求后，三条告警引用的全部指标序列
-> （`yyc3_ai_route_requests_total{outcome=…}`、`yyc3_business_requests_total{status="503"}`、
-> `nodejs_eventloop_lag_p99_seconds`）在 `/api/metrics` 输出中可见，13 项断言全过。
-> 接入真实 Prometheus 实例后按步骤 0–5 复核即可。
+> **实测记录（2026-11-20，Docker 29.9.3 + prom/prometheus:v3.1.0）**：
+> `promtool check config` → `SUCCESS`（1 rule file / 3 rules）；目标 `up=1`；3 条规则装载成功；
+> 真实触发 2 次 TTS 503 后 `Yyc3TtsServiceUnavailable` 进入 **firing**（注解正确带上 10m 增量与处置建议）；
+> 负向改错令牌后 `up=0`，恢复令牌后回到 `up=1`。全链路闭环，无需降级方案。
 
 ---
 
@@ -348,3 +358,4 @@ curl -X POST localhost:9090/-/reload     # 需启动时带 --web.enable-lifecycl
 | 日期 | 变更 | 说明 |
 | ---- | ---- | ---- |
 | 2026-11-20 | 首版 | 从 08 部署篇章抽出独立 Runbook：Prometheus 部署六步 + 密钥轮换四类 + 排障表 + 快速命令卡；同步修复 `deploy/monitoring/metrics_token` 未 gitignore 的误提交风险 |
+| 2026-11-20 | 实机复核 | Docker 29.9.3 + prometheus v3.1.0 实跑通过；据实测修正三处：① `promtool check` 依赖令牌文件存在（须先做步骤 1）；② `--user` 与命名卷冲突，改宿主目录绑定挂载；③ `increase()` 首样本语义（验证需触发两次） |

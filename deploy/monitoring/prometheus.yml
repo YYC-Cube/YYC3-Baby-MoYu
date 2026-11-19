@@ -5,18 +5,19 @@
 #   2) 写入令牌文件（该路径已 .gitignore，禁止提交）：
 #        umask 077 && printf '%s' "<token>" > deploy/monitoring/metrics_token
 #        chmod 600 deploy/monitoring/metrics_token
-#   3) 启动（--user 使 0600 令牌可读；端口仅监听本机）：
+#   3) 启动（--user 使 0600 令牌可读；数据用宿主目录挂载——命名卷在 --user 下不可写）：
+#        mkdir -p deploy/monitoring/data
 #        docker run -d --name yyc3-prometheus \
 #          --user "$(id -u):$(id -g)" \
 #          -p 127.0.0.1:9090:9090 \
 #          -v "$PWD/deploy/monitoring:/etc/prometheus:ro" \
-#          -v yyc3-prometheus-data:/prometheus \
+#          -v "$PWD/deploy/monitoring/data:/prometheus" \
 #          prom/prometheus:v3.1.0 \
 #          --config.file=/etc/prometheus/prometheus.yml \
 #          --storage.tsdb.path=/prometheus \
 #          --storage.tsdb.retention.time=15d
 #
-# 完整 Runbook（含 promtool 校验、负向验证、排障表）见 docs/developer/08-deployment.md
+# 完整 Runbook（含 promtool 校验、负向验证、排障表）见 docs/YYC3-运维Runbook-Prometheus部署与密钥轮换.md
 # 目标地址：容器内访问宿主机用 host.docker.internal；同机裸装改 127.0.0.1:1228
 
 global:
