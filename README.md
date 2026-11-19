@@ -244,6 +244,7 @@ flowchart LR
 | [10 · 可视化交互体系设计](./docs/developer/10-visual-interaction-system.md) | 设计令牌 / 四主题 / 交互状态机 / 数据可视化 / 动效 / WCAG 2.2 AA / 视觉回归 |
 | [11 · 国际化边界与治理](./docs/developer/11-i18n-boundary.md) | i18n 全量闭环（16/16 页双语 · 词条 977/977）· `@yyc3/i18n-core` 不适用评估 · 单组件复用强约定 · 残余清单 |
 | [12 · 部署承载分析](./docs/developer/12-hosting-profile.md) | 本机/单机/托管三方案对比 · 环境与反代/PG/备份配置清单 · 上线验收项 |
+| [运维 Runbook](./docs/YYC3-运维Runbook-Prometheus部署与密钥轮换.md) | ★ Prometheus 实例部署六步（三形态+排障表）· 六类密钥轮换（影响面/回滚/清单）· 快速命令卡 |
 
 ## 开源协作
 
