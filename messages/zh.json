@@ -192,6 +192,17 @@
       "submit": "创建记录"
     },
     "charts": {
+      "trend": {
+        "title": "成长趋势预测",
+        "needMore": "已有 {current} 次评估，满 {need} 次即可生成趋势预测",
+        "confidence": "置信度 {percent}%",
+        "retry": "重新加载",
+        "chartAria": "发展评估总分历史与未来趋势预测图",
+        "legendHistory": "历史评估",
+        "legendForecast": "预测趋势",
+        "legendUnit": "分数",
+        "disclaimer": "统计外推结果，仅供趋势参考，不构成医疗或发育评估结论"
+      },
       "chartTypes": {
         "radar": "雷达图",
         "line": "趋势图",

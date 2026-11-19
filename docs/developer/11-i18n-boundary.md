@@ -1,7 +1,7 @@
 # 11 · 国际化（i18n）边界与治理
 
 > 结论先行：**全量国际化已闭环达成（2026-11-04，P0–P4 全部完成）**——
-> 16/16 路由双语镜像 + 词条 977/977 一致 + `check:i18n:strict` CI 阻断级门禁。
+> 16/16 路由双语镜像 + 词条 986/986 一致 + `check:i18n:strict` CI 阻断级门禁。
 > 本文保留治理口径与历史排期供回溯，新增页面必须遵循 §3 边界治理。
 
 ## 1. 现状（以构建产物与源码为准，2026-11-05 复核）
@@ -11,7 +11,7 @@
 | 方案 | `next-intl` v4（仅此一套，**不引入第二套 i18n 运行时**） |
 | 默认语言 | `zh`（无前缀，根路由 `/`、`/growth`…） |
 | 英文路由 | `/en` + 15 个 `app/[locale]` 镜像 = **16/16（100%）**，全部「单组件复用」re-export |
-| 文案规模 | zh/en **977/977** 键一致（`check:i18n:strict` CI 阻断级校验） |
+| 文案规模 | zh/en **986/986** 键一致（`check:i18n:strict` CI 阻断级校验） |
 | Provider | 根布局注入 zh Provider；`/en\|/zh` 由 `app/[locale]/layout.tsx` 内层 Provider 覆盖 |
 | 文案源 | `messages/zh.json`、`messages/en.json`（多命名空间，扁平键严格一致） |
 | 路由策略 | `middleware.ts`：仅 `/en`、`/zh` 前缀交 next-intl；其余直通根路由（防全站被重写导致 404） |
@@ -35,7 +35,7 @@ SSR 水合风险，且无法复用现有 `messages/*.json` 与 middleware 策略
 
 ## 3. 边界治理（当前做法）
 
-1. **词条键一致**：`messages/zh.json` 与 `en.json` 的键集合必须相同（缺失键会导致运行期回退到 key）；`check:i18n:strict` 已入 CI 阻断校验（当前 977/977）。
+1. **词条键一致**：`messages/zh.json` 与 `en.json` 的键集合必须相同（缺失键会导致运行期回退到 key）；`check:i18n:strict` 已入 CI 阻断校验（当前 986/986）。
 2. **页面覆盖率可见**：`bun run check:i18n` 输出覆盖率与缺失清单（首页已计入）；⚠️ 仅统计路由存在，词条化需按 §1 诚实口径单独核对。
 3. **镜像页必须用「单组件复用」**（P1 起的强约定）：`app/[locale]/<page>/page.tsx` 一律 re-export 根组件，**禁止复制页面代码**——既有三个副本页即为反例教训。
 4. **未翻译入口不暴露**：导航/首页仅链接中文路由；`/en` 仅放已翻译页面。
@@ -44,7 +44,7 @@ SSR 水合风险，且无法复用现有 `messages/*.json` 与 middleware 策略
 ## 4. 全量国际化判定标准（2026-11-04 验收）
 
 - [x] `check:i18n:strict` 页面覆盖率 100%（16/16 路由镜像一一对应，CI 阻断级）
-- [x] `zh/en` 键集合完全一致（977/977），无 key 回退
+- [x] `zh/en` 键集合完全一致（986/986），无 key 回退
 - [x] 日期/数字使用统一 formatter（`lib/i18n/format.ts`，收敛 7 处 toLocale* 散布）
 - [x] 用户可见 UI 文案均来自 `messages`（含弹层/统计/徽章数据层词条；内容数据层残留见 §6 有意保留清单）
 - [x] 英文路由纳入 Playwright 双语实测（SSR 直出 + 交互抽查，见 §7 P3.5/P4 记录）
@@ -72,7 +72,7 @@ SSR 水合风险，且无法复用现有 `messages/*.json` 与 middleware 策略
 3. 翻译质量由产品/领域专家复核（育儿术语不使用机器直译）；
 4. 每阶段把 `check:i18n:strict` 纳入 CI（先告警，P4 起阻断）。
 
-**进度（2026-11-04，PR #25 合并后）**：**P0–P4 全部完成 ✅（i18n 全局闭环达成）**——**英文镜像 16/16（100%）**，词条 **977/977** 一致。
+**进度（2026-11-04，PR #25 合并后）**：**P0–P4 全部完成 ✅（i18n 全局闭环达成）**——**英文镜像 16/16（100%）**，词条 **986/986** 一致。
 - P4 三项收口实测：① formatter——新增 `lib/i18n/format.ts`（localeTag/formatDateByLocale/formatTimeByLocale），收敛 7 处 toLocale* 散布（顺带修复 interactions en 镜像下日期硬编码 zh-CN 的缺陷）；② hreflang——根 layout alternates.languages 三条（zh-CN/en/x-default），curl 实测 head 输出正确；③ `check:i18n:strict` 入 CI quality-gates（阻断级，exit 1），本机实测 exit 0。
 - 有意保留：EmailNotification zh 邮件模板（服务端内容层）、VideoGenerator 配音 language:"zh-CN"（数据参数）。
 - 内容数据层残留（上线后迭代项）：时间线示例 25 处、书籍 mock、`BOOK_CATEGORY_CONFIG`/`lib/growth_stages` 数据本体、console 日志 2 处 + 默认参数 3 处（非 UI）、品牌 Header。**不虚假宣称「内容 100%」。**
@@ -88,5 +88,5 @@ SSR 水合风险，且无法复用现有 `messages/*.json` 与 middleware 策略
 | 2026-11-04（P2 次批，PR #21） | **courses/books/messages/activities 真双语** | courses 课程/分类改稳定 id（`categoryColors` 修复英文按中文科名失配隐患）；books 分类名词条化（zh 与数据层逐字一致）；messages 用 `messageCenter` 命名空间避开目录名；activities `icon.includes("plant")` 隐性匹配改显式 `theme` 字段、history Tab "(5)" 保基线标 TODO(P3)；+4 镜像；messages 481/481；tsc/lint 0 错误、单测 266 pass、e2e+视觉 11 pass、双语运行时抽查通过 |
 | 2026-11-04（P2 收口，PR #22） | **videos/ai-creative/interactions/curriculum/schedule 真双语（P2 全部完成）** | 5 大页全词条 + VideoPlayer aria-label + BackButton 默认"返回"走 common.back；curriculum 22 学科/星期/课程类型映射（option value 保数据层中文键）；修复 TIME_SLOTS.map((t)) 遮蔽隐患；+5 镜像 → **16/16（100%）**；词条 716/716；受保护页带 Cookie 复验口径确立（PROTECTED_PAGES 会话门禁 307 属既有设计）；全部门禁绿 |
 | 2026-11-04（P3 主项，PR #23） | **30 枚勋章/VideoGenerator/GrowthTimeline 数据层词条化 + 全维度实测文档** | types/badges 增 4 个 i18n 字段（titleKey/descriptionKey/condKeys/progressGoal），30 勋章+12 复合条件+4 等级+8 分类入词条，badges 页 9 处消费点改词条渲染（计数型条件 progress 反推动态模板）；VideoGenerator 63 处全词条；GrowthTimeline 骨架 8 组；videos 风格标签/BookReader 收尾；**新增 06 号实测数值总结文档（7/7 门禁 + Playwright 双语 6/6 FOUND 双向验证 + 诚实残留清单）**；词条 **873/873**；单测 266 pass、coverage lines 59.15%（如实呈报）、e2e 11 pass |
-| 2026-11-04（P3.5，PR #24） | **growth 7 弹层组件 UI 骨架 86 处全部清零** | CreateRecordModal 23（情绪 6 值词条化）/GrowthCharts 22（雷达 SVG 标签改全名，替代 slice 截断）/TagSelector 18（16 预设标签键化）/DevelopmentCurveChart 11/AssessmentReport 12（评估日期按 locale）/StageIndicator 12（`lib/growth_stages` 阶段数据按内容层归档）/MediaUploader 3；残留如实登记：console 日志 2 + 默认参数 3（非 UI）；词条 **977/977**；Playwright SSR 直出确认 StageIndicator/DevelopmentCurveChart 双语渲染 + CreateRecordModal 交互 3/4 命中（缺项为 AI 建议条件渲染区）；全部门禁绿 |
+| 2026-11-04（P3.5，PR #24） | **growth 7 弹层组件 UI 骨架 86 处全部清零** | CreateRecordModal 23（情绪 6 值词条化）/GrowthCharts 22（雷达 SVG 标签改全名，替代 slice 截断）/TagSelector 18（16 预设标签键化）/DevelopmentCurveChart 11/AssessmentReport 12（评估日期按 locale）/StageIndicator 12（`lib/growth_stages` 阶段数据按内容层归档）/MediaUploader 3；残留如实登记：console 日志 2 + 默认参数 3（非 UI）；词条 **986/986**；Playwright SSR 直出确认 StageIndicator/DevelopmentCurveChart 双语渲染 + CreateRecordModal 交互 3/4 命中（缺项为 AI 建议条件渲染区）；全部门禁绿 |
 | 2026-11-04（P4，PR #25） | **formatter + hreflang + strict CI（i18n 全局闭环达成）** | ① 新增 `lib/i18n/format.ts`，收敛 7 处 toLocale* 散布（videos 保 month:short 原样式；修复 interactions en 镜像日期硬编码 zh-CN 缺陷；EmailNotification/配音参数/shadcn ui 有意保留并登记）；② 根 layout `alternates.languages` 三条 hreflang（zh-CN/en/x-default），curl 实测 head 输出正确；③ CI quality-gates 新增 `check:i18n:strict` 阻断步骤（本机实测 exit 0，PR #25 CI 双绿）；Playwright 实测 HomeHeader 日期 en/zh 双格式正确。**P0–P4 全部完成，闭环达成** |

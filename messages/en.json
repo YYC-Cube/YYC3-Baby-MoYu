@@ -192,6 +192,17 @@
       "submit": "Create Record"
     },
     "charts": {
+      "trend": {
+        "title": "Growth Trend Forecast",
+        "needMore": "{current} assessments so far — {need} needed to generate a forecast",
+        "confidence": "Confidence {percent}%",
+        "retry": "Reload",
+        "chartAria": "Overall development score history and forecast chart",
+        "legendHistory": "History",
+        "legendForecast": "Forecast",
+        "legendUnit": "Score",
+        "disclaimer": "Statistical extrapolation for trend reference only; not a medical or developmental diagnosis"
+      },
       "chartTypes": {
         "radar": "Radar",
         "line": "Trend",

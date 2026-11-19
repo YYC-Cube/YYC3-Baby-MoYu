@@ -13,6 +13,7 @@ import StageIndicator from "@/components/growth/StageIndicator"
 import DevelopmentCurveChart from "@/components/growth/DevelopmentCurveChart"
 import GrowthCharts from "@/components/growth/GrowthCharts"
 import AssessmentReport from "@/components/growth/AssessmentReport"
+import GrowthTrendPrediction from "@/components/growth/GrowthTrendPrediction"
 import ChildSelector from "@/components/ChildSelector"
 import { useGrowthStage } from "@/hooks/useGrowthStage"
 import { useChildren } from "@/hooks/useChildren"
@@ -176,7 +177,13 @@ export default function GrowthPage() {
             </motion.div>
           )}
           {activeTab === "records" && <RecordsTab key="records" onOpenCreateModal={() => { setIsCreateModalOpen(true); }} />}
-          {activeTab === "assessment" && <AssessmentTab key="assessment" childName={childName} />}
+          {activeTab === "assessment" && (
+            <div key="assessment" className="space-y-6">
+              <AssessmentTab childName={childName} />
+              {/* 趋势预测：读库内评估记录做统计外推（不足 5 次评估时给引导空态） */}
+              <GrowthTrendPrediction childId={currentChild?.id} />
+            </div>
+          )}
         </AnimatePresence>
       </main>
 

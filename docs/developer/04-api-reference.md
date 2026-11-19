@@ -152,6 +152,7 @@ AgenticCore 及 prediction 服务栈仅存在于服务端，客户端经此 HTTP
 | POST /api/ai/text-to-speech | 10/min | `{ text(≤2000), voice?, speed? }` → `audio/wav` 二进制；音色白名单 `TTS_VOICES`；未配置密钥 **503**，上游失败 **502** |
 | POST /api/ai/generate-image | 6/min | 文生图（fal.ai 计费端点，从严） |
 | POST /api/ai/orchestrate · continue-story · assessment-report | 10/min | 真实模型调用 |
+| POST /api/ai/prediction | 20/min | `{ points(5–500), horizon?(1–30, 默认 7), metric? }` → 时序统计外推（TimeSeriesEngine）：历史 + 预测点 + 置信区间；body 含 `disclaimer` 明示「仅供趋势参考」 |
 | POST /api/ai/chat | 20/min | 预设回复集 + 角色路由 |
 | POST /api/ai/emotion · enhanced-emotion · analyze-record | 30/min | 规则/轻实现 |
 
