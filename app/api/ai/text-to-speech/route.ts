@@ -8,7 +8,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { guardAIRequest } from "@/lib/api/ai-guard"
-import { getVoiceService, hasVoiceService, TTS_VOICES } from "@/lib/api/voice-services"
+import { getVoiceService, hasVoiceService, TTS_VOICES, UpstreamHttpError } from "@/lib/api/voice-services"
 
 /** 单次合成文本上限（控成本、防长文本拖垮响应） */
 const MAX_TEXT_LENGTH = 2000
@@ -63,6 +63,11 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
+    // 区分「凭据失效」与「上游故障」：前者运维只需换 key，后者才需要排查服务
+    if (error instanceof UpstreamHttpError && (error.status === 401 || error.status === 403)) {
+      console.error("[api] 语音合成凭据失效:", error.message)
+      return NextResponse.json({ error: "语音服务凭据无效，请检查 BIGMODEL_API_KEY" }, { status: 503 })
+    }
     console.error("[api] 语音合成失败:", error)
     return NextResponse.json({ error: "语音合成失败，请稍后重试" }, { status: 502 })
   }

@@ -3,6 +3,19 @@
 // 密钥边界：仅服务端路由（/api/ai/text-to-speech、/api/ai/speech-to-text）使用本模块，
 // BIGMODEL_API_KEY 严禁加 NEXT_PUBLIC_ 前缀；浏览器端一律走代理路由。
 
+import { isRealSecret } from "@/lib/config/secret"
+
+/** 上游 HTTP 错误（保留状态码，供路由区分「凭据失效」与「服务故障」） */
+export class UpstreamHttpError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message)
+    this.name = "UpstreamHttpError"
+  }
+}
+
 /** CogTTS 合法音色白名单（服务端路由据此校验入参） */
 export const TTS_VOICES = ["tongtong", "chuichui", "xiaochen", "jam", "kazi", "douji", "luodo"] as const
 
@@ -71,6 +84,11 @@ export class VoiceService {
       }
     } catch (error) {
       console.error("文本转语音失败:", error)
+      // 凭据失效不属于「可降级故障」：原样上抛，由路由映射为 503（提示检查密钥），
+      // 否则会被降级逻辑吞成普通 Error，误报为 502 上游故障
+      if (error instanceof UpstreamHttpError && (error.status === 401 || error.status === 403)) {
+        throw error
+      }
       // 降级到浏览器原生TTS（仅浏览器环境；服务端直接抛出交由路由转 502）
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         try {
@@ -291,9 +309,9 @@ export class VoiceService {
       if (!response.ok) {
         console.error(`${url} 请求失败:`, response.status, response.statusText)
         if (response.status === 429) {
-          throw new Error(`请求频率过高，请稍后再试`)
+          throw new UpstreamHttpError(`请求频率过高，请稍后再试`, 429)
         }
-        throw new Error(`${url} 请求失败: ${response.status} ${response.statusText}`)
+        throw new UpstreamHttpError(`${url} 请求失败: ${response.status} ${response.statusText}`, response.status)
       }
       
       return response
@@ -330,5 +348,5 @@ export function getVoiceService(): VoiceService {
 
 /** 是否已配置语音服务密钥（路由据此提前返回 503，避免无谓上游调用） */
 export function hasVoiceService(): boolean {
-  return Boolean(process.env.BIGMODEL_API_KEY)
+  return isRealSecret(process.env.BIGMODEL_API_KEY)
 }

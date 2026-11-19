@@ -58,9 +58,12 @@ PG 服务不对外暴露端口（仅容器网络内可达）；数据落 `./pgda
 | 变量 | 必填 | 默认 | 说明 |
 | ---- | ---- | ---- | ---- |
 | `JWT_SECRET` | ✅（生产） | —（开发用 `data/.jwt-dev-secret` 随机密钥） | 缺失时生产进程拒绝签发令牌 |
-| `BIGMODEL_API_KEY` | 视功能 | — | 作业批改 / 语音转写 |
+| `BIGMODEL_API_KEY` | 视功能 | — | 作业批改 / 语音转写 / **语音合成（TTS）**；缺失或为占位符时 TTS 返回 503 |
 | `OPENAI_API_KEY` | 视功能 | — | 对话 / 编排 / 评估报告 / 故事续写（缺失则对话降级为示例） |
 | `OPENAI_BASE_URL` | | — | 可选，OpenAI 兼容网关地址 |
+| `OPENAI_MODEL` | | gpt-4o-mini | 可选，直连通道模型型号 |
+| `AI_API_KEY` + `AI_BASE_URL` | | — | 可选，第二优先级通用网关通道（**必须成对**；单独配密钥不生效） |
+| `AI_MODEL` | | gpt-4o-mini | 可选，网关通道模型型号 |
 | `FAL_KEY` | | — | 生图（缺失则返回占位图） |
 | `PORT` | | 1228（脚本内置） | 监听端口 |
 | `DATABASE_URL` | | `<cwd>/data/yyc3.db` | **SQLite 文件路径**（非 PG 连接串） |
@@ -80,7 +83,8 @@ PG 服务不对外暴露端口（仅容器网络内可达）；数据落 `./pgda
 | `database-schema.sql` | 参考 | 表结构 SQL 独立副本（以 `lib/db/sqlite-client.ts` 为准） |
 | `auto-fix-errors.ts`、`fix-integration-conflicts.ts` | 历史维护工具 | 一次性脚本，不建议复用 |
 
-> 容器化尚未落地（仓库无 `Dockerfile` / `docker-compose.yml`）。若需容器化，基础镜像必须 Node ≥ 22.13，并按 `08` 的「单实例锁定」约束评估。
+> 上述 `deploy-*.sh` 均为历史遗留（依赖仓库中不存在的 `services/xiaoyu-api/`、`microservices/` 等资产），
+> 现行部署路径只有两条：本机 `bun run build && bun run start`，或容器 `docker compose up -d --build`。
 
 ## 备份与恢复
 
@@ -96,11 +100,21 @@ PG 服务不对外暴露端口（仅容器网络内可达）；数据落 `./pgda
 - [ ] `bun run build && bun run start` 本地通过
 - [ ] `curl -o /dev/null -w "%{http_code}" localhost:1228/` 返回 200（匿名可访问）
 - [ ] `curl -fsS localhost:1228/api/health` 返回 `status: ok` 且 HTTP 200
+- [ ] `curl -fsS localhost:1228/api/metrics` 返回 200 且含 `process_cpu_user_seconds_total`
 - [ ] `curl localhost:1228/api/children` 返回 **401**（数据端点必须登录，200 即为越权缺陷）
+- [ ] `curl -X POST localhost:1228/api/ai/prediction -d '{}'` 返回 **401**（AI 端点鉴权门禁）
+- [ ] `curl -X POST localhost:1228/api/ai/text-to-speech -d '{"text":"hi"}'` 返回 **401**；
+      带 Cookie 且未配 BigModel 密钥时返回 **503**（而非 502——503=未配置，502=上游故障）
 - [ ] `/en` 与根路由均 200（混合路由回归点）
-- [ ] `.env.local` 密钥为服务端变量且已轮换过
+- [ ] 响应头含 `X-Content-Type-Options` / `X-Frame-Options` / `Referrer-Policy` / `Permissions-Policy`；
+      生产模式另含 CSP（`frame-ancestors` 生效）
+- [ ] `.env.local` 密钥为服务端变量且已轮换过（占位符 `your_...` 会被识别为未配置）
 - [ ] `data/`、`.env*` 均在 .gitignore
 - [ ] `bun run audit:osv` 0 Critical（High/Medium 有书面处置）
+- [ ] **`/api/metrics` 仅对内网/监控放行**：端点匿名只读，公网暴露会泄露进程内存/事件循环等运行信息；
+      建议在反向代理层限制来源（如 Nginx `allow 10.0.0.0/8; deny all;`）
+
+> CI 已内置「生产冒烟（八项路由）」job，本条清单的前七项在每次 push 后被自动验证。
 
 ## 运行时约束
 

@@ -13,13 +13,7 @@
 
 import { createOpenAI } from "@ai-sdk/openai"
 import type { LanguageModel } from "ai"
-
-/** 过滤 .env.example 抄来的占位符密钥，避免假配置抢占第一优先级 */
-function realKey(value: string | undefined): boolean {
-  if (!value) return false
-  const v = value.trim()
-  return v.length >= 20 && !v.toLowerCase().includes("your")
-}
+import { isRealSecret } from "@/lib/config/secret"
 
 interface ResolvedProvider {
   model: LanguageModel
@@ -29,7 +23,7 @@ interface ResolvedProvider {
 
 function resolveProvider(): ResolvedProvider | null {
   const openaiKey = process.env["OPENAI_API_KEY"]
-  if (realKey(openaiKey)) {
+  if (isRealSecret(openaiKey)) {
     const openai = createOpenAI({
       apiKey: openaiKey,
       ...(process.env["OPENAI_BASE_URL"] ? { baseURL: process.env["OPENAI_BASE_URL"] } : {}),
@@ -40,7 +34,7 @@ function resolveProvider(): ResolvedProvider | null {
 
   const gatewayKey = process.env["AI_API_KEY"]
   const gatewayBase = process.env["AI_BASE_URL"]
-  if (realKey(gatewayKey) && gatewayBase) {
+  if (isRealSecret(gatewayKey) && gatewayBase) {
     const gateway = createOpenAI({
       apiKey: gatewayKey,
       baseURL: gatewayBase,

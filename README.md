@@ -57,7 +57,7 @@
 
 | 层级 | 技术 |
 | ------ | ------ |
-| 框架 | Next.js 16.4.3（App Router）+ React 19 + TypeScript 5.9 |
+| 框架 | Next.js 16.4.5（App Router）+ React 19 + TypeScript 5.9 |
 | 运行时/包管理 | Node ≥ 22.13（`node:sqlite`）+ Bun（测试）/ npm 兼容 |
 | 样式 | Tailwind CSS 4 + shadcn/ui（Radix） |
 | 状态 | React state + AuthProvider Context + authFetch/apiClient（认证自动附带与刷新） |
@@ -236,7 +236,7 @@ bun run test
 - ✅ 类型债 1,986 → **0**（演进史见 [07 · 测试与质量门禁](./docs/developer/07-testing-quality.md)，`tsc --noEmit` 0 error）
 - ✅ i18n 全量闭环（P0–P4 完成）：16/16 页真双语、词条 977/977 一致、`check:i18n:strict` 入 CI 阻断、hreflang 三语声明
 - ✅ AI 悬浮窗水合错配修复（首帧确定性定位 + 挂载后视口校正，Playwright 8 路由 0 错误）
-- ✅ 关键依赖安全升级：`next` 16.4.3、`zod` 4.6.7、`next-intl` 4.14.9（关闭已知通告；项目以 `bun.lock` 为准）
+- ✅ 关键依赖安全升级：`next` 16.4.5、`zod` 4.6.7、`next-intl` 4.14.9（关闭已知通告；项目以 `bun.lock` 为准）
 - ✅ OSV 依赖审计：`bun run audit:osv` + `.github/workflows/osv-audit.yml`（Critical 阻断、每周定时、PR/push 触发、报告 artifact）
 - ✅ 四主题视觉回归：`e2e/theme-visual.e2e.ts` 8 张基线（首页/视频工坊 × 暖阳/液态/赛博/极光），macOS 与 Linux 分平台
 - ✅ 徽章系统：30 枚勋章 × 真实数据评估引擎（`lib/badges/`）

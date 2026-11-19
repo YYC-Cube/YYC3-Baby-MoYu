@@ -12,6 +12,7 @@ import { resetRateLimits } from "@/lib/rate-limit"
 let configured = true
 let upstreamFail = false
 let fallbackMode = false
+let authFailStatus = 0
 let lastCall: { text: string; voice?: string; speed?: number } | null = null
 
 mock.module("@/lib/auth/service", () => ({
@@ -43,19 +44,31 @@ mock.module("@/lib/auth/service", () => ({
 mock.module("@/lib/logger/server", () => ({ error: () => {}, info: () => {}, warn: () => {} }))
 
 /** 导出超集：speech-to-text 路由也引用 getVoiceService，须一并提供 */
-mock.module("@/lib/api/voice-services", () => ({
-  TTS_VOICES: ["tongtong", "chuichui", "xiaochen", "jam", "kazi", "douji", "luodo"],
-  hasVoiceService: () => configured,
-  getVoiceService: () => ({
-    textToSpeech: async (text: string, options: { voice?: string; speed?: number }) => {
-      lastCall = { text, voice: options.voice, speed: options.speed }
-      if (upstreamFail) throw new Error("upstream down")
-      if (fallbackMode) return { audio: new Blob(), format: "fallback" }
-      return { audio: new Blob([new Uint8Array([1, 2, 3])]), format: "wav" }
-    },
-    uploadAndTranscribe: async () => "转写结果",
-  }),
-}))
+mock.module("@/lib/api/voice-services", () => {
+  class UpstreamHttpError extends Error {
+    readonly status: number
+    constructor(message: string, status: number) {
+      super(message)
+      this.name = "UpstreamHttpError"
+      this.status = status
+    }
+  }
+  return {
+    TTS_VOICES: ["tongtong", "chuichui", "xiaochen", "jam", "kazi", "douji", "luodo"],
+    UpstreamHttpError,
+    hasVoiceService: () => configured,
+    getVoiceService: () => ({
+      textToSpeech: async (text: string, options: { voice?: string; speed?: number }) => {
+        lastCall = { text, voice: options.voice, speed: options.speed }
+        if (authFailStatus) throw new UpstreamHttpError("401 Unauthorized", authFailStatus)
+        if (upstreamFail) throw new Error("upstream down")
+        if (fallbackMode) return { audio: new Blob(), format: "fallback" }
+        return { audio: new Blob([new Uint8Array([1, 2, 3])]), format: "wav" }
+      },
+      uploadAndTranscribe: async () => "转写结果",
+    }),
+  }
+})
 
 const ttsRoute = await import("../../app/api/ai/text-to-speech/route")
 
@@ -76,6 +89,7 @@ beforeEach(() => {
   configured = true
   upstreamFail = false
   fallbackMode = false
+  authFailStatus = 0
   lastCall = null
 })
 
@@ -153,5 +167,19 @@ describe("POST /api/ai/text-to-speech", () => {
     fallbackMode = true
     const res = await ttsRoute.POST(post({ text: "你好" }))
     expect(res.status).toBe(502)
+  })
+
+  test("上游凭据失效（401）→ 503 且提示检查密钥", async () => {
+    authFailStatus = 401
+    const res = await ttsRoute.POST(post({ text: "你好" }))
+    expect(res.status).toBe(503)
+    const body = (await res.json()) as { error?: string }
+    expect(body.error).toContain("BIGMODEL_API_KEY")
+  })
+
+  test("上游凭据无权限（403）→ 503", async () => {
+    authFailStatus = 403
+    const res = await ttsRoute.POST(post({ text: "你好" }))
+    expect(res.status).toBe(503)
   })
 })
