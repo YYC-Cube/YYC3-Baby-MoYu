@@ -1,0 +1,58 @@
+# 夜间质量任务：覆盖率（白天 push 门禁不跑，避免 7 分钟内跑不完的错觉）
+# 口径必须带 --path-ignore-patterns='docs/**'：docs/ 下有归档工作区的测试副本，
+# 不加会让 bun test --coverage 长时间不收敛（2026-11-20 定位）。
+
+name: Nightly Quality
+
+on:
+  schedule:
+    # UTC 18:00 = 次日 02:00 Asia/Shanghai
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    name: 覆盖率（夜间）
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Node (node:sqlite 需要 ≥ 22.5)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: 覆盖率（funcs/lines 门槛 90%）
+        run: |
+          set -euo pipefail
+          bun run test:coverage > /tmp/coverage.log 2>&1 || { tail -80 /tmp/coverage.log; exit 1; }
+          tail -40 /tmp/coverage.log
+
+          read -r funcs lines <<< "$(awk -F'|' '/All files/{gsub(/ /,"",$2); gsub(/ /,"",$3); print $2, $3}' /tmp/coverage.log)"
+          echo "funcs=${funcs}% lines=${lines}%"
+          if [ -z "${funcs:-}" ] || [ -z "${lines:-}" ]; then
+            echo "❌ 未解析到 All files 汇总行"; exit 1
+          fi
+          awk -v f="$funcs" -v l="$lines" 'BEGIN { exit !(f+0 >= 90 && l+0 >= 90) }' \
+            || { echo "❌ 覆盖率低于门槛（funcs/lines ≥ 90%）"; exit 1; }
+
+      - name: 上传覆盖率报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: /tmp/coverage.log
+          retention-days: 14

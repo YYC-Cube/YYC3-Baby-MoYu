@@ -1,0 +1,37 @@
+# YYC³ Baby-MoYu · Prometheus 抓取配置
+#
+# 前置：/api/metrics 已启用应用层令牌（生产未配置 METRICS_TOKEN 时返回 503）
+#   1) 生成令牌：bun run gen:metrics-token -- production
+#   2) 写入令牌文件（仅 Prometheus 可读）：
+#        printf '%s' "$METRICS_TOKEN" > deploy/monitoring/metrics_token
+#        chmod 600 deploy/monitoring/metrics_token
+#   3) 启动：
+#        docker run -d --name yyc3-prometheus \
+#          -p 9090:9090 \
+#          -v "$PWD/deploy/monitoring:/etc/prometheus:ro" \
+#          prom/prometheus
+#
+# 目标地址：容器内访问宿主机用 host.docker.internal；同机裸装可改 127.0.0.1:1228
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 30s
+  external_labels:
+    stack: yyc3-baby-moyu
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+scrape_configs:
+  - job_name: yyc3-baby-moyu
+    metrics_path: /api/metrics
+    scheme: http
+    authorization:
+      type: Bearer
+      credentials_file: /etc/prometheus/metrics_token
+    static_configs:
+      - targets:
+          - host.docker.internal:1228
+        labels:
+          service: yyc3-baby-moyu
+          env: production

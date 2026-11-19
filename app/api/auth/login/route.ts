@@ -29,10 +29,10 @@ export async function POST(request: Request) {
 
     // 限流：每 IP 10 次/分钟 + 每邮箱 5 次/分钟
     const ip = clientIP(request)
-    if (!checkRateLimit(`login:ip:${ip}`, 10, 60_000).allowed) {
+    if (!(await checkRateLimit(`login:ip:${ip}`, 10, 60_000)).allowed) {
       return NextResponse.json({ success: false, error: "Rate Limit", message: "尝试过于频繁，请稍后再试" }, { status: 429 })
     }
-    if (!checkRateLimit(`login:email:${parsed.data.email}`, 5, 60_000).allowed) {
+    if (!(await checkRateLimit(`login:email:${parsed.data.email}`, 5, 60_000)).allowed) {
       return NextResponse.json({ success: false, error: "Rate Limit", message: "该账号尝试过于频繁，请稍后再试" }, { status: 429 })
     }
 

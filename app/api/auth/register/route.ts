@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     // 限流：每 IP 5 次/分钟
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
-    if (!checkRateLimit(`register:ip:${ip}`, 5, 60_000).allowed) {
+    if (!(await checkRateLimit(`register:ip:${ip}`, 5, 60_000)).allowed) {
       return NextResponse.json({ success: false, error: "Rate Limit", message: "注册尝试过于频繁，请稍后再试" }, { status: 429 })
     }
 

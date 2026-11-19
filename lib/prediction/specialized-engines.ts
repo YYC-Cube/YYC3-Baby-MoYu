@@ -428,7 +428,12 @@ export class AnomalyDetectionEngine extends BasePredictor {
     const values = processedData.data.map(p => p.value)
     const anomalies: Anomaly[] = []
 
-    const method = String(this.config.parameters.method) || 'zscore'
+    // 注意：不能写 String(params.method) || 'zscore'——String(undefined) 为 "undefined" 是 truthy，
+    // 会绕过默认值导致未配置 method 时静默不检测。必须显式类型判定。
+    const configuredMethod = this.config.parameters.method
+    const method = typeof configuredMethod === "string" && configuredMethod.length > 0
+      ? configuredMethod
+      : 'zscore'
 
     for (let i = 0; i < values.length; i++) {
       const value = values[i]

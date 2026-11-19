@@ -9,9 +9,16 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { guardAIRequest } from "@/lib/api/ai-guard"
 import { getVoiceService, hasVoiceService, TTS_VOICES, UpstreamHttpError } from "@/lib/api/voice-services"
+import { businessRequestsTotal } from "@/lib/monitoring/metrics"
 
 /** 单次合成文本上限（控成本、防长文本拖垮响应） */
 const MAX_TEXT_LENGTH = 2000
+const ROUTE = "ai/text-to-speech"
+
+/** 记录业务指标：TTS 503 表示未配置或凭据失效，告警规则据此区分运维问题与上游故障 */
+function record(status: number): void {
+  businessRequestsTotal.inc({ route: ROUTE, status: String(status) })
+}
 
 const bodySchema = z.object({
   text: z.string().min(1, "文本不能为空").max(MAX_TEXT_LENGTH, `文本过长（上限 ${MAX_TEXT_LENGTH} 字）`),
@@ -25,6 +32,7 @@ export async function POST(request: Request) {
   if (guard instanceof NextResponse) return guard
 
   if (!hasVoiceService()) {
+    record(503)
     return NextResponse.json({ error: "语音合成服务未配置" }, { status: 503 })
   }
 
@@ -32,11 +40,13 @@ export async function POST(request: Request) {
   try {
     body = await request.json()
   } catch {
+    record(400)
     return NextResponse.json({ error: "请求体必须是 JSON" }, { status: 400 })
   }
 
   const parsed = bodySchema.safeParse(body)
   if (!parsed.success) {
+    record(400)
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? "参数错误" },
       { status: 400 },
@@ -52,8 +62,10 @@ export async function POST(request: Request) {
     })
     if (format === "fallback") {
       // 服务端不应触发浏览器降级路径；出现即视为上游异常
+      record(502)
       return NextResponse.json({ error: "语音合成服务暂时不可用" }, { status: 502 })
     }
+    record(200)
     return new Response(audio, {
       status: 200,
       headers: {
@@ -66,9 +78,11 @@ export async function POST(request: Request) {
     // 区分「凭据失效」与「上游故障」：前者运维只需换 key，后者才需要排查服务
     if (error instanceof UpstreamHttpError && (error.status === 401 || error.status === 403)) {
       console.error("[api] 语音合成凭据失效:", error.message)
+      record(503)
       return NextResponse.json({ error: "语音服务凭据无效，请检查 BIGMODEL_API_KEY" }, { status: 503 })
     }
     console.error("[api] 语音合成失败:", error)
+    record(502)
     return NextResponse.json({ error: "语音合成失败，请稍后重试" }, { status: 502 })
   }
 }

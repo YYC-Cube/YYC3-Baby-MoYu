@@ -1,0 +1,47 @@
+# YYC³ Baby-MoYu · 告警规则（三条）
+#
+# 指标来源：/api/metrics
+#   yyc3_ai_route_requests_total{route,outcome}   outcome ∈ success:* / no-provider / fallback / error
+#   yyc3_business_requests_total{route,status}    业务路由状态码（TTS 已接入）
+#   nodejs_eventloop_lag_p99_seconds              prom-client 默认指标
+
+groups:
+  - name: yyc3-baby-moyu
+    rules:
+      # 1) AI 路由 5 分钟错误率 > 2%
+      - alert: Yyc3AiErrorRatioHigh
+        expr: |
+          (
+            sum(rate(yyc3_ai_route_requests_total{outcome="error"}[5m]))
+            /
+            clamp_min(sum(rate(yyc3_ai_route_requests_total[5m])), 0.001)
+          ) > 0.02
+        for: 5m
+        labels:
+          severity: page
+          service: yyc3-baby-moyu
+        annotations:
+          summary: "AI 路由 5 分钟错误率超过 2%"
+          description: "当前错误率 {{ $value | humanizePercentage }}。优先核对模型网关连通性与密钥有效性（503=未配置/凭据无效，502=上游故障）。"
+
+      # 2) TTS 出现 503（未配置或凭据失效；区别于 502 上游故障）
+      - alert: Yyc3TtsServiceUnavailable
+        expr: increase(yyc3_business_requests_total{route="ai/text-to-speech",status="503"}[10m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          service: yyc3-baby-moyu
+        annotations:
+          summary: "TTS 返回 503（未配置或 BIGMODEL_API_KEY 失效）"
+          description: "10 分钟内 {{ $value }} 次 503。先核对 BIGMODEL_API_KEY 是否轮换（占位符或过期密钥会被判定为未配置）。"
+
+      # 3) 事件循环 P99 延迟 > 100ms（单进程阻塞信号）
+      - alert: Yyc3EventLoopLagHigh
+        expr: nodejs_eventloop_lag_p99_seconds > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          service: yyc3-baby-moyu
+        annotations:
+          summary: "事件循环 P99 延迟持续 > 100ms"
+          description: "当前 P99 {{ $value }}s。检查慢查询（SQLite 全表扫描）、同步文件 IO 或长任务阻塞。"

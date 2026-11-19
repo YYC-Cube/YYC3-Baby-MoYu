@@ -89,7 +89,7 @@ async function notifySlack(report: ErrorReport): Promise<void> {
 
 export async function POST(request: NextRequest) {
   const ip = clientIP(request)
-  const rl = checkRateLimit(`error-report:ip:${ip}`, 10, 60_000)
+  const rl = await checkRateLimit(`error-report:ip:${ip}`, 10, 60_000)
   if (!rl.allowed) {
     return NextResponse.json(
       { success: false, error: "Rate Limit", message: "上报过于频繁，请稍后再试" },

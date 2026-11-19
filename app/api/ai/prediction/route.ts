@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   const auth = await requireAuth(request)
   if (auth instanceof NextResponse) return auth
 
-  const rl = checkRateLimit(`ai:prediction:${auth.user.id}`, 20, 60_000)
+  const rl = await checkRateLimit(`ai:prediction:${auth.user.id}`, 20, 60_000)
   if (!rl.allowed) {
     return NextResponse.json(
       { success: false, error: "Rate Limit", message: `请求过于频繁，请 ${rl.retryAfterSec} 秒后再试` },

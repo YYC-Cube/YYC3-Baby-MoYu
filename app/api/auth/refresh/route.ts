@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   try {
     // 限流：每 IP 15 次/分钟（刷新不应高频发生）
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
-    if (!checkRateLimit(`refresh:ip:${ip}`, 15, 60_000).allowed) {
+    if (!(await checkRateLimit(`refresh:ip:${ip}`, 15, 60_000)).allowed) {
       return NextResponse.json({ success: false, error: "Rate Limit", message: "请求过于频繁" }, { status: 429 })
     }
 

@@ -46,9 +46,9 @@ PG 服务不对外暴露端口（仅容器网络内可达）；数据落 `./pgda
 > 目标环境选型（本机 / 单机服务器 / 托管平台）与完整配置清单见 **[12 · 部署承载分析](./12-hosting-profile.md)**。
 
 
-**部署拓扑约束（单实例锁定）**：当前三种实现均为**单进程语义**，多实例/Serverless 水平扩缩前不可直接复制副本——
-1. **限流**（`lib/rate-limit.ts`）：进程内内存桶，多副本时每副本独立计数，实际配额 = 副本数 × 配置值。多实例前接 Upstash Redis 替换存储后端（接口不变，仅换实现）。
-2. **SQLite 单写者**：多副本需共享挂载 `data/` 或改用 PostgreSQL（接口已抽象）。
+**部署拓扑约束**：当前实现仍为**单进程语义**，多实例/Serverless 水平扩缩前需逐项确认——
+1. **限流**（`lib/rate-limit.ts`）：默认进程内固定窗口；配置 `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` 后自动切换到 Upstash（多副本共享配额，存储异常时回退进程内并告警）。**多实例前必须成对配置**。
+2. **SQLite 单写者**：多副本需共享挂载 `data/` 或改用 PostgreSQL（接口已抽象，切换演练见 §迁移）。
 3. **AgenticCore 服务端单例**（`lib/agentic/server.ts`）：状态仅进程内，多副本各自独立（无正确性问题，仅状态不共享）。
 
 **运行环境**：`next start` 为 production 模式——必须配置 `JWT_SECRET`（缺失即拒绝签发令牌），且**不会**种入演示账号（开发专属）。
@@ -59,6 +59,7 @@ PG 服务不对外暴露端口（仅容器网络内可达）；数据落 `./pgda
 | ---- | ---- | ---- | ---- |
 | `JWT_SECRET` | ✅（生产） | —（开发用 `data/.jwt-dev-secret` 随机密钥） | 缺失时生产进程拒绝签发令牌 |
 | `METRICS_TOKEN` | ✅（生产） | — | 指标端点应用层令牌；未配置时 `/api/metrics` 直接 503，配置后匿名 401、`Authorization: Bearer <token>` 或 `x-metrics-token` 通过 |
+| `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` | 多实例必备 | — | 限流存储切换 Upstash（**必须成对**；只填 URL 会回退进程内）；异常时回退内存并打印告警 |
 | `BIGMODEL_API_KEY` | 视功能 | — | 作业批改 / 语音转写 / **语音合成（TTS）**；缺失或为占位符时 TTS 返回 503 |
 | `OPENAI_API_KEY` | 视功能 | — | 对话 / 编排 / 评估报告 / 故事续写（缺失则对话降级为示例） |
 | `OPENAI_BASE_URL` | | — | 可选，OpenAI 兼容网关地址 |
@@ -114,6 +115,31 @@ bun run gen:metrics-token -- production --print     # 额外输出明文与 Auth
 
 # 恢复：停服后用备份文件替换 data/yyc3.db
 ```
+
+## 监控接入（Prometheus + 告警）
+
+仓库内已提供可直接使用的配置：[`deploy/monitoring/prometheus.yml`](../../deploy/monitoring/prometheus.yml)（抓取）与 [`deploy/monitoring/alerts.yml`](../../deploy/monitoring/alerts.yml)（三条告警）。
+
+```bash
+# 1) 生成令牌（默认输出掩码，--print 才显示明文）
+bun run gen:metrics-token -- production --print
+
+# 2) 令牌文件只给 Prometheus 读（0600）
+printf '%s' '<METRICS_TOKEN>' > deploy/monitoring/metrics_token
+chmod 600 deploy/monitoring/metrics_token
+
+# 3) 启动（配置目录只读挂载）
+docker run -d --name yyc3-prometheus -p 9090:9090 \
+  -v "$PWD/deploy/monitoring:/etc/prometheus:ro" prom/prometheus
+```
+
+| 告警 | 表达式 | 阈值 | 处置 |
+| ---- | ------ | ---- | ---- |
+| `Yyc3AiErrorRatioHigh` | AI 路由 5m 错误率 | > 2%，持续 5m | 先看 `/api/metrics` 的 `outcome` 分布：`error`=上游故障，`no-provider`=密钥缺失 |
+| `Yyc3TtsServiceUnavailable` | TTS 503 计数（10m 增量） | > 0，持续 1m | 503 表示未配置或 `BIGMODEL_API_KEY` 失效（占位符/过期）；502 才排查上游 |
+| `Yyc3EventLoopLagHigh` | `nodejs_eventloop_lag_p99_seconds` | > 100ms，持续 10m | 排查慢查询、同步 IO 或长任务阻塞 |
+
+> 抓取目标地址按部署环境调整：容器内访问宿主机用 `host.docker.internal:1228`，同机裸装改 `127.0.0.1:1228`。
 
 ## 健康检查清单（上线前）
 

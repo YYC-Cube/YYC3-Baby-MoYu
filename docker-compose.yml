@@ -23,6 +23,9 @@ services:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET 未设置}
       # 指标端点令牌：生产未配置时 /api/metrics 返回 503（应用层兜底，不依赖反代）
       METRICS_TOKEN: ${METRICS_TOKEN:-}
+      # 限流存储（可选）：成对配置后切换 Upstash，多副本共享配额
+      UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL:-}
+      UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:-}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-2h}
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-30d}
       # AI 密钥均可留空：缺省时对话降级为示例、生图降级为占位图（见 06-ai-engine.md）

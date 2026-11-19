@@ -31,7 +31,7 @@ export async function guardAIRequest(
   if (auth instanceof NextResponse) return auth
 
   const { name, limit = 20, windowMs = 60_000 } = options
-  const rl = checkRateLimit(`ai:${name}:${auth.user.id}`, limit, windowMs)
+  const rl = await checkRateLimit(`ai:${name}:${auth.user.id}`, limit, windowMs)
 
   if (!rl.allowed) {
     return NextResponse.json(
