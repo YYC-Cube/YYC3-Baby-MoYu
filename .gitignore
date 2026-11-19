@@ -31,6 +31,9 @@ secrets/
 credentials/
 .keys/
 .secrets/
+# Prometheus 抓取凭据（由 bun run gen:metrics-token 生成，仅本机/服务器留存）
+deploy/monitoring/metrics_token
+deploy/monitoring/data/
 
 # Database Credentials & Configs
 db-credentials.json

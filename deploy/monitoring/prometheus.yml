@@ -1,17 +1,23 @@
 # YYC³ Baby-MoYu · Prometheus 抓取配置
 #
 # 前置：/api/metrics 已启用应用层令牌（生产未配置 METRICS_TOKEN 时返回 503）
-#   1) 生成令牌：bun run gen:metrics-token -- production
-#   2) 写入令牌文件（仅 Prometheus 可读）：
-#        printf '%s' "$METRICS_TOKEN" > deploy/monitoring/metrics_token
+#   1) 生成令牌：bun run gen:metrics-token -- production --print
+#   2) 写入令牌文件（该路径已 .gitignore，禁止提交）：
+#        umask 077 && printf '%s' "<token>" > deploy/monitoring/metrics_token
 #        chmod 600 deploy/monitoring/metrics_token
-#   3) 启动：
+#   3) 启动（--user 使 0600 令牌可读；端口仅监听本机）：
 #        docker run -d --name yyc3-prometheus \
-#          -p 9090:9090 \
+#          --user "$(id -u):$(id -g)" \
+#          -p 127.0.0.1:9090:9090 \
 #          -v "$PWD/deploy/monitoring:/etc/prometheus:ro" \
-#          prom/prometheus
+#          -v yyc3-prometheus-data:/prometheus \
+#          prom/prometheus:v3.1.0 \
+#          --config.file=/etc/prometheus/prometheus.yml \
+#          --storage.tsdb.path=/prometheus \
+#          --storage.tsdb.retention.time=15d
 #
-# 目标地址：容器内访问宿主机用 host.docker.internal；同机裸装可改 127.0.0.1:1228
+# 完整 Runbook（含 promtool 校验、负向验证、排障表）见 docs/developer/08-deployment.md
+# 目标地址：容器内访问宿主机用 host.docker.internal；同机裸装改 127.0.0.1:1228
 
 global:
   scrape_interval: 15s
