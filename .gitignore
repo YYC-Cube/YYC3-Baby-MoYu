@@ -400,6 +400,8 @@ swagger-ui/
 /docs/YYC3-小语/
 /docs/YYC3-成长守护-未来之语/
 /docs/xy/
+# 历史工程完整副本（YY-Nexus/yyc3-xyai v2.1.0，23M，仅本地参考；自带测试副本会干扰覆盖率口径）
+/docs/yyc3-xy/
 # 有日期后缀的会话执行日志：一次性产物，结论沉淀进 docs/developer/ 后本地留档
 /docs/YYC3-Baby-MoYu-*-20*/
 

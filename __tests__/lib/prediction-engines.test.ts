@@ -331,3 +331,66 @@ describe("CausalInferenceEngine", () => {
     expect(defaults.effectSize).toBe(0)
   })
 })
+
+describe("剩余分支收口", () => {
+  test("季节性数据训练后预测会注入季节分量", async () => {
+    const engine = new TimeSeriesEngine(makeConfig("exponential_smoothing"))
+    // 两个完整 7 日周期的正弦序列：训练时识别 weekly 季节性
+    const periodic = makeData(Array.from({ length: 16 }, (_, i) => 50 + 10 * Math.sin((2 * Math.PI * i) / 7)))
+    await engine.train(periodic)
+
+    const result = await engine.predict(periodic, 3)
+    expect(Array.isArray(result.prediction)).toBe(true)
+    // 季节分量非零时多步预测应产生非恒定序列（gamma=0.1 生效）
+    const values = result.prediction as number[]
+    expect(values.some((v, i) => i > 0 && v !== values[0])).toBe(true)
+  })
+
+  test("dip 型异常与解释分支（异常点置于序列中部，避开端点分类退化）", async () => {
+    const engine = new AnomalyDetectionEngine(makeConfig("anomaly", { method: "zscore", threshold: 2 }))
+    await engine.train(makeData([100, 100, 100, 100, 100, 100]))
+    // 中部骤降：contextSize=min(5,3,2)=2 → dip 判定可达（端点会退化为 spike，属已知边界）
+    const report = await engine.detectAnomalies(makeData([100, 100, 100, 1, 100, 100]))
+    expect(report.totalCount).toBeGreaterThanOrEqual(1)
+    expect(report.anomalies.some((a) => a.type === "dip")).toBe(true)
+
+    const explanations = await engine.explainAnomalies(report.anomalies)
+    for (const exp of explanations) {
+      expect(exp.explanation.length).toBeGreaterThan(0)
+      expect(exp.recommendedAction.length).toBeGreaterThan(0)
+    }
+  })
+
+  test("引擎钩子：createInstance 复制实例与搜索空间形状", () => {
+    class TsProbe extends TimeSeriesEngine {
+      instance(config: PredictorConfig): BasePredictor {
+        return this.createInstance(config)
+      }
+      space(): Record<string, unknown> {
+        return this.getSearchSpace()
+      }
+    }
+    const probe = new TsProbe(makeConfig("exponential_smoothing"))
+    const cloned = probe.instance(makeConfig("exponential_smoothing", { alpha: 0.5 }))
+    expect(cloned).toBeInstanceOf(TimeSeriesEngine)
+
+    const space = probe.space() as Record<string, { type?: string }>
+    expect(space.windowSize.type).toBe("range")
+    expect(space.seasonalityPeriod).toEqual([7, 14, 30, 90, 365])
+
+    class AnProbe extends AnomalyDetectionEngine {
+      space(): Record<string, unknown> {
+        return this.getSearchSpace()
+      }
+    }
+    const anSpace = new AnProbe(makeConfig("anomaly")).space() as Record<string, { min?: number }>
+    expect(anSpace.threshold.min).toBe(1.5)
+
+    class CausalProbe extends CausalInferenceEngine {
+      instance(config: PredictorConfig): BasePredictor {
+        return this.createInstance(config)
+      }
+    }
+    expect(new CausalProbe(makeConfig("causal")).instance(makeConfig("causal"))).toBeInstanceOf(CausalInferenceEngine)
+  })
+})

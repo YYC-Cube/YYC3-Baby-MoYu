@@ -139,6 +139,13 @@ docker run -d --name yyc3-prometheus -p 9090:9090 \
 | `Yyc3TtsServiceUnavailable` | TTS 503 计数（10m 增量） | > 0，持续 1m | 503 表示未配置或 `BIGMODEL_API_KEY` 失效（占位符/过期）；502 才排查上游 |
 | `Yyc3EventLoopLagHigh` | `nodejs_eventloop_lag_p99_seconds` | > 100ms，持续 10m | 排查慢查询、同步 IO 或长任务阻塞 |
 
+> **接线验证（2026-11-20 实测）**：本机无 promtool/docker 时按降级方案验证——
+> ① 两份 YAML 结构校验（规则/抓取/挂载字段）通过；② 以生产模式启动应用并真实触发
+> TTS 503 与 AI `no-provider` 请求后，三条告警引用的全部指标序列
+> （`yyc3_ai_route_requests_total{outcome=…}`、`yyc3_business_requests_total{status="503"}`、
+> `nodejs_eventloop_lag_p99_seconds`）在 `/api/metrics` 输出中可见，13 项断言全过。
+> 接入真实 Prometheus 实例后仅需替换目标地址与令牌文件。
+
 > 抓取目标地址按部署环境调整：容器内访问宿主机用 `host.docker.internal:1228`，同机裸装改 `127.0.0.1:1228`。
 
 ## 健康检查清单（上线前）

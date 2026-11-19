@@ -26,6 +26,7 @@ flowchart TB
 | [YYC3-成长守护-日志系统/](./YYC3-成长守护-日志系统/) | 成长记录/日志/时间线产品语义 | 功能演进时更新 |
 | `YYC3-成长守护-未来之语/`（本地） | 0–22 岁成长寄语与阶段设计方案（gitignore，暂缓入库） | 本地维护 |
 | `YYC3-小语/`（本地） | 组件拆分工作区（gitignore，本地审计用） | 本地维护 |
+| `yyc3-xy/`（本地） | 历史工程完整副本（YY-Nexus/yyc3-xyai v2.1.0，gitignore，本地参考） | 本地维护 |
 | `YYC3-Baby-MoYu-glm53flash-*/`（本地） | 有日期后缀的会话执行日志（gitignore，一次性产物不入库） | 本地留档 |
 
 > 历史归档（archive/analysis/standard/status 与 20261102 两轮审计日志）已于 2026-11-05
