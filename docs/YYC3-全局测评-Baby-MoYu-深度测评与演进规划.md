@@ -41,7 +41,8 @@
 | `bun run audit:osv` | 0 Critical / 0 High，**1 moderate** | `minimatch@10.2.6`（dev 链，修复版 11.0.1 为 major，跟踪） |
 | CI（quality / visual / smoke） | 三 job 全绿 | 最近一次 push 实测 |
 
-**覆盖率**：本轮未重跑（`bun test --coverage` 超过 7 分钟未收敛），沿用 [07](./developer/07-testing-quality.md) 记录的 funcs / lines **92.1%** 基线；建议后续改为夜间任务而非本地阻断。
+**覆盖率**（2026-11-20 实测）：funcs **90.06%** / lines **90.33%**，500 用例 2.8s 跑完。较 2026-11-05 的 92.1% 略降是分母变大（新增 prediction 引擎、metrics 令牌门禁），核心安全模块（jwt / guard / rate-limit / cookies / secret / db-identifier）仍为 100%。
+命令必须带 `--path-ignore-patterns='docs/**'`：`docs/` 下归档工作区自带测试副本，不加会导致 `bun test --coverage` 长时间不收敛（本轮已复现并定位）。
 
 ## 4. 运行时验收（本地生产模式，28 项全过）
 
@@ -54,6 +55,20 @@
 | 降级语义 | 2 | 未配 BigModel → TTS **503**；未配 AI → chat `demo:true` |
 | 限流与可观测 | 4 | prediction 第 21 次 **429**；metrics 含 AI 计数器、`source="mock"`、默认进程指标 |
 | 性能基线 | 3 | `/` 10ms、`/api/health` 2ms、`/api/metrics` 2ms（3 次均值） |
+
+### 静态安全与债务扫描（2026-11-20）
+
+| 检查项 | 结果 | 说明 |
+| ------ | ---- | ---- |
+| 路由鉴权覆盖 | **24/30 受保护** | 未保护的 6 个均为设计内公开：`auth/login`、`auth/register`、`auth/refresh`（Cookie 自证）、`auth/logout`、`health`、`metrics`（令牌门禁） |
+| AI 路由守卫 | 全部经 `guardAIRequest` | 认证 + 按用户限流（20/min）统一入口，无裸奔 AI 端点 |
+| SQL 拼接风险 | **0** | `findMany / findOne / delete` 的表名与条件键均先过 `assertSQLIdentifier` 白名单 |
+| 硬编码密钥 | **0** | 未发现 `sk-*` / AKIA 等模式；密钥仅经环境变量注入 |
+| `NEXT_PUBLIC_` 疑似密钥 | **0** | 无 `*_KEY/_SECRET/_TOKEN` 前缀泄漏 |
+| `eval` / `new Function` | **0** | — |
+| `dangerouslySetInnerHTML` | 1 处 | `components/ui/chart.tsx`（shadcn 注入 CSS 变量，配置驱动，非用户输入） |
+| `any` 使用 | **0** | strict 类型纪律完好 |
+| TODO/FIXME | 1 处 | `app/activities/page.tsx`（P3 视觉基线对齐，历史遗留） |
 
 ## 5. 五维评估
 
@@ -74,7 +89,7 @@
 | 中 | 容器启动方式 | `next start` 在 standalone 产物下的已知警告 | 容器内改 `node .next/standalone/server.js` | 首次容器发布 |
 | 中 | 指标端点运维依赖 | 生产未配 `METRICS_TOKEN` 即 503 | 用 `bun run gen:metrics-token` 生成并按环境注入；反代白名单作第二层 | 上线前 |
 | 低 | minimatch moderate | OSV 明细 1 条（dev 链） | 修复版为 major，暂跟踪 | 季度 |
-| 低 | 覆盖率基线未刷新 | 本轮覆盖率重跑超时 | 改为夜间 CI 任务，不阻断 | 一月内 |
+| 低 | prediction 引擎覆盖率短板 | `specialized-engines.ts` 24.9%、`base-predictor.ts` 52.4% | 补引擎级单测（各预测器入口 + 退化输入） | 一月内 |
 | 观察 | 预警准确度无回测 | 预测为统计外推，卡片含免责声明 | 补 30 天回测指标（MAPE / 区间覆盖率） | 季度 |
 
 ## 7. 建议与路线图
@@ -92,7 +107,7 @@
 | 目标 | 验收标准 |
 | ---- | -------- |
 | 可观测闭环 | Prometheus 抓取 + 3 条告警（5xx 比率 >2%、TTS 503 >0、事件循环延迟 >100ms） |
-| 覆盖率回归 CI | 夜间任务产出覆盖率，funcs/lines 不低于 92.1% 基线 |
+| 覆盖率回归 CI | 夜间任务产出覆盖率；prediction 引擎行覆盖率提升至 60%+，全仓不低于 90% |
 | e2e 增强 | 增加 prediction 与 TTS 两条真实交互链路（当前仅冒烟 + 视觉） |
 | 依赖维护 | `eslint-config-next` 跟随 next patch（当前 16.4.5，16.4.6 已发布） |
 

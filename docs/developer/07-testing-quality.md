@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart LR
-    T["bunx tsc --noEmit<br/>0 错误"] --> L["bun run lint<br/>0 error / 0 warning"] --> B["next build<br/>含类型检查"] --> U["bun run test<br/>459 用例"] --> P["推送 ✅"]
+    T["bunx tsc --noEmit<br/>0 错误"] --> L["bun run lint<br/>0 error / 0 warning"] --> B["next build<br/>含类型检查"] --> U["bun run test<br/>500 用例"] --> P["推送 ✅"]
 ```
 
 | 门禁 | 命令 | 当前基线 |
@@ -12,8 +12,8 @@ flowchart LR
 | 类型 | `bun run type-check` | **0 错误**（应用代码；`__tests__/`、`themes/` 排除） |
 | Lint | `bun run lint` | **0 error / 0 warning**（2026-11-05 清零；语义等价改写优先，合法惯用法注释豁免） |
 | 构建 | `bun run build` | 通过（类型门禁已恢复，无 ignoreBuildErrors） |
-| 测试 | `bun run test` | 496/496（31 文件，~2.6s；含鉴权/越权/限流类安全行为用例） |
-| 覆盖率 | `bun test --coverage` | 全仓 funcs/lines 均 **92.1%**；jwt/badges/rate-limit/utils/cookies/guard/homework/ai_roles/auth refresh 路由均 100%（2026-11-05 补齐） |
+| 测试 | `bun run test` | 500/500（31 文件，~2.8s；含鉴权/越权/限流类安全行为用例） |
+| 覆盖率 | `bun run test:coverage`（等价 `bun test --coverage --path-ignore-patterns='docs/**'`） | 全仓 funcs **90.06%** / lines **90.33%**（2026-11-20 实测）；jwt/badges/rate-limit/utils/cookies/guard/secret/metrics/db-identifier 均 100%；短板在 `lib/prediction/specialized-engines.ts` 24.9%、`base-predictor.ts` 52.4% |
 | DB 直测 | `bun run test:node` | 7/7（SQLite）；设置 `PG_TEST_URL` 后 +5 条 PG 用例（共 12/12，CI 默认跳过 PG） |
 | e2e | `bun run test:e2e` | 3/3（登录→建娃→写记录→登出 / 匿名 401 矩阵 / 敏感页重定向；生产构建，账号自举不依赖种子） |
 | 视觉 | `bun run test:visual` | 8/8（首页/视频工坊 × 四主题；darwin/linux 分平台基线） |
@@ -21,8 +21,10 @@ flowchart LR
 | i18n | `bun run check:i18n:strict` | 16/16 路由镜像 + 词条 986/986 一致（CI 阻断级） |
 | 依赖 | `bun run audit:osv` | OSV.dev 审计；Critical 阻断，报告输出 `osv-results.json`（ignored）。当前 1 条 moderate（minimatch，dev 链，跟踪中） |
 
-> 2026-11-20 复核实测：tsc 0 error · lint 0 error/0 warning · 496/496 · node 7/7 · e2e 3/3 · 四主题视觉 8/8 · 生产冒烟 8/8 ·
-> 覆盖率全仓 funcs/lines 均 92%+（jwt dev-secret/badges/rate-limit sweep/character-manager/auth refresh/model-provider/metrics/TTS/预测端点已补齐）·
+> 2026-11-20 复核实测：tsc 0 error · lint 0 error/0 warning · 500/500 · node 7/7 · e2e 3/3 · 四主题视觉 8/8 · 生产冒烟 8/8 ·
+> 覆盖率全仓 funcs 90.06% / lines 90.33%（新增 prediction 引擎与 metrics 令牌门禁后分母变大，绝对值较 92.1% 略降，核心安全模块仍 100%）·
+> **覆盖率命令必须带 `--path-ignore-patterns='docs/**'`**：`docs/` 下归档工作区自带测试副本，不加会让 `bun test --coverage`
+> 长时间不收敛（与 `bun run test` 的门禁口径保持一致）。
 > OSV 0 Critical/0 High/0 moderate-on-runtime（next 16.4.3→16.4.5 关闭 2 条缓存/信息泄露 moderate；残余 minimatch 10.2.6 1 条 moderate
 > GHSA-g3hv-75wg-m249：由 @typescript-eslint/typescript-estree 引入，上游最新 8.72.1 仍钉 ^10.2.2，
 > 修复版 11.0.1 为 major 且 bun 全局 override 无法按范围作用域（会连带 eslint 的 minimatch@3 链），待上游随链消除）。

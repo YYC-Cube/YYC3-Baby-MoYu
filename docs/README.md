@@ -24,7 +24,7 @@
 | `bunx tsc --noEmit` | **0 错误** |
 | `bun run lint` | **0 error / 0 warning** |
 | `bun run test` | **500/500**（31 文件） |
-| 覆盖率 | funcs/lines **92.1%**（2026-11 初基线，本轮未重跑） |
+| 覆盖率 | funcs **90.06%** / lines **90.33%**（2026-11-20 实测；命令须排除 `docs/**`） |
 | `check:i18n:strict` | 镜像路由 100% · 词条 986/986（CI 阻断级） |
 | e2e / 视觉 | 2/2 · 8/8 |
 | OSV 依赖审计 | 0 Critical / 0 High（余 1 条 moderate，dev 链） |
