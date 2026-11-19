@@ -1,7 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
-import { createOpenAI } from "@ai-sdk/openai"
 import { guardAIRequest } from "@/lib/api/ai-guard"
+import { getModel, getModelSource } from "@/lib/ai/model-provider"
+import { aiRouteRequestsTotal } from "@/lib/monitoring/metrics"
 import { z } from "zod"
 
 const bodySchema = z.object({
@@ -10,13 +11,6 @@ const bodySchema = z.object({
   previousContent: z.string().max(20000).optional(),
   userInput: z.string().max(2000).optional(),
 })
-
-const openai = createOpenAI({
-  apiKey: process.env['OPENAI_API_KEY'] ?? "",
-  ...(process.env['OPENAI_BASE_URL'] && { baseURL: process.env['OPENAI_BASE_URL'] })
-})
-
-const model = openai("gpt-4o-mini")
 
 // 故事风格模板
 const STYLE_TEMPLATES: Record<string, string> = {
@@ -74,6 +68,11 @@ ${userInput ? `孩子新写的内容：${userInput}` : "请开始故事"}
 请提供3个续写选项：`
 
     try {
+      const model = getModel()
+      if (!model) {
+        aiRouteRequestsTotal.inc({ route: "continue-story", outcome: "no-provider" })
+        throw new Error("未配置模型 Provider")
+      }
       const { text } = await generateText({
         model,
         system: systemPrompt,
@@ -85,10 +84,12 @@ ${userInput ? `孩子新写的内容：${userInput}` : "请开始故事"}
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         const parsed: unknown = JSON.parse(jsonMatch[0])
+        aiRouteRequestsTotal.inc({ route: "continue-story", outcome: `success:${getModelSource()}` })
         return NextResponse.json(parsed)
       }
     } catch (aiError) {
       console.error("AI生成失败:", aiError)
+      aiRouteRequestsTotal.inc({ route: "continue-story", outcome: "fallback" })
     }
 
     // 降级：返回模板续写选项
@@ -96,6 +97,7 @@ ${userInput ? `孩子新写的内容：${userInput}` : "请开始故事"}
     return NextResponse.json({ options: defaultOptions })
   } catch (error) {
     console.error("续写故事错误:", error)
+    aiRouteRequestsTotal.inc({ route: "continue-story", outcome: "error" })
     return NextResponse.json({ error: "故事续写失败" }, { status: 500 })
   }
 }

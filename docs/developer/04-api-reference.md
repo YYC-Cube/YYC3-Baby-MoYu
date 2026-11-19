@@ -121,6 +121,19 @@ curl -X PUT http://localhost:1228/api/user-documents \
 `GET /api/health` → `{ status: "ok" | "degraded", checks: { database }, version, uptimeSec, timestamp }`。
 数据库只读探针失败返回 **503**，供容器/K8s 探活与摘流；不返回连接串、路径等内部信息。
 
+## 可观测性（`/api/metrics`，匿名只读）
+
+`GET /api/metrics` → Prometheus 文本格式（`text/plain; version=0.0.4`，`Cache-Control: no-store`）。
+
+| 指标 | 类型 | 标签 | 说明 |
+| ------ | ------ | ------ | ------ |
+| `process_*` 系列 | 默认 | — | CPU / 内存 / 事件循环（`collectDefaultMetrics`） |
+| `yyc3_ai_chat_requests_total` | Counter | `role`, `source` | AI 对话调用数；`source=mock` 即降级为示例回答 |
+| `yyc3_ai_route_requests_total` | Counter | `route`, `outcome` | AI 路由调用数；`outcome=success:openai/gateway \| no-provider \| fallback \| error` |
+| `yyc3_business_requests_total` | Counter | `route`, `status` | 业务 API 调用数 |
+
+与 `/api/health` 分工：health 管**存活探针**（503 摘流），metrics 管**指标抓取**（面板/告警）。
+
 ## 自治核心（服务端单例）
 
 | 端点 | 限流 | 说明 |
@@ -136,6 +149,7 @@ AgenticCore 及 prediction 服务栈仅存在于服务端，客户端经此 HTTP
 | ------ | ------ | ------ |
 | POST /api/ai/homework-correction | 10/min | base64 data URL 图片（≤10MB）→ 批改结果；413 超限 |
 | POST /api/ai/speech-to-text | 10/min | multipart `audio`（≤25MB）→ `{ text }` |
+| POST /api/ai/text-to-speech | 10/min | `{ text(≤2000), voice?, speed? }` → `audio/wav` 二进制；音色白名单 `TTS_VOICES`；未配置密钥 **503**，上游失败 **502** |
 | POST /api/ai/generate-image | 6/min | 文生图（fal.ai 计费端点，从严） |
 | POST /api/ai/orchestrate · continue-story · assessment-report | 10/min | 真实模型调用 |
 | POST /api/ai/chat | 20/min | 预设回复集 + 角色路由 |

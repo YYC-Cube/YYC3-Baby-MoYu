@@ -94,3 +94,76 @@ jobs:
 
       - name: 视觉回归（四主题 × 首页/视频工坊）
         run: bun run test:visual
+
+  # 生产冒烟：干净 runner 上真实 next start，八项路由实测
+  # 与 e2e 分工：e2e 验交互流程（Playwright），本 job 验「进程起来后接口真的通」，
+  # 覆盖健康探针/指标端点/静态资源/鉴权门禁/降级语义，不依赖浏览器与种子数据
+  smoke:
+    name: 生产冒烟（八项路由）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      JWT_SECRET: ci-smoke-secret-not-for-production
+      # 冒烟不配真实 AI 密钥：验证的是「无密钥时不崩溃且诚实降级」
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Node (node:sqlite 需要 ≥ 22.5)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: bun run build
+
+      - name: Start server
+        run: |
+          bun run start > /tmp/next-start.log 2>&1 &
+          for i in $(seq 1 40); do
+            if curl -fsS -o /dev/null http://localhost:1228/api/health; then
+              echo "server ready after ${i}s"
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Smoke checks（八项）
+        run: |
+          set -euo pipefail
+          fail=0
+          check() { # name expected_code url [extra curl args...]
+            name="$1"; expected="$2"; url="$3"; shift 3
+            code=$(curl -sS -o /tmp/body.$$ -w '%{http_code}' "$@" "$url" || echo 000)
+            if [ "$code" = "$expected" ]; then
+              echo "✅ $name ($code)"
+            else
+              echo "❌ $name 期望 $expected 实际 $code"; head -c 300 /tmp/body.$$ || true; echo; fail=1
+            fi
+            rm -f /tmp/body.$$
+          }
+
+          check "首页"            200 http://localhost:1228/
+          check "视频工坊页"      200 http://localhost:1228/videos
+          check "英文首页"        200 http://localhost:1228/en
+          check "健康探针"        200 http://localhost:1228/api/health
+          check "Prometheus 指标" 200 http://localhost:1228/api/metrics
+          check "PWA 清单"        200 http://localhost:1228/manifest.json
+          check "站点图标"        200 http://localhost:1228/icon.svg
+          check "AI 路由鉴权门禁" 401 -X POST -H 'content-type: application/json' -d '{"message":"hi"}' http://localhost:1228/api/ai/chat
+
+          # 指标端点必须含默认进程指标（防止空注册表假绿）
+          curl -fsS http://localhost:1228/api/metrics | grep -q process_cpu_user_seconds_total \
+            || { echo "❌ /api/metrics 缺少默认指标"; fail=1; }
+
+          if [ "$fail" != 0 ]; then
+            echo "---- server log tail ----"; tail -60 /tmp/next-start.log
+            exit 1
+          fi
+          echo "生产冒烟全部通过"

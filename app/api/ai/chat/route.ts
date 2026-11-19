@@ -12,9 +12,10 @@
  * @license MIT
  */
 
-import { createOpenAI } from "@ai-sdk/openai"
 import { generateText } from "ai"
 import { guardAIRequest } from "@/lib/api/ai-guard"
+import { getModel, getModelName, getModelSource } from "@/lib/ai/model-provider"
+import { aiChatRequestsTotal } from "@/lib/monitoring/metrics"
 import { AI_ROLES, selectRoleByContext, type AIRole } from "@/lib/ai_roles"
 import { NextResponse } from "next/server"
 import { z } from "zod"
@@ -28,8 +29,7 @@ const bodySchema = z.object({
   complexity: z.unknown().optional(),
 })
 
-/** 模型标识：与 orchestrate / assessment-report 使用同一型号，避免多模型口径漂移 */
-const MODEL_ID = "gpt-4o-mini"
+/** 模型标识：实时来自统一 Provider（未配置时为 "mock"，此时 demo=true 不返回模型名） */
 
 /** 示例话术：仅在未配置模型密钥时使用，且前端会收到 demo 标记 */
 const SAMPLE_RESPONSES = {
@@ -96,15 +96,9 @@ function sampleResponse(message: string, role: AIRole): string {
   return roleSample ?? pick(SAMPLE_RESPONSES.fallback)
 }
 
-/** 按需构建模型实例：无密钥返回 null，调用方据此决定 demo 路径 */
+/** 按需构建模型实例：统一 Provider，无密钥返回 null，调用方据此决定 demo 路径 */
 function buildModel() {
-  const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) return null
-  const provider = createOpenAI({
-    apiKey,
-    ...(process.env.OPENAI_BASE_URL && { baseURL: process.env.OPENAI_BASE_URL }),
-  })
-  return provider(MODEL_ID)
+  return getModel()
 }
 
 /**
@@ -114,6 +108,7 @@ function buildModel() {
 async function composeAnswer(message: string, role: AIRole): Promise<{ text: string; demo: boolean }> {
   const model = buildModel()
   if (!model) {
+    aiChatRequestsTotal.inc({ role, source: "mock" })
     return { text: sampleResponse(message, role), demo: true }
   }
   try {
@@ -125,11 +120,16 @@ async function composeAnswer(message: string, role: AIRole): Promise<{ text: str
       maxOutputTokens: 600,
     })
     const clean = text.trim()
-    if (clean.length > 0) return { text: clean, demo: false }
+    if (clean.length > 0) {
+      aiChatRequestsTotal.inc({ role, source: getModelSource() })
+      return { text: clean, demo: false }
+    }
     // 模型返回空串（内容过滤等）同样按示例兜底，但保留 demo 标记
+    aiChatRequestsTotal.inc({ role, source: "mock" })
     return { text: sampleResponse(message, role), demo: true }
   } catch (err) {
     console.error("[api/ai/chat] 模型调用失败，降级为示例回答：", err)
+    aiChatRequestsTotal.inc({ role, source: "mock" })
     return { text: sampleResponse(message, role), demo: true }
   }
 }
@@ -146,7 +146,7 @@ function streamAnswer(payload: { text: string; demo: boolean; role: AIRole; chun
       }
 
       // 首帧声明能力状态：前端据此渲染「示例回答」标记，不再靠猜
-      send({ type: "meta", demo, role, model: demo ? null : MODEL_ID })
+      send({ type: "meta", demo, role, model: demo ? null : getModelName() })
 
       try {
         let current = ""

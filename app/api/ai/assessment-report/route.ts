@@ -1,6 +1,7 @@
 import { generateText } from "ai"
-import { createOpenAI } from "@ai-sdk/openai"
 import { guardAIRequest } from "@/lib/api/ai-guard"
+import { getModel, getModelSource } from "@/lib/ai/model-provider"
+import { aiRouteRequestsTotal } from "@/lib/monitoring/metrics"
 import { z } from "zod"
 
 const bodySchema = z.object({
@@ -11,13 +12,6 @@ const bodySchema = z.object({
   scores: z.record(z.string(), z.number()),
 })
 import { NextResponse } from "next/server"
-
-const openai = createOpenAI({
-  apiKey: process.env['OPENAI_API_KEY'] ?? "",
-  ...(process.env['OPENAI_BASE_URL'] && { baseURL: process.env['OPENAI_BASE_URL'] })
-})
-
-const model = openai("gpt-4o-mini")
 
 interface DimensionAnalysis {
   score: number
@@ -40,6 +34,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "请求体格式不正确" }, { status: 400 })
     }
     const { childName, childAge, stageId, stageName, scores } = parsed.data
+
+    const model = getModel()
+    if (!model) {
+      aiRouteRequestsTotal.inc({ route: "assessment-report", outcome: "no-provider" })
+      return NextResponse.json({ error: "服务配置错误，请检查 API 密钥" }, { status: 500 })
+    }
 
     // 计算各维度得分和总体评估
     const dimensionAnalysis = analyzeDimensions(scores)
@@ -93,9 +93,11 @@ ${JSON.stringify(dimensionAnalysis, null, 2)}
       nextSteps: generateNextSteps(stageId, dimensionAnalysis),
     }
 
+    aiRouteRequestsTotal.inc({ route: "assessment-report", outcome: `success:${getModelSource()}` })
     return Response.json(report)
   } catch (error) {
     console.error("Assessment report error:", error)
+    aiRouteRequestsTotal.inc({ route: "assessment-report", outcome: "error" })
     return Response.json({ error: "报告生成失败" }, { status: 500 })
   }
 }

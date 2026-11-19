@@ -1,10 +1,17 @@
 // 语音服务：文本转语音(TTS)和语音转文本(STT)
 // 基于文档: https://open.bigmodel.cn/dev/api#tts
+// 密钥边界：仅服务端路由（/api/ai/text-to-speech、/api/ai/speech-to-text）使用本模块，
+// BIGMODEL_API_KEY 严禁加 NEXT_PUBLIC_ 前缀；浏览器端一律走代理路由。
+
+/** CogTTS 合法音色白名单（服务端路由据此校验入参） */
+export const TTS_VOICES = ["tongtong", "chuichui", "xiaochen", "jam", "kazi", "douji", "luodo"] as const
+
+export type TTSVoice = (typeof TTS_VOICES)[number]
 
 interface TTSRequest {
   model: "cogtts"
   input: string
-  voice: "tongtong" | "chuichui" | "xiaochen" | "jam" | "kazi" | "douji" | "luodo"
+  voice: TTSVoice
   stream?: boolean
   speed?: number
   volume?: number
@@ -64,8 +71,8 @@ export class VoiceService {
       }
     } catch (error) {
       console.error("文本转语音失败:", error)
-      // 降级到浏览器原生TTS
-      if ('speechSynthesis' in window) {
+      // 降级到浏览器原生TTS（仅浏览器环境；服务端直接抛出交由路由转 502）
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
         try {
           const utterance = new SpeechSynthesisUtterance(text)
           utterance.lang = 'zh-CN'
@@ -212,7 +219,7 @@ export class VoiceService {
     } catch (error) {
       console.error("语音朗读失败:", error)
       // 使用浏览器内置的语音合成作为降级方案
-      if ('speechSynthesis' in window) {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
         this.browserSpeakText(text)
       }
       // 不抛出错误，让体验更流畅
@@ -319,4 +326,9 @@ export function getVoiceService(): VoiceService {
     voiceService = new VoiceService(apiKey)
   }
   return voiceService
+}
+
+/** 是否已配置语音服务密钥（路由据此提前返回 503，避免无谓上游调用） */
+export function hasVoiceService(): boolean {
+  return Boolean(process.env.BIGMODEL_API_KEY)
 }

@@ -1,6 +1,7 @@
 import { generateText } from "ai"
-import { createOpenAI } from "@ai-sdk/openai"
 import { guardAIRequest } from "@/lib/api/ai-guard"
+import { getModel, getModelSource } from "@/lib/ai/model-provider"
+import { aiRouteRequestsTotal } from "@/lib/monitoring/metrics"
 import { NextResponse } from "next/server"
 import { AI_ROLES, analyzeQueryComplexity, getCoordinatedPrompt } from "@/lib/ai_roles"
 import { z } from "zod"
@@ -8,13 +9,6 @@ import { z } from "zod"
 const bodySchema = z.object({
   message: z.string().min(1, "消息内容不能为空").max(4000),
 })
-
-const openai = createOpenAI({
-  apiKey: process.env['OPENAI_API_KEY'] ?? "",
-  ...(process.env['OPENAI_BASE_URL'] && { baseURL: process.env['OPENAI_BASE_URL'] })
-})
-
-const model = openai("gpt-4o-mini")
 
 export async function POST(request: Request) {
   // 中/复杂度会触发多次模型调用，配额从严
@@ -28,8 +22,10 @@ export async function POST(request: Request) {
     }
     const { message } = parsed.data
 
-    if (!process.env['OPENAI_API_KEY']) {
-      console.error("OpenAI API key is not configured")
+    const model = getModel()
+    if (!model) {
+      console.error("[orchestrate] 未配置模型 Provider（OPENAI_API_KEY 或 AI_API_KEY+AI_BASE_URL）")
+      aiRouteRequestsTotal.inc({ route: "orchestrate", outcome: "no-provider" })
       return Response.json({ error: "服务配置错误，请检查 API 密钥" }, { status: 500 })
     }
 
@@ -45,6 +41,7 @@ export async function POST(request: Request) {
         prompt: message,
       })
 
+      aiRouteRequestsTotal.inc({ route: "orchestrate", outcome: `success:${getModelSource()}` })
       return Response.json({
         complexity,
         mainRole: role,
@@ -71,6 +68,7 @@ export async function POST(request: Request) {
         }),
       ])
 
+      aiRouteRequestsTotal.inc({ route: "orchestrate", outcome: `success:${getModelSource()}` })
       return Response.json({
         complexity,
         mainRole,
@@ -123,6 +121,7 @@ export async function POST(request: Request) {
       .map((a) => a.trim())
       .filter(Boolean)
 
+    aiRouteRequestsTotal.inc({ route: "orchestrate", outcome: `success:${getModelSource()}` })
     return Response.json({
       complexity,
       mainRole: involvedRoles[0] ?? 'advisor',
@@ -139,6 +138,7 @@ export async function POST(request: Request) {
     })
   } catch (err) {
     console.error("[AI Orchestrate Error]", err)
+    aiRouteRequestsTotal.inc({ route: "orchestrate", outcome: "error" })
     const error = err instanceof Error ? err.message : String(err)
 
     let errorMessage = "AI协同响应失败，请稍后重试"

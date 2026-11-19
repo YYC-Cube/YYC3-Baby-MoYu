@@ -336,8 +336,10 @@ truststore/
 # ========================================
 
 # Monitoring
-monitoring/
-metrics/
+# 仅忽略仓库根下的运维数据目录（Prometheus/Grafana 落盘）；
+# 源码目录 app/api/metrics/ 与 lib/monitoring/ 必须入库，故用根锚定
+/monitoring/
+/metrics/
 traces/
 
 # Analytics (root-level data only; components/analytics/ is tracked)
