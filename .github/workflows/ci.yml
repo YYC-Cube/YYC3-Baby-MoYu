@@ -138,13 +138,13 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
-          check() { # name expected_code url [extra curl args...]
-            name="$1"; expected="$2"; url="$3"; shift 3
-            code=$(curl -sS -o /tmp/body.$$ -w '%{http_code}' "$@" "$url" || echo 000)
+          check() { # name expected_code url
+            name="$1"; expected="$2"; url="$3"
+            code=$(curl -sS -o /tmp/body.$$ -w '%{http_code}' "$url" || echo 000)
             if [ "$code" = "$expected" ]; then
               echo "✅ $name ($code)"
             else
-              echo "❌ $name 期望 $expected 实际 $code"; head -c 300 /tmp/body.$$ || true; echo; fail=1
+              echo "❌ $name 期望 $expected 实际 $code"; head -c 300 /tmp/body.$$ 2>/dev/null || true; echo; fail=1
             fi
             rm -f /tmp/body.$$
           }
@@ -156,7 +156,18 @@ jobs:
           check "Prometheus 指标" 200 http://localhost:1228/api/metrics
           check "PWA 清单"        200 http://localhost:1228/manifest.json
           check "站点图标"        200 http://localhost:1228/icon.svg
-          check "AI 路由鉴权门禁" 401 -X POST -H 'content-type: application/json' -d '{"message":"hi"}' http://localhost:1228/api/ai/chat
+
+          # 第八项：AI 路由未认证必须 401（POST 带体，单独断言避免参数顺序歧义）
+          ai_code=$(curl -sS -o /tmp/body.ai -w '%{http_code}' \
+            -X POST -H 'content-type: application/json' -d '{"message":"hi"}' \
+            http://localhost:1228/api/ai/chat || echo 000)
+          if [ "$ai_code" = "401" ]; then
+            echo "✅ AI 路由鉴权门禁 (401)"
+          else
+            echo "❌ AI 路由鉴权门禁 期望 401 实际 $ai_code"
+            head -c 300 /tmp/body.ai 2>/dev/null || true; echo; fail=1
+          fi
+          rm -f /tmp/body.ai
 
           # 指标端点必须含默认进程指标（防止空注册表假绿）
           curl -fsS http://localhost:1228/api/metrics | grep -q process_cpu_user_seconds_total \
