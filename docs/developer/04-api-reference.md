@@ -121,9 +121,13 @@ curl -X PUT http://localhost:1228/api/user-documents \
 `GET /api/health` → `{ status: "ok" | "degraded", checks: { database }, version, uptimeSec, timestamp }`。
 数据库只读探针失败返回 **503**，供容器/K8s 探活与摘流；不返回连接串、路径等内部信息。
 
-## 可观测性（`/api/metrics`，匿名只读）
+## 可观测性（`/api/metrics`，需令牌）
 
 `GET /api/metrics` → Prometheus 文本格式（`text/plain; version=0.0.4`，`Cache-Control: no-store`）。
+
+访问控制：配置 `METRICS_TOKEN` 后必须携带 `Authorization: Bearer <token>`（或 `x-metrics-token`），
+否则 **401**；生产环境未配置该变量时直接 **503**（避免进程内存/事件循环信息裸奔）；
+开发环境未配置时放行，便于本地 `curl` 调试。
 
 | 指标 | 类型 | 标签 | 说明 |
 | ------ | ------ | ------ | ------ |

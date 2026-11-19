@@ -21,6 +21,8 @@ services:
       NODE_ENV: production
       # 缺失即启动后被鉴权拒绝：必须在 .env.local 或宿主机环境中提供
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET 未设置}
+      # 指标端点令牌：生产未配置时 /api/metrics 返回 503（应用层兜底，不依赖反代）
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-2h}
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-30d}
       # AI 密钥均可留空：缺省时对话降级为示例、生图降级为占位图（见 06-ai-engine.md）

@@ -58,6 +58,7 @@ PG 服务不对外暴露端口（仅容器网络内可达）；数据落 `./pgda
 | 变量 | 必填 | 默认 | 说明 |
 | ---- | ---- | ---- | ---- |
 | `JWT_SECRET` | ✅（生产） | —（开发用 `data/.jwt-dev-secret` 随机密钥） | 缺失时生产进程拒绝签发令牌 |
+| `METRICS_TOKEN` | ✅（生产） | — | 指标端点应用层令牌；未配置时 `/api/metrics` 直接 503，配置后匿名 401、`Authorization: Bearer <token>` 或 `x-metrics-token` 通过 |
 | `BIGMODEL_API_KEY` | 视功能 | — | 作业批改 / 语音转写 / **语音合成（TTS）**；缺失或为占位符时 TTS 返回 503 |
 | `OPENAI_API_KEY` | 视功能 | — | 对话 / 编排 / 评估报告 / 故事续写（缺失则对话降级为示例） |
 | `OPENAI_BASE_URL` | | — | 可选，OpenAI 兼容网关地址 |
@@ -100,7 +101,8 @@ PG 服务不对外暴露端口（仅容器网络内可达）；数据落 `./pgda
 - [ ] `bun run build && bun run start` 本地通过
 - [ ] `curl -o /dev/null -w "%{http_code}" localhost:1228/` 返回 200（匿名可访问）
 - [ ] `curl -fsS localhost:1228/api/health` 返回 `status: ok` 且 HTTP 200
-- [ ] `curl -fsS localhost:1228/api/metrics` 返回 200 且含 `process_cpu_user_seconds_total`
+- [ ] `curl -o /dev/null -w "%{http_code}" localhost:1228/api/metrics` 匿名返回 **401**（应用层令牌门禁），
+      `curl -H "Authorization: Bearer $METRICS_TOKEN" localhost:1228/api/metrics` 返回 200 且含 `process_cpu_user_seconds_total`
 - [ ] `curl localhost:1228/api/children` 返回 **401**（数据端点必须登录，200 即为越权缺陷）
 - [ ] `curl -X POST localhost:1228/api/ai/prediction -d '{}'` 返回 **401**（AI 端点鉴权门禁）
 - [ ] `curl -X POST localhost:1228/api/ai/text-to-speech -d '{"text":"hi"}'` 返回 **401**；
@@ -111,10 +113,11 @@ PG 服务不对外暴露端口（仅容器网络内可达）；数据落 `./pgda
 - [ ] `.env.local` 密钥为服务端变量且已轮换过（占位符 `your_...` 会被识别为未配置）
 - [ ] `data/`、`.env*` 均在 .gitignore
 - [ ] `bun run audit:osv` 0 Critical（High/Medium 有书面处置）
-- [ ] **`/api/metrics` 仅对内网/监控放行**：端点匿名只读，公网暴露会泄露进程内存/事件循环等运行信息；
-      建议在反向代理层限制来源（如 Nginx `allow 10.0.0.0/8; deny all;`）
+- [ ] **`METRICS_TOKEN` 已配置**：`/api/metrics` 自带应用层令牌校验（未配置时生产直接 503），
+      反向代理层的来源限制（如 Nginx `allow 10.0.0.0/8; deny all;`）作为第二道防线
 
-> CI 已内置「生产冒烟（八项路由）」job，本条清单的前七项在每次 push 后被自动验证。
+> CI 已内置「生产冒烟（八项路由）」job：路由可达性、健康探针、指标令牌门禁（匿名 401 / 带令牌 200）、
+> AI 鉴权门禁在每次 push 后被自动验证。
 
 ## 运行时约束
 

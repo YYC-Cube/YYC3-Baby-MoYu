@@ -105,6 +105,8 @@ jobs:
     env:
       JWT_SECRET: ci-smoke-secret-not-for-production
       # 冒烟不配真实 AI 密钥：验证的是「无密钥时不崩溃且诚实降级」
+      # 指标端点应用层令牌：生产未配置即 503，冒烟据此同时验证「匿名 401 / 带令牌 200」
+      METRICS_TOKEN: ci-smoke-metrics-token
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -153,9 +155,25 @@ jobs:
           check "视频工坊页"      200 http://localhost:1228/videos
           check "英文首页"        200 http://localhost:1228/en
           check "健康探针"        200 http://localhost:1228/api/health
-          check "Prometheus 指标" 200 http://localhost:1228/api/metrics
           check "PWA 清单"        200 http://localhost:1228/manifest.json
           check "站点图标"        200 http://localhost:1228/icon.svg
+
+          # 指标端点：应用层令牌门禁——匿名必须 401，带令牌 200 且含默认进程指标
+          anon_metrics=$(curl -sS -o /dev/null -w '%{http_code}' http://localhost:1228/api/metrics || echo 000)
+          if [ "$anon_metrics" = "401" ]; then
+            echo "✅ 指标端点令牌门禁 (401)"
+          else
+            echo "❌ 指标端点令牌门禁 期望 401 实际 $anon_metrics"; fail=1
+          fi
+
+          metrics_code=$(curl -sS -o /tmp/metrics.txt -w '%{http_code}' \
+            -H "Authorization: Bearer $METRICS_TOKEN" \
+            http://localhost:1228/api/metrics || echo 000)
+          if [ "$metrics_code" = "200" ] && grep -q process_cpu_user_seconds_total /tmp/metrics.txt; then
+            echo "✅ Prometheus 指标（带令牌 200，含默认指标）"
+          else
+            echo "❌ Prometheus 指标 期望 200 且含默认指标，实际 $metrics_code"; fail=1
+          fi
 
           # 第八项：AI 路由未认证必须 401（POST 带体，单独断言避免参数顺序歧义）
           ai_code=$(curl -sS -o /tmp/body.ai -w '%{http_code}' \
@@ -168,10 +186,6 @@ jobs:
             head -c 300 /tmp/body.ai 2>/dev/null || true; echo; fail=1
           fi
           rm -f /tmp/body.ai
-
-          # 指标端点必须含默认进程指标（防止空注册表假绿）
-          curl -fsS http://localhost:1228/api/metrics | grep -q process_cpu_user_seconds_total \
-            || { echo "❌ /api/metrics 缺少默认指标"; fail=1; }
 
           if [ "$fail" != 0 ]; then
             echo "---- server log tail ----"; tail -60 /tmp/next-start.log
