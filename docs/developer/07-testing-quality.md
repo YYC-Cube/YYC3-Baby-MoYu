@@ -13,7 +13,8 @@ flowchart LR
 | Lint | `bun run lint` | **0 error / 0 warning**（2026-11-05 清零；语义等价改写优先，合法惯用法注释豁免） |
 | 构建 | `bun run build` | 通过（类型门禁已恢复，无 ignoreBuildErrors） |
 | 测试 | `bun run test` | 529/529（32 文件，~2.6s；含鉴权/越权/限流/预测引擎 22 例/Upstash 限流等行为用例） |
-| 覆盖率 | `bun run test:coverage`（等价 `bun test --coverage --path-ignore-patterns='docs/**'`） | 全仓 funcs **93.24%** / lines **93.40%**（2026-11-20 预测引擎补测后实测）；jwt/badges/rate-limit/utils/cookies/guard/secret/metrics/db-identifier 均 100%；预测引擎补测后 `specialized-engines.ts` 24.9%→**95.71%**、`base-predictor.ts` 52.4%→**95.24%** |
+| 覆盖率 | `bun run test:coverage`（等价 `bun test --coverage --path-ignore-patterns='docs/**'`） | 全仓 funcs **93.24%** / lines **93.40%**（2026-11-20 预测引擎补测后实测）；CI 环境首跑 **94.09% / 93.74%**（nightly，超 90% 门槛）；jwt/badges/rate-limit/utils/cookies/guard/secret/metrics/db-identifier 均 100%；预测引擎补测后 `specialized-engines.ts` 24.9%→**95.71%**、`base-predictor.ts` 52.4%→**95.24%** |
+| 覆盖率夜间 CI | `.github/workflows/nightly.yml` | 每日 02:00（Asia/Shanghai）+ 手动触发；funcs/lines ≥90% 阻断，报告留 artifact 14 天；首跑 2026-11-20 通过 |
 | DB 直测 | `bun run test:node` | 7/7（SQLite）；设置 `PG_TEST_URL` 后 +5 条 PG 用例（共 12/12，CI 默认跳过 PG） |
 | e2e | `bun run test:e2e` | 3/3（登录→建娃→写记录→登出 / 匿名 401 矩阵 / 敏感页重定向；生产构建，账号自举不依赖种子） |
 | 视觉 | `bun run test:visual` | 8/8（首页/视频工坊 × 四主题；darwin/linux 分平台基线） |
