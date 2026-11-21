@@ -194,7 +194,7 @@
     "charts": {
       "trend": {
         "title": "成长趋势预测",
-        "needMore": "已有 {current} 次评估，满 {need} 次即可生成趋势预测",
+        "needMore": "已有 {current} 天评估数据，满 {need} 天即可生成趋势预测",
         "confidence": "置信度 {percent}%",
         "retry": "重新加载",
         "chartAria": "发展评估总分历史与未来趋势预测图",

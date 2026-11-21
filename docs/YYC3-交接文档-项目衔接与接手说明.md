@@ -58,7 +58,7 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | 覆盖率 | 本地 funcs **93.24%** / lines **93.40%**；CI nightly **94.09% / 93.74%**（门槛 90%） |
 | 类型 / Lint | tsc **0** · eslint **0 error / 0 warning** |
 | 数据库直测 | SQLite 7/7；PG 12/12（设 `PG_TEST_URL` 后启用） |
-| e2e / 视觉 | 3/3 · 8/8（四主题 × 首页/视频工坊） |
+| e2e / 视觉 | 7/7（3 个 spec：smoke 3 + prediction/TTS 4）· 8/8（四主题 × 首页/视频工坊） |
 | i18n | 镜像路由 100% · 词条 986/986 |
 | 依赖安全 | OSV 0 Critical / 0 High；余 1 条 moderate（minimatch@10.2.6，dev 链，已书面跟踪） |
 | 静态资产 | `public/icon.svg`（145K）· `public/yyc3-pwa-icon.png`（128K）已就位；冒烟断言校验 **Content-Type + 魔数** |
@@ -83,6 +83,7 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | 限流存储可插拔（内存 / Upstash，故障回退） | `lib/rate-limit.ts` | `e97b4de` |
 | 预测引擎单测 22 例（行覆盖 24.9%→95.71%） | `__tests__/lib/prediction-engines.test.ts` | `e97b4de` / `e65a169` |
 | 夜间覆盖率 CI（90% 门槛 + artifact） | `.github/workflows/nightly.yml` | `e97b4de` |
+| e2e prediction/TTS 真实链路 4 例（外推区间+限流 / TTS 503 语义 / 趋势卡片诚实空态） | `e2e/prediction-tts.e2e.ts` | 本次提交 |
 
 ### 4.2 运维
 
@@ -161,7 +162,7 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 ### P1 · 一个月
 
 - [ ] 告警接入通知渠道（Alertmanager → 邮件/Slack；当前仅规则与 firing 验证）
-- [ ] 补 e2e：prediction 与 TTS 两条真实交互链路（当前 e2e 仅 3 例）
+- [x] ~~补 e2e：prediction 与 TTS 两条真实交互链路~~ → 已于 2026-11-21 落地（e2e 3 → **7 例**）；顺带修复 2 处用户可见 i18n 缺陷（趋势卡片命名空间、评估图表维度名传已翻译串）
 - [x] ~~`eslint-config-next` 跟随 patch~~ → 已于 2026-11-21 升级至 16.4.6（lint 0/0、529/529 复核通过）
 - [ ] 覆盖率门禁从「夜间」扩展为「PR 增量提示」（非阻断）
 
@@ -247,3 +248,4 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | 2026-11-20 | 首版 | 基线 `28e41bc`：门禁 529/529、覆盖率 93%+、CI 五工作流、三仓归档、Prometheus 实机跑通；沉淀决策理由、待办优先级与坑位清单 |
 | 2026-11-21 | 承接更新 | 基线推进至 `45738f3`：三仓二次复核完成（代码无可吸收、吸收 2 个图标资产）、冒烟假绿修复（Content-Type + 魔数断言）、交付清单补 §4.4、决策补 3 条、坑位补 1 条；长尾产品资产项按复核结论关闭 |
 | 2026-11-21 | 依赖对齐 | `eslint-config-next` 16.4.5 → **16.4.6**（与 next 16.4.5 同系 patch 对齐）；lint 0/0、tsc 0、529/529 复核通过 |
+| 2026-11-21 | e2e 补强 | 新增 `e2e/prediction-tts.e2e.ts` 4 例（匿名 401 / 外推区间与免责声明 + 20/min 限流 / TTS 200 或 503 语义 / 趋势卡片诚实空态），e2e 3 → **7**；顺带修复趋势卡片 `useTranslations` 命名空间与评估图表维度名传已翻译串两处缺陷；门禁全绿 |

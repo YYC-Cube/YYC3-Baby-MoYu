@@ -462,13 +462,15 @@ function AssessmentTab({ childName }: { childName: string }) {
   ] as const
 
   // 图表数据
-  // 图表维度标签同样走词条（图表组件按字符串渲染）
+  // dimension 必须是维度键（cognitive/language/…），GrowthCharts 内部再用
+  // growth.charts.dims.* 转成当前语言文案；此处不可传已翻译的中文名，
+  // 否则会拼出不存在的词条键并渲染出原始 key。
   const chartData = [
-    { date: "2023-01-15", dimension: t("dimCognitive"), score: 85 },
-    { date: "2023-01-15", dimension: t("dimLanguage"), score: 92 },
-    { date: "2023-01-15", dimension: t("dimMotor"), score: 78 },
-    { date: "2023-01-15", dimension: t("dimSocial"), score: 88 },
-    { date: "2023-01-15", dimension: t("dimSelfCare"), score: 90 },
+    { date: "2023-01-15", dimension: "cognitive", score: 85 },
+    { date: "2023-01-15", dimension: "language", score: 92 },
+    { date: "2023-01-15", dimension: "motor", score: 78 },
+    { date: "2023-01-15", dimension: "social", score: 88 },
+    { date: "2023-01-15", dimension: "selfcare", score: 90 },
   ]
 
   const mockAssessmentResultWithName = {

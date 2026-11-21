@@ -194,7 +194,7 @@
     "charts": {
       "trend": {
         "title": "Growth Trend Forecast",
-        "needMore": "{current} assessments so far — {need} needed to generate a forecast",
+        "needMore": "{current} day(s) with assessments so far — {need} days needed to generate a forecast",
         "confidence": "Confidence {percent}%",
         "retry": "Reload",
         "chartAria": "Overall development score history and forecast chart",

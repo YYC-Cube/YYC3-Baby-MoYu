@@ -41,7 +41,7 @@ const CHART_H = 200
 const PAD = { top: 16, right: 16, bottom: 24, left: 36 }
 
 export default function GrowthTrendPrediction({ childId }: { childId?: string }) {
-  const t = useTranslations("growth")
+  const t = useTranslations("growth.charts")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [pointCount, setPointCount] = useState(0)
@@ -65,17 +65,13 @@ export default function GrowthTrendPrediction({ childId }: { childId?: string })
         .filter((r) => typeof r.overall_score === "number")
         .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
 
-      setPointCount(rows.length)
-      if (rows.length < MIN_POINTS) {
-        setPayload(null)
-        return
-      }
-
       const points = rows.map((r) => ({
         timestamp: new Date(r.created_at).getTime(),
         value: r.overall_score,
       }))
-      // 同一天多次评估会让时间轴重叠加倍，此处按天取均值
+      // 同一天多次评估会让时间轴重叠加倍，此处按天取均值。
+      // 门槛与文案都必须按「天数」而非「记录条数」计：否则同一天连测 6 次会显示
+      // 「已有 6 次评估，满 5 次即可」，但实际只聚合出 1 个点，永远画不出曲线。
       const byDay = new Map<number, { sum: number; n: number }>()
       for (const p of points) {
         const day = Math.floor(p.timestamp / 86_400_000) * 86_400_000
@@ -86,6 +82,7 @@ export default function GrowthTrendPrediction({ childId }: { childId?: string })
         .sort((a, b) => a[0] - b[0])
         .map(([timestamp, { sum, n }]) => ({ timestamp, value: Math.round((sum / n) * 10) / 10 }))
 
+      setPointCount(series.length)
       if (series.length < MIN_POINTS) {
         setPayload(null)
         return
@@ -170,7 +167,7 @@ export default function GrowthTrendPrediction({ childId }: { childId?: string })
 }
 
 function TrendChart({ payload }: { payload: PredictionPayload }) {
-  const t = useTranslations("growth")
+  const t = useTranslations("growth.charts")
   const history = payload.history
   const forecast = payload.forecast
   const all = [
