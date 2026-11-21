@@ -56,3 +56,72 @@
 | 本地工作区脏改动 | 保留 | Companion 1 个删除文档 + `.DS_Store`；Guardian `bun.lock` 等 8 项。仓库已只读，改动无影响，无需处理 |
 | `node_modules` 清理 | **待手动执行** | Guardian 1.1G + Growth-Guardian 1.2G ≈ 2.3G。命令策略禁止递归删除，需手动执行：<br>`rm -rf ~/YYC-Cube/personal/YYC3-AI-Growth-Guardian-System/node_modules`<br>`rm -rf ~/YYC-Cube/personal/YYC3-Growth-Guardian-System/node_modules`<br>（Companion 无 `node_modules`，总体积仅 94M） |
 | Dependabot 告警 | 已停止产生 | 归档仓不再接收自动升级；历史告警仅作记录展示 |
+
+## 7. 二次复核：可吸收内容确认（2026-11-21）
+
+> 复核方式：文件级对照（路由/模块/组件/资产清单 diff）+ 引用度、测试覆盖、实现质量抽样。
+> 目的：在最终归档前确认「三仓确无可吸收内容」，避免归档后再回捞。
+
+### 7.1 规模与同源判定
+
+| 仓库 | API 路由 | 页面 | 组件 | lib 模块 | 测试文件 |
+| ---- | -------- | ---- | ---- | -------- | -------- |
+| Baby-MoYu（主线） | 30 | 33 | 88 | 40 | 32 |
+| AI-Growth-Companion | 18 | 20 | 164 | 128 | 36 |
+| AI-Growth-Guardian-System | 15 | 29 | 147 | 62 | 12 |
+| Growth-Guardian-System | 15 | 29 | 147 | 62 | 12 |
+
+- 后两仓 `lib/` 文件清单 **diff 为空**（完全同源），可视为同一快照的两次提交。
+
+### 7.2 独有 API 路由（仅 3 个，均不吸收）
+
+| 路由 | 实现实况 | 不吸收原因 |
+| ---- | -------- | ---------- |
+| `GET /api/badges`（Companion） | 依赖 `src/services/badgeService`（377 行）+ 指标计数 | 主线徽章为**客户端声明式评估**（30 枚、17 例单测、localStorage 幂等），服务端化属架构倒退 |
+| `GET/PUT /api/user-profile`（两 Guardian） | 调用 `db.seedMockData()`，`findMany` 后前端过滤，**无鉴权**、`any` 类型 | 主线 `/api/auth/profile` 已具备 JWT + 租户隔离；该实现是安全反例 |
+| `GET /api/placeholder/avatar`（两 Guardian） | 20 行内联 SVG 字符串 | 主线已有占位图策略，无需重复 |
+
+### 7.3 lib 模块：数量多但不可吸收
+
+抽样 15 个高价值候选（情绪引擎、自主引擎、连续性/适应性引擎、里程碑、记忆守护、推荐系统、性能优化器、角色校验、Supabase 客户端等）：
+
+| 判据 | 实测 |
+| ---- | ---- |
+| 外部模型调用 | **0**（`grep fetch/openai/chat-completions` 全部为 0） |
+| 自述「模拟/简化」 | 抽样 4 个文件中 3 个命中 |
+| 单元测试 | **0**（全部候选模块在各自仓 `__tests__` 中零引用） |
+| 与主线重叠 | 情感链路由主线 `lib/ai/enhanced-emotion-fusion.ts` + `/api/ai/emotion`、`/api/ai/enhanced-emotion` 真实模型接线覆盖 |
+
+结论：这些模块是**规则/关键词驱动的演示实现**，迁入会以「无测试的模拟逻辑」替换主线「有测试的真实接线」，属质量倒退。
+
+### 7.4 重型后端目录：骨架而非实现
+
+| 目录 | 内容 | 判定 |
+| ---- | ---- | ---- |
+| `microservices/`（12K） | 仅 3 个文件：两个 `package.json` + 一个 `index.ts` | 骨架 |
+| `backend/`（180–220K） | 仅 middleware + migration SQL，**无服务入口** | 骨架 |
+| `analytics/`（52K） | dashboard 单页 + realtime-processor 骨架 | 骨架 |
+
+### 7.5 资产层：发现 1 项真实缺口并已吸收
+
+| 资产 | 三仓 vs 主线 | 处置 |
+| ---- | ------------ | ---- |
+| `public/icon.svg`（145K）+ `public/yyc3-pwa-icon.png`（128K） | 两仓**完全相同**，主线**缺失** | ✅ **已吸收**（2026-11-21）。主线的 `layout.tsx`（`icon`/`apple`）与 `manifest.json` 一直引用这两个路径 |
+| `yyc3-logo-{black,blue,gray,white,red,R_blue}.png`（共 ~330K） | 两仓独有，主线未引用 | ⏸ **未吸收**：当前代码/文档无引用，品牌顶图 `yyc3-family.png` 已满足标规三要素；需要时可按需拷入 |
+| 4 份产品/设计文档（0–22 岁生命周期 488 行、AI 浮窗语音交互 788 行、UI 分层设计 629 行、组件提示词 792 行） | 两 Guardian 独有 | ⏸ **不迁移**：归档仓只读仍可查阅；如需进入路线规划，再按「先评审后摘录」单次抽取 |
+
+### 7.6 连带修复：CI 冒烟「假绿」
+
+复核 `icon.svg` 时发现：主线此前**没有**该文件，但请求 `/icon.svg` 返回 **200 + text/html**——
+被 `app/[locale]` 动态段当作 locale 渲染了首页。CI 冒烟只断言状态码，因此长期误报通过。
+
+- 已修：`smoke` job 新增 `check_asset()`，同时校验 **Content-Type + 内容魔数**（manifest → `application/json` + `"name"`；icon → `image/svg+xml` + `<svg`）。
+- 本地负向验证：`/not-exist.svg` 仍返回 `200 text/html`，新断言可正确识别为失败。
+
+### 7.7 归档放行结论
+
+**代码层无可吸收内容**（3 个独有路由均劣于主线实现；lib 为无测试模拟实现；重型后端为骨架）。
+**资产层已闭环**：仅有的真实缺口（站点图标 / PWA 图标）已吸收并补齐 CI 防假绿断言。
+
+→ **三仓可执行最终归档**，无需在归档前再做内容迁移。
+

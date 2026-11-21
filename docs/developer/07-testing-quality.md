@@ -18,7 +18,7 @@ flowchart LR
 | DB 直测 | `bun run test:node` | 7/7（SQLite）；设置 `PG_TEST_URL` 后 +5 条 PG 用例（共 12/12，CI 默认跳过 PG） |
 | e2e | `bun run test:e2e` | 3/3（登录→建娃→写记录→登出 / 匿名 401 矩阵 / 敏感页重定向；生产构建，账号自举不依赖种子） |
 | 视觉 | `bun run test:visual` | 8/8（首页/视频工坊 × 四主题；darwin/linux 分平台基线） |
-| 生产冒烟 | CI `smoke` job | 8 项（首页/视频工坊/英文首页/health/metrics/manifest/icon/AI 鉴权门禁）+ metrics 默认指标断言；干净 runner 真实 `next start`，无浏览器 |
+| 生产冒烟 | CI `smoke` job | 8 项（首页/视频工坊/英文首页/health/manifest/icon/AI 鉴权门禁/指标令牌门禁）；静态资产同时校验 Content-Type 与魔数（防动态路由 200 假绿）；干净 runner 真实 `next start`，无浏览器 |
 | i18n | `bun run check:i18n:strict` | 16/16 路由镜像 + 词条 986/986 一致（CI 阻断级） |
 | 依赖 | `bun run audit:osv` | OSV.dev 审计；Critical 阻断，报告输出 `osv-results.json`（ignored）。当前 1 条 moderate（minimatch，dev 链，跟踪中） |
 

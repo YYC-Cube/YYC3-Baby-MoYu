@@ -151,12 +151,28 @@ jobs:
             rm -f /tmp/body.$$
           }
 
+          # 静态资产只断言状态码会被动态路由"假绿"（/icon.svg 曾被 [locale] 段以 200 返回 HTML），
+          # 因此必须同时校验 Content-Type 与内容首字节
+          check_asset() { # name expected_code expected_type url magic
+            name="$1"; expected="$2"; type="$3"; url="$4"; magic="$5"
+            code=$(curl -sS -o /tmp/asset.$$ -D /tmp/hdr.$$ -w '%{http_code}' "$url" || echo 000)
+            ctype=$(grep -i '^content-type:' /tmp/hdr.$$ | head -1 | tr -d '\r' | cut -d' ' -f2-)
+            if [ "$code" = "$expected" ] && echo "$ctype" | grep -qi "$type" \
+               && head -c 64 /tmp/asset.$$ | grep -q "$magic"; then
+              echo "✅ $name ($code, $ctype)"
+            else
+              echo "❌ $name 期望 $expected/$type/$magic 实际 $code/$ctype"
+              head -c 200 /tmp/asset.$$ 2>/dev/null || true; echo; fail=1
+            fi
+            rm -f /tmp/asset.$$ /tmp/hdr.$$
+          }
+
           check "首页"            200 http://localhost:1228/
           check "视频工坊页"      200 http://localhost:1228/videos
           check "英文首页"        200 http://localhost:1228/en
           check "健康探针"        200 http://localhost:1228/api/health
-          check "PWA 清单"        200 http://localhost:1228/manifest.json
-          check "站点图标"        200 http://localhost:1228/icon.svg
+          check_asset "PWA 清单"  200 "application/json" http://localhost:1228/manifest.json '"name"'
+          check_asset "站点图标"  200 "image/svg+xml" http://localhost:1228/icon.svg '<svg'
 
           # 指标端点：应用层令牌门禁——匿名必须 401，带令牌 200 且含默认进程指标
           anon_metrics=$(curl -sS -o /dev/null -w '%{http_code}' http://localhost:1228/api/metrics || echo 000)

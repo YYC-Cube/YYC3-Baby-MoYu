@@ -389,6 +389,9 @@ tracking/
 !public/role-photos/
 !public/role-photos/**
 public/role-photos/.DS_Store
+# 站点图标 / PWA 图标（app/layout.tsx metadata 与 manifest.json 引用；2026-11-21 从归档仓吸收）
+!public/icon.svg
+!public/yyc3-pwa-icon.png
 
 # ========================================
 # 📄 Documentation & Reports

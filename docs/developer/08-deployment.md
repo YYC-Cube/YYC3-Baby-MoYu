@@ -174,4 +174,6 @@ bun run gen:metrics-token -- production --print     # 额外输出明文与 Auth
 
 - 服务进程必须 **Node ≥ 22.13**（node:sqlite）；Bun 只跑 install/test
 - Node 22 的 node:sqlite 打实验警告属预期，可 `NODE_OPTIONS=--no-warnings` 消音
-- PWA 资产（manifest.json / sw.js / yyc3-pwa-icon.png）已在 `public/`，manifest 已挂接根 layout
+- PWA 与品牌资产（`public/manifest.json`、`public/sw.js`、`public/icon.svg`、`public/yyc3-pwa-icon.png`）已就位，
+  manifest 已挂接根 layout；`icon.svg`/`yyc3-pwa-icon.png` 于 2026-11-21 从归档仓吸收（此前缺失，请求会落到
+  `[locale]` 动态段返回 200 HTML——CI 冒烟已改为校验 Content-Type + 魔数，避免此类假绿）
