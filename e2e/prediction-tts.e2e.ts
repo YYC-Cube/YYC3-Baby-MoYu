@@ -88,8 +88,10 @@ test("TTS 端点：已登录时返回 200（有密钥）或 503（无密钥，�
 
   expect([200, 503]).toContain(status)
   if (status === 503) {
+    // 503 有且只有两种语义：未配置（"语音合成服务未配置"）或凭据失效（提示 BIGMODEL_API_KEY）；
+    // 上游故障必须是 502，不能被 503 吞掉。
     const body = (await res.json()) as { error?: string }
-    expect(body.error ?? "").toContain("BIGMODEL_API_KEY")
+    expect(body.error ?? "").toMatch(/未配置|BIGMODEL_API_KEY/)
   } else {
     expect(res.headers()["content-type"] ?? "").toMatch(/audio\//)
   }
