@@ -58,7 +58,7 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | 覆盖率 | 本地 funcs **93.24%** / lines **93.40%**；CI nightly **94.09% / 93.74%**（门槛 90%） |
 | 类型 / Lint | tsc **0** · eslint **0 error / 0 warning** |
 | 数据库直测 | SQLite 7/7；PG 12/12（设 `PG_TEST_URL` 后启用） |
-| e2e / 视觉 | 7/7（3 个 spec：smoke 3 + prediction/TTS 4）· 8/8（四主题 × 首页/视频工坊） |
+| e2e / 视觉 | 9/9（3 个 spec：smoke 5 + prediction/TTS 4）· 8/8（四主题 × 首页/视频工坊） |
 | i18n | 镜像路由 100% · 词条 986/986 |
 | 依赖安全 | OSV 0 Critical / 0 High；余 1 条 moderate（minimatch@10.2.6，dev 链，已书面跟踪） |
 | 静态资产 | `public/icon.svg`（145K）· `public/yyc3-pwa-icon.png`（128K）已就位；冒烟断言校验 **Content-Type + 魔数** |
@@ -106,6 +106,7 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | 工作区未跟踪项决策 | 2 份调研报告入库；`docs/yyc3-xy/`（23M 工程副本）gitignore | `e65a169` |
 | flaky 修复 | 限流时间敏感用例窗口 1ms→50ms（CI 暴露） | `85a88bb` |
 | 旧文档副本收敛 | 删除 `docs/YYC3-成长守护-开发指导/`（13 篇，developer/ 的停滞子集），同步 docs/README 索引、根 README 文档树与基线数字 | 本次提交 |
+| AI 浮窗与首页交互修复 | 补回 `IntelligentAIWidget.css` 引入（原缺失导致透明浮层吞点击、面板错乱）；浮窗改为默认收起为右下角浮标、层级降到导航/弹窗之下；首页受保护入口在应用内跳转时补弹登录框（`useSearchParams`）；新增 2 条 e2e 锁定 | 本次提交 |
 
 ### 4.4 谱系收敛终局（2026-11-21）
 
@@ -199,6 +200,8 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | 覆盖率跑不完 | 未排除 `docs/**` | 用 `bun run test:coverage` |
 | PG 连上却报 read-only | 本机 5433 可能是只读副本 | 改用可写实例或临时集群 |
 | 未知单段路径返回 200 HTML | `app/[locale]` 动态段把 `/icon.svg` 之类当 locale 渲染首页（静态资产缺失时表现为“假绿”） | 静态资产断言必须校验 Content-Type + 魔数；新增 `public/` 资产前确认文件真实存在 |
+| 全站按钮点不动 / 右侧出现透明浮层 | AI 浮窗样式未加载（`components/ai-widget/IntelligentAIWidget.css` 未随组件引入） | 浮窗已默认收起为右下角浮标；改动浮窗后跑 `bun run test:visual` 与 smoke 第 9 例 |
+| 点受保护入口无反应 | 应用内跳转被 middleware 改写为 `/?login=1` 但页面未重挂载，挂载期 effect 不重跑 | `HomeHeader` 已改用 `useSearchParams` 监听；见 smoke「就地弹登录框」用例 |
 
 ---
 
@@ -253,3 +256,4 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | 2026-11-21 | 依赖对齐 | `eslint-config-next` 16.4.5 → **16.4.6**（与 next 16.4.5 同系 patch 对齐）；lint 0/0、tsc 0、529/529 复核通过 |
 | 2026-11-21 | e2e 补强 | 新增 `e2e/prediction-tts.e2e.ts` 4 例（匿名 401 / 外推区间与免责声明 + 20/min 限流 / TTS 200 或 503 语义 / 趋势卡片诚实空态），e2e 3 → **7**；顺带修复趋势卡片 `useTranslations` 命名空间与评估图表维度名传已翻译串两处缺陷；门禁全绿 |
 | 2026-11-21 | 文档收敛 | 删除 `docs/YYC3-成长守护-开发指导/`（13 篇停滞副本），`docs/developer/` 成为开发文档唯一事实源；同步 docs/README 索引与根 README 文档树、README/07 基线数字（529 用例 · 986 词条） |
+| 2026-11-21 | UI 修复 | AI 浮窗补回样式引入并默认收起为右下角浮标（原透明浮层吞掉页面点击、面板错位）；层级降至导航/弹窗之下；应用内点击受保护入口就地弹登录框；e2e 7 → **9** |

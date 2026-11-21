@@ -3,7 +3,8 @@
 import LoginModal from "@/components/auth/LoginModal"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
+import { Suspense, useCallback, useEffect, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { localeTag } from "@/lib/i18n/format"
 
@@ -35,18 +36,10 @@ export default function HomeHeader() {
     return () => { clearInterval(timer); }
   }, [dateLocale])
 
-  // 敏感页重定向回来的登录提示（middleware 307 到 /?login=1）：
-  // rAF 在首帧绘制前执行，与同步执行视觉等价；消费后 replaceState 清除参数。
-  // 读 URL 参数而非 Cookie——预取的 307 只会缓存无参 "/"，不会被误触发
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => {
-      if (new URLSearchParams(window.location.search).has("login")) {
-        setAuthModal("login")
-        window.history.replaceState(null, "", window.location.pathname)
-      }
-    })
-    return () => { cancelAnimationFrame(raf); }
-  }, [])
+  // 敏感页重定向回来的登录提示（middleware 307 到 /?login=1）。
+  // 必须监听 searchParams 变化而非仅在挂载时读一次：应用内 <Link> 跳转受保护页时，
+  // 路由会被就地改写为 /?login=1，HomeHeader 不会重新挂载，挂载期 effect 不会重跑。
+  const openLogin = useCallback(() => { setAuthModal("login") }, [])
 
   return (
     <motion.header
@@ -102,6 +95,9 @@ export default function HomeHeader() {
           >
             {t("register")}
           </motion.button>
+          <Suspense fallback={null}>
+            <LoginParamWatcher onLogin={openLogin} />
+          </Suspense>
           <LoginModal
             isOpen={authModal !== null}
             initialMode={authModal ?? "login"}
@@ -133,6 +129,24 @@ export default function HomeHeader() {
       </div>
     </motion.header>
   )
+}
+
+/**
+ * 监听 ?login=1：middleware 对受保护页的 307 会落到首页并携带该参数。
+ * 用 useSearchParams（而非 window.location）保证应用内 Link 跳转、页面未重挂载时同样触发；
+ * 消费后 replaceState 清除参数，避免刷新重复弹窗。
+ */
+function LoginParamWatcher({ onLogin }: { onLogin: () => void }) {
+  const searchParams = useSearchParams()
+  const login = searchParams.get("login")
+
+  useEffect(() => {
+    if (!login) return
+    onLogin()
+    window.history.replaceState(null, "", window.location.pathname)
+  }, [login, onLogin])
+
+  return null
 }
 
 function QuickActionButton({

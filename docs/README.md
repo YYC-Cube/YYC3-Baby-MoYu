@@ -43,7 +43,7 @@ flowchart TB
 | `bun run test` | **529/529**（32 文件） |
 | 覆盖率 | funcs **93.24%** / lines **93.40%**（本地；CI nightly 94.09%/93.74%，门槛 90%；命令须排除 `docs/**`） |
 | `check:i18n:strict` | 镜像路由 100% · 词条 986/986（CI 阻断级） |
-| e2e / 视觉 | 7/7（3 个 spec：smoke 3 + prediction/TTS 4）· 8/8 |
+| e2e / 视觉 | 9/9（3 个 spec：smoke 5 + prediction/TTS 4）· 8/8 |
 | OSV 依赖审计 | 0 Critical / 0 High（余 1 条 moderate，dev 链） |
 | 生产冒烟 | 八项断言全过（含指标令牌门禁 401 / 带令牌 200） |
 

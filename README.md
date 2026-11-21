@@ -139,7 +139,7 @@ bun run test
 | `bun run test:coverage` | 覆盖率（排除 `docs/**`；夜间 CI 设 90% 门槛） |
 | `bun run type-check` | 类型检查（应用代码 **0 错误**，见 [07 · 测试与质量门禁](./docs/developer/07-testing-quality.md)） |
 | `bun run lint` / `lint:fix` | ESLint 检查 / 自动修复 |
-| `bun run test:e2e` | Playwright 行为链路（7 例：冒烟 3 + prediction/TTS 4） |
+| `bun run test:e2e` | Playwright 行为链路（9 例：冒烟 5 + prediction/TTS 4） |
 | `bun run test:visual` | 四主题视觉回归（首页/视频工坊 × 暖阳/液态/赛博/极光） |
 | `bun run test:visual:update` | 重新生成当前平台视觉基线（darwin / linux） |
 | `bun run audit:osv` | OSV.dev 依赖审计（Critical 阻断，生成 `osv-results.json`） |

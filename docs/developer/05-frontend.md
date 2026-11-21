@@ -12,7 +12,7 @@
 | `emotion/` | EmotionMonitor 情绪监测面板 |
 | `analytics/` | 指标总览、实时活动流、WebSocket 连接 |
 | `prediction/` | 预测仪表盘、实时监控、智能配置面板 |
-| `ai-xiaoyu/` `ai-widget/` | AI 小语浮窗（FixedAIWidget）与可拖拽智能浮窗（AgenticCore 驱动） |
+| `ai-xiaoyu/` `ai-widget/` | AI 小语浮窗（FixedAIWidget）与可拖拽智能浮窗（AgenticCore 驱动；样式随组件引入 `IntelligentAIWidget.css`，首屏默认收起为右下角浮标，层级低于底部导航与弹窗） |
 | `auth/` | LoginModal、UserCenter |
 | `accessibility/` `pwa/` | 无障碍面板、PWA 提示 |
 | `theme/` | 生日主题族（Countdown/WishForm/Decorations） |

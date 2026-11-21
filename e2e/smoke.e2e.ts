@@ -109,3 +109,24 @@ test("未登录访问敏感页 → 重定向首页并提示登录", async ({ pag
   await expect(page.getByText("欢迎回来")).toBeVisible({ timeout: 5_000 })
   expect(page.url()).toBe("http://localhost:1228/")
 })
+
+test("应用内点击受保护页入口 → 就地弹登录框（不整页刷新）", async ({ page }) => {
+  await page.goto("/")
+  await page.getByRole("button", { name: "学习打卡" }).click()
+  // 路由被 middleware 改写为 /?login=1，但页面未重挂载；
+  // 必须由 useSearchParams 监听触发弹窗（挂载期 effect 不会重跑）
+  await expect(page.getByText("欢迎回来")).toBeVisible({ timeout: 5_000 })
+  expect(page.url()).toBe("http://localhost:1228/")
+})
+
+test("AI 浮窗默认收起为右下角浮标，点击可展开交互", async ({ page }) => {
+  await page.goto("/")
+  const launcher = page.locator(".minimized-launcher .launcher-button")
+  await expect(launcher).toBeVisible()
+  // 样式必须真正加载：浮标为圆形（此前 CSS 未引入，浮窗变成透明覆盖层并吞掉页面点击）
+  await expect(page.locator(".minimized-launcher")).toHaveCSS("border-radius", "9999px")
+
+  await launcher.click()
+  await expect(page.getByText("YYC³ AI助手")).toBeVisible()
+  await expect(page.locator(".ai-widget textarea")).toBeVisible()
+})

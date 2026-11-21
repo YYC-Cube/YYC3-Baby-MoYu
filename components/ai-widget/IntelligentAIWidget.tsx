@@ -33,6 +33,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import './IntelligentAIWidget.css'
 
 // 图标组件
 import { characterManager } from '@/lib/character-manager'
@@ -41,6 +42,15 @@ import { AgentState } from '../../core/agent-state'
 // 仅类型导入（编译期擦除）：避免 AgenticCore 及 prediction 服务栈进客户端包，
 // 运行时经 /api/agentic 调用服务端实例
 import type { AgentResponse, AgentTask, SystemStatus } from '../../core/AgenticCore'
+
+// 浮窗层级必须低于底部导航（z-40）与全局弹窗（z-50）：
+// 否则底部入口被压住、登录/确认弹窗也会被浮窗遮挡。
+// 同一时刻只挂载一个浮窗，拖动时抬到 35 仍保持在页面内容之上。
+const FLOATING_Z_INDEX = 30
+const FLOATING_Z_INDEX_ACTIVE = 35
+
+// 收起态浮标尺寸（圆形容器，贴右下角）
+const LAUNCHER_SIZE = 56
 
 // 拖拽类型定义
 export interface WidgetPosition {
@@ -115,11 +125,12 @@ export const IntelligentAIWidget: React.FC<WidgetProps> = ({
 }) => {
   const [state, setState] = useState<WidgetState>(() => ({
     isVisible: true,
-    isMinimized: false,
+    // 默认收起为右下角浮标：全屏面板会遮挡各页面内容（PS：原实现首屏即展开，已按反馈调整）
+    isMinimized: true,
     isFullscreen: false,
     currentView: 'chat',
     mode: 'floating',
-    position: getInitialPosition(initialPosition, width, height),
+    position: getInitialPosition(initialPosition, LAUNCHER_SIZE, LAUNCHER_SIZE),
     sessionId: generateSessionId(),
     unreadCount: 0,
     connectionStatus: 'connected',
@@ -187,7 +198,7 @@ export const IntelligentAIWidget: React.FC<WidgetProps> = ({
         ...prev.position,
         x: prev.position.x + delta.x,
         y: prev.position.y + delta.y,
-        zIndex: Math.max(prev.position.zIndex, 1000)
+        zIndex: Math.max(prev.position.zIndex, FLOATING_Z_INDEX_ACTIVE)
       }
 
       const optimizedPosition = optimizePosition(
@@ -297,13 +308,41 @@ export const IntelligentAIWidget: React.FC<WidgetProps> = ({
   const toggleMinimize = useCallback(() => {
     setState(prev => {
       const newMinimized = !prev.isMinimized
+      if (typeof window === 'undefined') {
+        return { ...prev, isMinimized: newMinimized, unreadCount: newMinimized ? 0 : prev.unreadCount }
+      }
+      const margin = 20
+      if (newMinimized) {
+        // 收起为右下角圆形浮标，避免长条盖住功能卡与底部导航
+        return {
+          ...prev,
+          isMinimized: true,
+          unreadCount: 0,
+          position: {
+            ...prev.position,
+            x: Math.max(margin, window.innerWidth - LAUNCHER_SIZE - margin),
+            y: Math.max(margin, window.innerHeight - LAUNCHER_SIZE - margin),
+            width: LAUNCHER_SIZE,
+            height: LAUNCHER_SIZE
+          }
+        }
+      }
+      // 展开：恢复面板尺寸，底部对齐并给顶部全局入口留 96px
+      const expanded = fitSizeToViewport(width, height)
+      const panelHeight = Math.min(expanded.height, window.innerHeight - 96 - margin)
       return {
         ...prev,
-        isMinimized: newMinimized,
-        unreadCount: newMinimized ? 0 : prev.unreadCount
+        isMinimized: false,
+        position: {
+          ...prev.position,
+          x: Math.max(margin, window.innerWidth - expanded.width - margin),
+          y: Math.max(margin, window.innerHeight - panelHeight - margin),
+          width: expanded.width,
+          height: panelHeight
+        }
       }
     })
-  }, [])
+  }, [width, height])
 
   // 切换全屏状态
   const toggleFullscreen = useCallback(() => {
@@ -382,7 +421,8 @@ export const IntelligentAIWidget: React.FC<WidgetProps> = ({
     const handleResize = () => {
       setState(prev => {
         if (prev.mode === 'floating') {
-          const newPosition = optimizePosition(prev.position, window.innerWidth, window.innerHeight)
+          const size = fitSizeToViewport(prev.position.width, prev.position.height)
+          const newPosition = optimizePosition({ ...prev.position, ...size }, window.innerWidth, window.innerHeight)
           return { ...prev, position: newPosition }
         }
         return prev
@@ -399,13 +439,19 @@ export const IntelligentAIWidget: React.FC<WidgetProps> = ({
     const raf = requestAnimationFrame(() => {
       setState(prev => {
         if (prev.mode !== 'floating') return prev
+        // 首屏统一收起为浮标：面板展开会遮挡页面入口（登录/注册/功能卡），
+        // 用户点开浮标即可获得完整对话。挂载后按真实视口把浮标贴到右下角。
+        const margin = 20
         return {
           ...prev,
-          position: optimizePosition(
-            getInitialPosition(initialPosition, width, height),
-            window.innerWidth,
-            window.innerHeight
-          )
+          isMinimized: true,
+          position: {
+            x: Math.max(margin, window.innerWidth - LAUNCHER_SIZE - margin),
+            y: Math.max(margin, window.innerHeight - LAUNCHER_SIZE - margin),
+            width: LAUNCHER_SIZE,
+            height: LAUNCHER_SIZE,
+            zIndex: prev.position.zIndex
+          }
         }
       })
     })
@@ -415,21 +461,59 @@ export const IntelligentAIWidget: React.FC<WidgetProps> = ({
   // 渲染主组件
   if (!state.isVisible) return null
 
+  // 收起态：右下角圆形浮标（不遮挡页面内容，点击展开面板）
+  if (state.isMinimized) {
+    return (
+      <DndProvider backend={isTouchDevice ? TouchBackend : HTML5Backend}>
+        <div
+          ref={setWidgetRef}
+          className={`ai-widget minimized-launcher ${className} ${isDragging ? 'dragging' : ''}`}
+          style={{
+            position: 'fixed',
+            left: `${state.position.x}px`,
+            top: `${state.position.y}px`,
+            width: `${LAUNCHER_SIZE}px`,
+            height: `${LAUNCHER_SIZE}px`,
+            zIndex: state.position.zIndex
+          }}
+        >
+          <button
+            type="button"
+            className="launcher-button"
+            onClick={toggleMinimize}
+            title="AI 浮窗"
+            aria-label="展开 AI 浮窗"
+          >
+            <Image
+              src={characterManager.getAIAvatarPath(userGender)}
+              alt="AI助手头像"
+              width={40}
+              height={40}
+              style={{ width: 40, height: 40 }}
+              className="rounded-full"
+            />
+            {state.unreadCount > 0 && <span className="launcher-badge">{state.unreadCount}</span>}
+          </button>
+        </div>
+      </DndProvider>
+    )
+  }
+
   return (
     <DndProvider backend={isTouchDevice ? TouchBackend : HTML5Backend}>
       <div
         ref={setWidgetRef}
-        className={`ai-widget ${className} ${state.mode} ${state.isMinimized ? 'minimized' : ''} ${state.isFullscreen ? 'fullscreen' : ''
+        className={`ai-widget ${className} ${state.mode} ${state.isFullscreen ? 'fullscreen' : ''
           } ${isDragging ? 'dragging' : ''} ${isOver ? 'over' : ''}`}
         style={{
           position: state.mode === 'floating' ? 'fixed' : 'relative',
           left: state.mode === 'floating' ? `${state.position.x}px` : 'auto',
           top: state.mode === 'floating' ? `${state.position.y}px` : 'auto',
           width: state.isFullscreen ? '100%' : `${state.position.width}px`,
-          height: state.isMinimized ? '60px' : state.isFullscreen ? '100%' : `${state.position.height}px`,
+          height: state.isFullscreen ? '100%' : `${state.position.height}px`,
           zIndex: state.position.zIndex,
-          minWidth: state.isMinimized ? 'auto' : '320px',
-          minHeight: state.isMinimized ? 'auto' : '400px',
+          minWidth: '320px',
+          minHeight: '400px',
           maxWidth: state.isFullscreen ? '100%' : '600px',
           maxHeight: state.isFullscreen ? '100%' : '800px'
         }}
@@ -448,58 +532,53 @@ export const IntelligentAIWidget: React.FC<WidgetProps> = ({
               </span>
             </div>
 
-            {!state.isMinimized && (
-              <h3 className="widget-title flex items-center gap-2">
-                <Image
-                  src={characterManager.getAIAvatarPath(userGender)}
-                  alt="AI助手头像"
-                  width={32}
-                  height={32}
-                  className="rounded-full border-2 border-white shadow-sm"
-                />
-                YYC³ AI助手
-                {(systemStatus?.activeTasks ?? 0) > 0 && (
-                  <Badge variant="secondary" className="ml-2">
-                    {systemStatus?.activeTasks}
-                  </Badge>
-                )}
-              </h3>
-            )}
+            <h3 className="widget-title flex items-center gap-2">
+              <Image
+                src={characterManager.getAIAvatarPath(userGender)}
+                alt="AI助手头像"
+                width={32}
+                height={32}
+                style={{ width: 32, height: 32 }}
+                className="rounded-full border-2 border-white shadow-sm"
+              />
+              YYC³ AI助手
+              {(systemStatus?.activeTasks ?? 0) > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {systemStatus?.activeTasks}
+                </Badge>
+              )}
+            </h3>
           </div>
 
           <div className="header-right">
-            {!state.isMinimized && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => { switchView('chat'); }}
-                  className={state.currentView === 'chat' ? 'active' : ''}
-                >
-                  <MessageCircle size={16} />
-                </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { switchView('chat'); }}
+              className={state.currentView === 'chat' ? 'active' : ''}
+            >
+              <MessageCircle size={16} />
+            </Button>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => { switchView('dashboard'); }}
-                  className={state.currentView === 'dashboard' ? 'active' : ''}
-                >
-                  <BarChart3 size={16} />
-                </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { switchView('dashboard'); }}
+              className={state.currentView === 'dashboard' ? 'active' : ''}
+            >
+              <BarChart3 size={16} />
+            </Button>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => { switchView('tools'); }}
-                  className={state.currentView === 'tools' ? 'active' : ''}
-                >
-                  <Settings2 size={16} />
-                </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { switchView('tools'); }}
+              className={state.currentView === 'tools' ? 'active' : ''}
+            >
+              <Settings2 size={16} />
+            </Button>
 
-                <Separator orientation="vertical" className="mx-1" />
-              </>
-            )}
+            <Separator orientation="vertical" className="mx-1" />
 
             {state.mode === 'floating' && !state.isFullscreen && (
               <Button
@@ -507,7 +586,7 @@ export const IntelligentAIWidget: React.FC<WidgetProps> = ({
                 size="sm"
                 onClick={toggleMinimize}
               >
-                {state.isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
+                <Minimize2 size={16} />
               </Button>
             )}
 
@@ -530,8 +609,7 @@ export const IntelligentAIWidget: React.FC<WidgetProps> = ({
         </div>
 
         {/* 内容区域 */}
-        {!state.isMinimized && (
-          <div className="widget-content">
+        <div className="widget-content">
             {state.currentView === 'chat' && (
               <ChatView
                 messages={messages}
@@ -569,25 +647,15 @@ export const IntelligentAIWidget: React.FC<WidgetProps> = ({
                 onThemeChange={() => { }}
               />
             )}
-          </div>
-        )}
+        </div>
 
         {/* 调整大小手柄 */}
-        {state.mode === 'floating' && !state.isMinimized && !state.isFullscreen && (
+        {state.mode === 'floating' && !state.isFullscreen && (
           <ResizeHandles
             onResizeStart={handleResizeStart}
             onResize={handleResize}
             onResizeEnd={handleResizeEnd}
           />
-        )}
-
-        {/* 未读消息指示器 */}
-        {state.isMinimized && state.unreadCount > 0 && (
-          <div className="unread-indicator">
-            <Badge variant="destructive" className="animate-pulse">
-              {state.unreadCount}
-            </Badge>
-          </div>
         )}
       </div>
     </DndProvider>
@@ -952,23 +1020,23 @@ function getInitialPosition(position: string, width: number, height: number): Wi
 
   switch (position) {
     case 'top-left':
-      return { x: margin, y: margin, width, height, zIndex: 1000 }
+      return { x: margin, y: margin, width, height, zIndex: FLOATING_Z_INDEX }
     case 'top-right':
-      return { x: viewportWidth - width - margin, y: margin, width, height, zIndex: 1000 }
+      return { x: viewportWidth - width - margin, y: margin, width, height, zIndex: FLOATING_Z_INDEX }
     case 'bottom-left':
-      return { x: margin, y: viewportHeight - height - margin, width, height, zIndex: 1000 }
+      return { x: margin, y: viewportHeight - height - margin, width, height, zIndex: FLOATING_Z_INDEX }
     case 'bottom-right':
-      return { x: viewportWidth - width - margin, y: viewportHeight - height - margin, width, height, zIndex: 1000 }
+      return { x: viewportWidth - width - margin, y: viewportHeight - height - margin, width, height, zIndex: FLOATING_Z_INDEX }
     case 'center':
       return {
         x: (viewportWidth - width) / 2,
         y: (viewportHeight - height) / 2,
         width,
         height,
-        zIndex: 1000
+        zIndex: FLOATING_Z_INDEX
       }
     default:
-      return { x: viewportWidth - width - margin, y: viewportHeight - height - margin, width, height, zIndex: 1000 }
+      return { x: viewportWidth - width - margin, y: viewportHeight - height - margin, width, height, zIndex: FLOATING_Z_INDEX }
   }
 }
 
@@ -985,6 +1053,21 @@ function optimizePosition(
     ...position,
     x: Math.max(margin, Math.min(position.x, maxX)),
     y: Math.max(margin, Math.min(position.y, maxY))
+  }
+}
+
+/**
+ * 视口适配：默认 400×600 在 1024×597 等小屏上会超出高度，
+ * 造成头部/输入区被截断、且整块透明区域吞掉页面点击。
+ * 宽高按视口各留 20px 边距收缩，并保留可用下限。
+ */
+function fitSizeToViewport(width: number, height: number): { width: number; height: number } {
+  if (typeof window === 'undefined') return { width, height }
+  const maxWidth = Math.max(320, window.innerWidth - 40)
+  const maxHeight = Math.max(400, window.innerHeight - 40)
+  return {
+    width: Math.min(width, maxWidth),
+    height: Math.min(height, maxHeight)
   }
 }
 

@@ -877,3 +877,107 @@
   border-color: #f59e0b;
   box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
 }
+/* ============================================================
+   头部紧凑化（400px 固定宽度下的可读性修复）
+   原样式未约束标题与按钮，导致「在线 / YYC³ AI助手」被挤压成多行
+   ============================================================ */
+.widget-header {
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.header-left {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.status-indicator {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.widget-title {
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.widget-title img {
+  /* 锁死宽高：仅设 flex-shrink 时，容器挤压会让 Next/Image 的 max-width 生效而高度不变，
+     触发「width/height 只改了一个」告警并拉伸头像 */
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.header-right {
+  flex-shrink: 0;
+  gap: 2px;
+}
+
+.header-right button {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+}
+
+.header-right button svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* 竖分隔线在 400px 短条内不占位（shadcn Separator 带 data-orientation） */
+.header-right [data-orientation="vertical"] {
+  display: none;
+}
+
+/* ============================================================
+   收起态：右下角圆形浮标
+   替代原先 400×60 长条——长条会压住功能卡与底部导航，浮标只占角落
+   ============================================================ */
+.ai-widget.minimized-launcher {
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.45);
+  overflow: visible;
+}
+
+.minimized-launcher .launcher-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.minimized-launcher .launcher-button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.minimized-launcher .launcher-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+}

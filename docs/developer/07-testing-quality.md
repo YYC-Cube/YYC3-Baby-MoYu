@@ -16,13 +16,13 @@ flowchart LR
 | 覆盖率 | `bun run test:coverage`（等价 `bun test --coverage --path-ignore-patterns='docs/**'`） | 全仓 funcs **93.24%** / lines **93.40%**（2026-11-20 预测引擎补测后实测）；CI 环境首跑 **94.09% / 93.74%**（nightly，超 90% 门槛）；jwt/badges/rate-limit/utils/cookies/guard/secret/metrics/db-identifier 均 100%；预测引擎补测后 `specialized-engines.ts` 24.9%→**95.71%**、`base-predictor.ts` 52.4%→**95.24%** |
 | 覆盖率夜间 CI | `.github/workflows/nightly.yml` | 每日 02:00（Asia/Shanghai）+ 手动触发；funcs/lines ≥90% 阻断，报告留 artifact 14 天；首跑 2026-11-20 通过 |
 | DB 直测 | `bun run test:node` | 7/7（SQLite）；设置 `PG_TEST_URL` 后 +5 条 PG 用例（共 12/12，CI 默认跳过 PG） |
-| e2e | `bun run test:e2e` | 7/7（smoke 3：登录→建娃→写记录→登出 / 匿名 401 矩阵 / 敏感页重定向；prediction-tts 4：匿名 401 / 预测外推+限流 / TTS 200 或 503 / 趋势卡片诚实空态；生产构建，账号自举不依赖种子） |
+| e2e | `bun run test:e2e` | 9/9（smoke 5：登录→建娃→写记录→登出 / 匿名 401 矩阵 / 敏感页重定向 / 应用内受保护入口就地弹登录 / AI 浮窗收起与展开；prediction-tts 4：匿名 401 / 预测外推+限流 / TTS 200 或 503 / 趋势卡片诚实空态；生产构建，账号自举不依赖种子） |
 | 视觉 | `bun run test:visual` | 8/8（首页/视频工坊 × 四主题；darwin/linux 分平台基线） |
 | 生产冒烟 | CI `smoke` job | 8 项（首页/视频工坊/英文首页/health/manifest/icon/AI 鉴权门禁/指标令牌门禁）；静态资产同时校验 Content-Type 与魔数（防动态路由 200 假绿）；干净 runner 真实 `next start`，无浏览器 |
 | i18n | `bun run check:i18n:strict` | 16/16 路由镜像 + 词条 986/986 一致（CI 阻断级） |
 | 依赖 | `bun run audit:osv` | OSV.dev 审计；Critical 阻断，报告输出 `osv-results.json`（ignored）。当前 1 条 moderate（minimatch，dev 链，跟踪中） |
 
-> 2026-11-21 复核实测：e2e **7/7**（smoke 3 + prediction/TTS 4）· 四主题视觉 8/8 · tsc 0 · lint 0 error/0 warning · 529/529。
+> 2026-11-21 复核实测：e2e **9/9**（smoke 5 + prediction/TTS 4）· 四主题视觉 8/8 · tsc 0 · lint 0 error/0 warning · 529/529。
 > 2026-11-20 复核实测：tsc 0 error · lint 0 error/0 warning · 529/529 · node 7/7（PG 直测 12/12，需 PG_TEST_URL）· e2e 3/3 · 四主题视觉 8/8 · 生产冒烟 8/8 ·
 > 覆盖率全仓 funcs 93.24% / lines 93.40%（预测引擎补测 22 例后：specialized-engines 95.71%、base-predictor 95.24%）·
 > **覆盖率命令必须带 `--path-ignore-patterns='docs/**'`**：`docs/` 下归档工作区自带测试副本，不加会让 `bun test --coverage`
