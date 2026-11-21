@@ -1,14 +1,14 @@
 # YYC³ Baby-MoYu · 项目交接与接手说明
 
-> 生成日期：2026-11-20 ｜ 基线提交：`28e41bc`（`main`，工作树干净）
+> 生成日期：2026-11-20 ｜ 最后更新：2026-11-21 ｜ 基线提交：`45738f3`（`main`，工作树干净）
 > 用途：新会话 / 新维护者接手时的**唯一入口文档**。读完本文即可知道「现在是什么状态、为什么这样、下一步做什么」。
-> 关联：[docs/README](./README.md)（文档中心）｜[全局测评](./YYC3-全局测评-Baby-MoYu-深度测评与演进规划.md)｜[运维 Runbook](./YYC3-运维Runbook-Prometheus部署与密钥轮换.md)｜[谱系收敛](./YYC3-谱系收敛-三仓归档执行总结.md)
+> 关联：[docs/README](./README.md)（文档中心）｜[全局测评](./YYC3-全局测评-Baby-MoYu-深度测评与演进规划.md)｜[运维 Runbook](./YYC3-运维Runbook-Prometheus部署与密钥轮换.md)｜[谱系收敛](./YYC3-谱系收敛-三仓归档执行总结.md)（§7 为二次复核结论）
 
 ---
 
 ## 1. 一句话现状
 
-本仓是 YYC³ 成长守护体系**唯一现役主线（SSOT）**：Next.js 16.4.5 单进程应用，六道门禁全绿、529 用例全过、覆盖率 93%+、CI 五工作流在跑；三个同源仓库已冻结归档。
+本仓是 YYC³ 成长守护体系**唯一现役主线（SSOT）**：Next.js 16.4.5 单进程应用，六道门禁全绿、529 用例全过、覆盖率 93%+、CI 五工作流在跑；三个同源仓库已冻结归档，且**二次复核确认代码层无可吸收内容**（唯一资产缺口——站点图标/PWA 图标——已补齐）。
 **上线只差两项运维动作**：轮换失效的 `BIGMODEL_API_KEY`、为各环境注入 `METRICS_TOKEN`。
 
 ---
@@ -48,12 +48,12 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 
 ---
 
-## 3. 当前基线快照（2026-11-20 实测）
+## 3. 当前基线快照（2026-11-21 实测）
 
 | 维度 | 现状 |
 | ---- | ---- |
 | 分支拓扑 | **仅 `main`**（远程 6 个 Dependabot 分支已全部收敛，本地陈旧分支已清理） |
-| 关键版本 | `next 16.4.5` · `react ^19.2.3` · `zod 4.6.7` · `eslint-config-next 16.4.5` |
+| 关键版本 | `next 16.4.5` · `react ^19.2.3` · `zod 4.6.7` · `eslint-config-next 16.4.6` |
 | 单元测试 | **529 / 529**（32 文件，~2.9s） |
 | 覆盖率 | 本地 funcs **93.24%** / lines **93.40%**；CI nightly **94.09% / 93.74%**（门槛 90%） |
 | 类型 / Lint | tsc **0** · eslint **0 error / 0 warning** |
@@ -61,8 +61,9 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | e2e / 视觉 | 3/3 · 8/8（四主题 × 首页/视频工坊） |
 | i18n | 镜像路由 100% · 词条 986/986 |
 | 依赖安全 | OSV 0 Critical / 0 High；余 1 条 moderate（minimatch@10.2.6，dev 链，已书面跟踪） |
+| 静态资产 | `public/icon.svg`（145K）· `public/yyc3-pwa-icon.png`（128K）已就位；冒烟断言校验 **Content-Type + 魔数** |
 | CI 工作流 | `ci.yml`（quality-gates / visual / smoke）· `osv-audit.yml` · `nightly.yml` · `deploy-pages.yml` · `yyc3-xy-workspace-ci.yml` |
-| 同源仓库 | Companion（`frozen/2026-11`）、AI-Growth-Guardian / Growth-Guardian（`archive/2026-11`），三者 `archived=true` |
+| 同源仓库 | Companion（`frozen/2026-11`）、AI-Growth-Guardian / Growth-Guardian（`archive/2026-11`），三者 `archived=true`；**二次复核通过，可最终归档** |
 
 ---
 
@@ -104,6 +105,16 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | 工作区未跟踪项决策 | 2 份调研报告入库；`docs/yyc3-xy/`（23M 工程副本）gitignore | `e65a169` |
 | flaky 修复 | 限流时间敏感用例窗口 1ms→50ms（CI 暴露） | `85a88bb` |
 
+### 4.4 谱系收敛终局（2026-11-21）
+
+| 交付 | 说明 | 提交 |
+| ---- | ---- | ---- |
+| 三仓二次复核 | 文件级 diff + 引用度 + 测试 + 实现质量抽样；独有 API 仅 3 个、lib 为无测试模拟实现、重型后端为骨架 → **代码层无可吸收** | `45738f3` |
+| 资产缺口吸收 | `public/icon.svg` + `public/yyc3-pwa-icon.png`（layout.tsx 与 manifest 长期引用但此前不存在） | `45738f3` |
+| 冒烟假绿修复 | 静态资产断言改为校验 Content-Type + 魔数（`/icon.svg` 曾返回 200 text/html） | `45738f3` |
+| 结论落档 | 谱系收敛总结 §7「二次复核：可吸收内容确认」 | `45738f3` |
+| 依赖对齐 | `eslint-config-next` 16.4.5 → 16.4.6（lint 0/0、529/529） | 本次提交 |
+
 ---
 
 ## 5. 关键决策与理由（为什么不是另一种做法）
@@ -117,6 +128,9 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | `JWT_SECRET` 不引入 kid 多密钥 | 单实例、无灰度需求；代价是轮换=全员登出，已在 Runbook 明确公告 | 引入 kid 机制（复杂度不划算） |
 | 生产未配 `METRICS_TOKEN` → **503** 而非放行 | 宁可抓取失败也不裸奔进程内存/事件循环信息 | 匿名可读 + 反代限制（原实现） |
 | 错误语义分层：503=未配置/凭据无效、502=上游故障、429=限流 | 运维可据此一步判断是换密钥还是查上游 | 一律 500/502（无法归因） |
+| 归档前二次复核，只吸收**资产**不吸收代码 | 3 个独有路由均劣于主线；lib 为无测试的模拟实现；后端为骨架。迁入等于质量倒退 | 「能跑就搬」——会把无测试模拟逻辑与无鉴权路由带入主线 |
+| 静态资产断言校验 Content-Type + 魔数 | 只断言状态码会被动态路由 200 假绿（`[locale]` 把 `/icon.svg` 当 locale 渲染首页） | 仅 `check 200`（已证明会误报） |
+| 6 个 `yyc3-logo` 变体与 4 份产品文档暂不吸收 | 主线零引用；产品内容按「先评审后摘录」单次抽取，归档仓只读仍可查阅 | 全部拷入（增加无引用资产与文档噪音） |
 
 ---
 
@@ -148,7 +162,7 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 
 - [ ] 告警接入通知渠道（Alertmanager → 邮件/Slack；当前仅规则与 firing 验证）
 - [ ] 补 e2e：prediction 与 TTS 两条真实交互链路（当前 e2e 仅 3 例）
-- [ ] `eslint-config-next` 跟随 patch（16.4.6 已发布，观察后升级）
+- [x] ~~`eslint-config-next` 跟随 patch~~ → 已于 2026-11-21 升级至 16.4.6（lint 0/0、529/529 复核通过）
 - [ ] 覆盖率门禁从「夜间」扩展为「PR 增量提示」（非阻断）
 
 ### P2 · 一个季度
@@ -160,8 +174,9 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 
 ### 长尾 / 产品侧
 
-- [ ] 从归档仓抽取产品资产为**文档**（0–22 岁生命周期、语音浮窗交互），不搬代码
+- [x] ~~从归档仓抽取产品资产为代码~~ → 已于 2026-11-21 二次复核否决（代码与模拟实现不吸收）；产品文档按需单次摘录（归档仓只读可查）
 - [ ] `docs/yyc3-xy/`（23M 工程副本）本地是否保留，按需清理
+- [ ] 三仓最终归档确认（内容复核已完成，归档操作由维护者执行）
 
 ---
 
@@ -179,6 +194,7 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | CI 单测偶发失败 | 时间敏感用例（历史 flaky 已修，见 `85a88bb`） | — |
 | 覆盖率跑不完 | 未排除 `docs/**` | 用 `bun run test:coverage` |
 | PG 连上却报 read-only | 本机 5433 可能是只读副本 | 改用可写实例或临时集群 |
+| 未知单段路径返回 200 HTML | `app/[locale]` 动态段把 `/icon.svg` 之类当 locale 渲染首页（静态资产缺失时表现为“假绿”） | 静态资产断言必须校验 Content-Type + 魔数；新增 `public/` 资产前确认文件真实存在 |
 
 ---
 
@@ -211,7 +227,7 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | [08 部署](./developer/08-deployment.md) | 部署形态、环境变量、拓扑约束、上线清单 |
 | [09 贡献](./developer/09-contributing.md) / [11 i18n](./developer/11-i18n-boundary.md) / [12 承载](./developer/12-hosting-profile.md) | 协作 / 国际化 / 承载选型 |
 | [**运维 Runbook**](./YYC3-运维Runbook-Prometheus部署与密钥轮换.md) | Prometheus 部署六步 + 密钥轮换 + 排障 |
-| [**谱系收敛**](./YYC3-谱系收敛-三仓归档执行总结.md) / [**全局测评**](./YYC3-全局测评-Baby-MoYu-深度测评与演进规划.md) | 三仓归档判据 / 风险登记册与路线图 |
+| [**谱系收敛**](./YYC3-谱系收敛-三仓归档执行总结.md) / [**全局测评**](./YYC3-全局测评-Baby-MoYu-深度测评与演进规划.md) | 三仓归档判据 + **§7 二次复核（可吸收内容确认）** / 风险登记册与路线图 |
 
 ---
 
@@ -229,3 +245,5 @@ bun run audit:osv         # 期望 0 Critical / 0 High（余 1 条 moderate，de
 | 日期 | 变更 | 说明 |
 | ---- | ---- | ---- |
 | 2026-11-20 | 首版 | 基线 `28e41bc`：门禁 529/529、覆盖率 93%+、CI 五工作流、三仓归档、Prometheus 实机跑通；沉淀决策理由、待办优先级与坑位清单 |
+| 2026-11-21 | 承接更新 | 基线推进至 `45738f3`：三仓二次复核完成（代码无可吸收、吸收 2 个图标资产）、冒烟假绿修复（Content-Type + 魔数断言）、交付清单补 §4.4、决策补 3 条、坑位补 1 条；长尾产品资产项按复核结论关闭 |
+| 2026-11-21 | 依赖对齐 | `eslint-config-next` 16.4.5 → **16.4.6**（与 next 16.4.5 同系 patch 对齐）；lint 0/0、tsc 0、529/529 复核通过 |
