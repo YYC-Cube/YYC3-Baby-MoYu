@@ -135,11 +135,11 @@ bun run test
 | ------ | ------ |
 | `bun run dev` | Next.js 开发服务器（:1228） |
 | `bun run build` / `start` | 生产构建 / 启动 |
-| `bun run test` | 单元测试（526 用例，全绿） |
+| `bun run test` | 单元测试（529 用例，全绿） |
 | `bun run test:coverage` | 覆盖率（排除 `docs/**`；夜间 CI 设 90% 门槛） |
 | `bun run type-check` | 类型检查（应用代码 **0 错误**，见 [07 · 测试与质量门禁](./docs/developer/07-testing-quality.md)） |
 | `bun run lint` / `lint:fix` | ESLint 检查 / 自动修复 |
-| `bun run test:e2e` | Playwright 行为冒烟（3 例） |
+| `bun run test:e2e` | Playwright 行为链路（7 例：冒烟 3 + prediction/TTS 4） |
 | `bun run test:visual` | 四主题视觉回归（首页/视频工坊 × 暖阳/液态/赛博/极光） |
 | `bun run test:visual:update` | 重新生成当前平台视觉基线（darwin / linux） |
 | `bun run audit:osv` | OSV.dev 依赖审计（Critical 阻断，生成 `osv-results.json`） |
@@ -170,13 +170,13 @@ bun run test
 ├── middleware.ts         # locale 路由中间件
 ├── hooks/ types/ config/ # 钩子、类型、配置
 ├── themes/               # Figma 三套主题参考（未接线，排除出 tsc）
-├── __tests__/            # 单元测试（526 用例）
+├── __tests__/            # 单元测试（529 用例）
 ├── public/               # 静态资源（icon/manifest/PWA/角色照片/CNAME）
 ├── scripts/              # 运维脚本（osv-audit / 令牌生成 / 文档生成 / PG 迁移）
 ├── deploy/monitoring/    # Prometheus 抓取与告警规则（可直接挂载使用）
 └── docs/                 # ★ 文档中心（唯一入口见 docs/README.md）
     ├── developer/        #   现行开发文档（12 篇，唯一维护）
-    └── YYC3-成长守护-*   #   产品设计基线（开发指导/全栈内容/角色系统/日志系统）
+    └── YYC3-成长守护-*   #   产品设计基线（全栈内容/角色系统/日志系统）
 ```
 
 ## 容器与探活
@@ -219,8 +219,8 @@ flowchart LR
         H --> J["12 部署承载分析"]
     end
     subgraph Prod["产品设计基线（演进时更新）"]
-        P1["开发指导"] --- P2["全栈内容"]
-        P3["角色系统"] --- P4["日志系统"]
+        P2["全栈内容"] --- P3["角色系统"]
+        P3 --- P4["日志系统"]
     end
     subgraph Open["开源协作四件套"]
         L[LICENSE] --- CT[CONTRIBUTING]
@@ -242,7 +242,7 @@ flowchart LR
 | [08 · 部署](./docs/developer/08-deployment.md) | 本地生产、脚本、Docker 注意事项 |
 | [09 · 贡献指南](./docs/developer/09-contributing.md) | 分支模型、提交规范、徽章系统扩展指南 |
 | [10 · 可视化交互体系设计](./docs/developer/10-visual-interaction-system.md) | 设计令牌 / 四主题 / 交互状态机 / 数据可视化 / 动效 / WCAG 2.2 AA / 视觉回归 |
-| [11 · 国际化边界与治理](./docs/developer/11-i18n-boundary.md) | i18n 全量闭环（16/16 页双语 · 词条 977/977）· `@yyc3/i18n-core` 不适用评估 · 单组件复用强约定 · 残余清单 |
+| [11 · 国际化边界与治理](./docs/developer/11-i18n-boundary.md) | i18n 全量闭环（16/16 页双语 · 词条 986/986）· `@yyc3/i18n-core` 不适用评估 · 单组件复用强约定 · 残余清单 |
 | [12 · 部署承载分析](./docs/developer/12-hosting-profile.md) | 本机/单机/托管三方案对比 · 环境与反代/PG/备份配置清单 · 上线验收项 |
 | [运维 Runbook](./docs/YYC3-运维Runbook-Prometheus部署与密钥轮换.md) | ★ Prometheus 实例部署六步（三形态+排障表）· 六类密钥轮换（影响面/回滚/清单）· 快速命令卡 |
 | [交接文档](./docs/YYC3-交接文档-项目衔接与接手说明.md) | ★ 接手第一入口：五分钟上手 · 基线快照 · 交付清单 · 决策理由 · 待办优先级 · 坑位表 |

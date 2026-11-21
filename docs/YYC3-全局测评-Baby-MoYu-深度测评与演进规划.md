@@ -111,6 +111,8 @@
 | e2e 增强 | 增加 prediction 与 TTS 两条真实交互链路（当前仅冒烟 + 视觉） |
 | 依赖维护 | `eslint-config-next` 跟随 next patch（当前 16.4.5，16.4.6 已发布） |
 
+> 2026-11-21 状态：本表 4 项均已落地（Prometheus 实机 up=1 + 3 条规则；夜间覆盖率 CI 首跑通过；e2e 3 → 7 例；`eslint-config-next` 16.4.6）。P0 仍为待执行的运维动作。
+
 ### P2 · 一个季度
 
 | 目标 | 验收标准 |

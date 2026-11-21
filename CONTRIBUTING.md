@@ -149,7 +149,7 @@ bun run test:e2e       # Playwright 冒烟（需先 build）
 
 ## 7. 文档贡献
 
-- 现行文档统一写入 `docs/developer/`；历史资料放 `docs/archive/`（只读）。
+- 现行文档统一写入 `docs/developer/`（唯一事实源，不建镜像副本）；历史资料随 git 历史可溯，`docs/archive/` 已于 2026-11-05 移出仓库。
 - 文档头部保留 YAML Front Matter（file/description/author/version/created/updated/status/tags/category）。
 - 图表优先 Mermaid；截图需说明来源与时间。
 - 文末保留 YYC³ 四行署名尾。
