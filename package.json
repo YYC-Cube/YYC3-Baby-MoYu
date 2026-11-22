@@ -58,7 +58,7 @@
     "audit:osv:high": "node scripts/osv-audit.mjs --fail-on=high"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.2",
+    "@ai-sdk/openai": "^4.0.121",
     "@emotion/is-prop-valid": "^1.4.0",
     "@radix-ui/react-accordion": "1.2.12",
     "@radix-ui/react-alert-dialog": "1.1.15",
